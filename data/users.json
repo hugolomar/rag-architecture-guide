@@ -1,0 +1,41 @@
+[
+  {
+    "user_id": "7f3a1c2e-8b44-4d1a-9e06-2c5b8a1d4f70",
+    "user_principal_name": "alex.morgan@crateexpectations.example",
+    "groups": [
+      "all-employees"
+    ]
+  },
+  {
+    "user_id": "1c9e6b30-5a27-4f83-8d14-6e0a9c3b7d52",
+    "user_principal_name": "jordan.lee@crateexpectations.example",
+    "groups": [
+      "all-employees",
+      "engineering-core"
+    ]
+  },
+  {
+    "user_id": "a4d82f15-3c68-4b90-a1e7-9f2d6c80b143",
+    "user_principal_name": "sam.patel@crateexpectations.example",
+    "groups": [
+      "all-employees",
+      "people-team"
+    ]
+  },
+  {
+    "user_id": "e6b19a04-7d32-4c5e-b8f1-0a3c6d9e2b87",
+    "user_principal_name": "riley.chen@crateexpectations.example",
+    "groups": [
+      "all-employees",
+      "security-oncall"
+    ]
+  },
+  {
+    "user_id": "5a0c8e73-2f14-4a6b-9d30-7b1e4c8f6a29",
+    "user_principal_name": "taylor.brooks@crateexpectations.example",
+    "groups": [
+      "all-employees",
+      "leadership"
+    ]
+  }
+]

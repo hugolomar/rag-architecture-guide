@@ -1,0 +1,9 @@
+# Protected evaluation suite.
+#
+# A release job places protected_set.json in this directory. Those questions
+# stay out of git. Ignoring the whole directory from the repository .gitignore
+# would be shorter, which is what we do for docs/local/, but then a clone would
+# not have the folder. This file is the convenient version: the directory is
+# visible and everything else in it is ignored.
+*
+!.gitignore

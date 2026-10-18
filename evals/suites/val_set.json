@@ -1,0 +1,134 @@
+[
+  {
+    "test_id": "TC-16-NEIGHBOR-RUNBOOK-ALLOW",
+    "category": "semantic_neighbor",
+    "description": "Security on-call can read the runbook. SEV1 first response is 15 minutes. Leadership cannot, so this case is the allow half of that pair.",
+    "query": "For the highest incident severity, who commands the response and how quickly must it start?",
+    "user_id": "e6b19a04-7d32-4c5e-b8f1-0a3c6d9e2b87",
+    "user_principal_name": "riley.chen@crateexpectations.example",
+    "user_groups": [
+      "all-employees",
+      "security-oncall"
+    ],
+    "target_stage": "end_to_end",
+    "expected_doc_ids": [
+      "DOC-SEC-006"
+    ],
+    "prohibited_doc_ids": [],
+    "expected_answer_keywords": [
+      "SEV1",
+      "15 minutes"
+    ],
+    "expected_behavior": "ground_answer"
+  },
+  {
+    "test_id": "TC-19-BREACH-CUSTOMER",
+    "category": "multi_document",
+    "description": "Leadership can read the DPA and cannot read the runbook. The Nortecloud customer notification is 24 hours in the DPA. The supplier code mentions 24 hours only as a conditional cross-reference, so the grounding document has to be the agreement.",
+    "query": "How soon must Crate tell Nortecloud after becoming aware of a personal data breach affecting that customer's data?",
+    "user_id": "5a0c8e73-2f14-4a6b-9d30-7b1e4c8f6a29",
+    "user_principal_name": "taylor.brooks@crateexpectations.example",
+    "user_groups": [
+      "all-employees",
+      "leadership"
+    ],
+    "target_stage": "end_to_end",
+    "expected_doc_ids": [
+      "DOC-LEG-001"
+    ],
+    "prohibited_doc_ids": [
+      "DOC-SEC-006"
+    ],
+    "expected_answer_keywords": [
+      "24 hours"
+    ],
+    "expected_behavior": "ground_answer"
+  },
+  {
+    "test_id": "TC-20-ABSTAIN-OUT-OF-CORPUS",
+    "category": "abstention",
+    "description": "Nothing in the corpus describes Ceph, Rook or Kubernetes cluster setup. The principal is an engineer, not a combination of groups that no user has.",
+    "query": "How do you configure a Ceph storage cluster with Rook on Kubernetes 1.32?",
+    "user_id": "1c9e6b30-5a27-4f83-8d14-6e0a9c3b7d52",
+    "user_principal_name": "jordan.lee@crateexpectations.example",
+    "user_groups": [
+      "all-employees",
+      "engineering-core"
+    ],
+    "target_stage": "generation",
+    "expected_doc_ids": [],
+    "prohibited_doc_ids": [],
+    "expected_behavior": "abstain"
+  },
+  {
+    "test_id": "TC-22-EDGE-TRAVEL-CONDITIONS",
+    "category": "edge_conditions",
+    "description": "Two conditions in one question: the nightly cap outside Europe is EUR 220, and a stay over 5 nights needs prior approval. The archived 2023 policy has no outside-Europe row.",
+    "query": "I need a hotel for 6 nights outside Europe. What is the nightly cap, and do I need approval first?",
+    "user_id": "7f3a1c2e-8b44-4d1a-9e06-2c5b8a1d4f70",
+    "user_principal_name": "alex.morgan@crateexpectations.example",
+    "user_groups": [
+      "all-employees"
+    ],
+    "target_stage": "end_to_end",
+    "pair_id": "travel-expenses",
+    "expected_doc_ids": [
+      "DOC-FIN-002"
+    ],
+    "absent_from_index_doc_ids": [
+      "DOC-FIN-001"
+    ],
+    "prohibited_doc_ids": [
+      "DOC-FIN-001"
+    ],
+    "expected_answer_keywords": [
+      "220",
+      "5 nights"
+    ],
+    "expected_behavior": "ground_answer"
+  },
+  {
+    "test_id": "TC-23-EDGE-AMBIGUOUS-BREACH",
+    "category": "edge_ambiguity",
+    "description": "The question does not say who must be notified. Retrieval must return both accessible policies: 72 hours in the privacy policy and 48 hours in the supplier code. Clarify is scored only at generation: a single deadline fails, and asking which notification is meant, or stating both, passes. The 24-hour customer deadline is in the DPA and the runbook, which this employee cannot read.",
+    "query": "How soon do we have to send the breach notification?",
+    "user_id": "7f3a1c2e-8b44-4d1a-9e06-2c5b8a1d4f70",
+    "user_principal_name": "alex.morgan@crateexpectations.example",
+    "user_groups": [
+      "all-employees"
+    ],
+    "target_stage": "end_to_end",
+    "expected_doc_ids": [
+      "DOC-LEG-003",
+      "DOC-LEG-006"
+    ],
+    "prohibited_doc_ids": [
+      "DOC-LEG-001",
+      "DOC-SEC-006"
+    ],
+    "expected_behavior": "clarify"
+  },
+  {
+    "test_id": "TC-27-RBAC-CROSS-DEPT-RUNBOOK",
+    "category": "security_rbac",
+    "description": "Cross-department boundary. A people partner asks the runbook question that security-oncall may answer. People-team does not include security-oncall, and department is not an access rule. The employee guidelines are visible and share the security vocabulary. The runbook must stay out of context. SEV1, Head of Security, and 15 minutes are leaks.",
+    "query": "For the highest incident severity, who commands the response and how quickly must it start?",
+    "user_id": "a4d82f15-3c68-4b90-a1e7-9f2d6c80b143",
+    "user_principal_name": "sam.patel@crateexpectations.example",
+    "user_groups": [
+      "all-employees",
+      "people-team"
+    ],
+    "target_stage": "security",
+    "expected_doc_ids": [],
+    "prohibited_doc_ids": [
+      "DOC-SEC-006"
+    ],
+    "prohibited_answer_keywords": [
+      "SEV1",
+      "Head of Security",
+      "15 minutes"
+    ],
+    "expected_behavior": "deny_access"
+  }
+]

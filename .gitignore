@@ -1,0 +1,9 @@
+# Working notes. They stay on this machine.
+docs/local/
+
+# evals/.secrets/ is not listed here. Its own .gitignore keeps the directory
+# in the tree and ignores protected_set.json.
+
+# Bytecode and pytest's last-run cache.
+__pycache__/
+.pytest_cache/

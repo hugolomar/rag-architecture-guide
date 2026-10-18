@@ -1,0 +1,2 @@
+# Hold-out questions. The assistant does not read them while the pipeline is built.
+evals/.secrets/

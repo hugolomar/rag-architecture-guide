@@ -1,0 +1,371 @@
+[
+  {
+    "doc_id": "DOC-ENG-001",
+    "relative_path": "docker/awslogs.md",
+    "department": "Engineering",
+    "allowed_groups": [
+      "engineering-core"
+    ],
+    "classification": "internal",
+    "status": "current"
+  },
+  {
+    "doc_id": "DOC-ENG-002",
+    "relative_path": "docker/bridge.md",
+    "department": "Engineering",
+    "allowed_groups": [
+      "engineering-core"
+    ],
+    "classification": "internal",
+    "status": "current"
+  },
+  {
+    "doc_id": "DOC-ENG-003",
+    "relative_path": "docker/configure.md",
+    "department": "Engineering",
+    "allowed_groups": [
+      "engineering-core"
+    ],
+    "classification": "internal",
+    "status": "current"
+  },
+  {
+    "doc_id": "DOC-SEC-001",
+    "relative_path": "docker/core-roles.md",
+    "department": "Security",
+    "allowed_groups": [
+      "security-oncall",
+      "leadership"
+    ],
+    "classification": "restricted",
+    "status": "current"
+  },
+  {
+    "doc_id": "DOC-ENG-004",
+    "relative_path": "docker/envvars-precedence.md",
+    "department": "Engineering",
+    "allowed_groups": [
+      "engineering-core"
+    ],
+    "classification": "internal",
+    "status": "current"
+  },
+  {
+    "doc_id": "DOC-ENG-005",
+    "relative_path": "docker/envvars.md",
+    "department": "Engineering",
+    "allowed_groups": [
+      "engineering-core"
+    ],
+    "classification": "internal",
+    "status": "current"
+  },
+  {
+    "doc_id": "DOC-ENG-006",
+    "relative_path": "docker/fluentd.md",
+    "department": "Engineering",
+    "allowed_groups": [
+      "engineering-core"
+    ],
+    "classification": "internal",
+    "status": "current"
+  },
+  {
+    "doc_id": "DOC-SEC-003",
+    "relative_path": "docker/group-mapping.md",
+    "department": "Security",
+    "allowed_groups": [
+      "security-oncall",
+      "leadership"
+    ],
+    "classification": "restricted",
+    "status": "current"
+  },
+  {
+    "doc_id": "DOC-ENG-007",
+    "relative_path": "docker/links.md",
+    "department": "Engineering",
+    "allowed_groups": [
+      "engineering-core"
+    ],
+    "classification": "internal",
+    "status": "current"
+  },
+  {
+    "doc_id": "DOC-ENG-008",
+    "relative_path": "docker/linux.md",
+    "department": "Engineering",
+    "allowed_groups": [
+      "engineering-core"
+    ],
+    "classification": "internal",
+    "status": "current"
+  },
+  {
+    "doc_id": "DOC-ENG-009",
+    "relative_path": "docker/logs.md",
+    "department": "Engineering",
+    "allowed_groups": [
+      "engineering-core"
+    ],
+    "classification": "internal",
+    "status": "current"
+  },
+  {
+    "doc_id": "DOC-ENG-010",
+    "relative_path": "docker/overlayfs-driver.md",
+    "department": "Engineering",
+    "allowed_groups": [
+      "engineering-core"
+    ],
+    "classification": "internal",
+    "status": "current"
+  },
+  {
+    "doc_id": "DOC-SEC-004",
+    "relative_path": "docker/permissions-reference.md",
+    "department": "Security",
+    "allowed_groups": [
+      "security-oncall",
+      "leadership"
+    ],
+    "classification": "restricted",
+    "status": "current"
+  },
+  {
+    "doc_id": "DOC-ENG-011",
+    "relative_path": "docker/pulls.md",
+    "department": "Engineering",
+    "allowed_groups": [
+      "engineering-core"
+    ],
+    "classification": "internal",
+    "status": "current"
+  },
+  {
+    "doc_id": "DOC-ENG-012",
+    "relative_path": "docker/resource_constraints.md",
+    "department": "Engineering",
+    "allowed_groups": [
+      "engineering-core"
+    ],
+    "classification": "internal",
+    "status": "current"
+  },
+  {
+    "doc_id": "DOC-SEC-005",
+    "relative_path": "docker/seccomp.md",
+    "department": "Security",
+    "allowed_groups": [
+      "engineering-core",
+      "security-oncall"
+    ],
+    "classification": "internal",
+    "status": "current"
+  },
+  {
+    "doc_id": "DOC-ENG-013",
+    "relative_path": "docker/splunk.md",
+    "department": "Engineering",
+    "allowed_groups": [
+      "engineering-core"
+    ],
+    "classification": "internal",
+    "status": "current"
+  },
+  {
+    "doc_id": "DOC-ENG-014",
+    "relative_path": "docker/standalone.md",
+    "department": "Engineering",
+    "allowed_groups": [
+      "engineering-core"
+    ],
+    "classification": "internal",
+    "status": "current"
+  },
+  {
+    "doc_id": "DOC-ENG-015",
+    "relative_path": "docker/syslog.md",
+    "department": "Engineering",
+    "allowed_groups": [
+      "engineering-core"
+    ],
+    "classification": "internal",
+    "status": "current"
+  },
+  {
+    "doc_id": "DOC-SEC-007",
+    "relative_path": "docker/userns-remap.md",
+    "department": "Security",
+    "allowed_groups": [
+      "engineering-core",
+      "security-oncall"
+    ],
+    "classification": "internal",
+    "status": "current"
+  },
+  {
+    "doc_id": "DOC-HR-001",
+    "relative_path": "synthetic/bonus-and-performance-plan-2026.md",
+    "department": "HR",
+    "allowed_groups": [
+      "people-team",
+      "leadership"
+    ],
+    "classification": "restricted",
+    "status": "current"
+  },
+  {
+    "doc_id": "DOC-LEG-001",
+    "relative_path": "synthetic/data-processing-agreement-2025.md",
+    "department": "Legal",
+    "allowed_groups": [
+      "leadership",
+      "security-oncall"
+    ],
+    "classification": "restricted",
+    "status": "current"
+  },
+  {
+    "doc_id": "DOC-HR-002",
+    "relative_path": "synthetic/disciplinary-procedure.md",
+    "department": "HR",
+    "allowed_groups": [
+      "people-team",
+      "leadership"
+    ],
+    "classification": "restricted",
+    "status": "current"
+  },
+  {
+    "doc_id": "DOC-SEC-002",
+    "relative_path": "synthetic/employee-security-guidelines.md",
+    "department": "Security",
+    "allowed_groups": [
+      "all-employees"
+    ],
+    "classification": "public",
+    "status": "current"
+  },
+  {
+    "doc_id": "DOC-HR-003",
+    "relative_path": "synthetic/leave-and-time-off-policy.md",
+    "department": "HR",
+    "allowed_groups": [
+      "all-employees"
+    ],
+    "classification": "internal",
+    "status": "current"
+  },
+  {
+    "doc_id": "DOC-LEG-002",
+    "relative_path": "synthetic/master-services-agreement-nortecloud-2025.md",
+    "department": "Legal",
+    "allowed_groups": [
+      "leadership"
+    ],
+    "classification": "restricted",
+    "status": "current"
+  },
+  {
+    "doc_id": "DOC-LEG-003",
+    "relative_path": "synthetic/privacy-policy-v3-2025.md",
+    "department": "Legal",
+    "allowed_groups": [
+      "all-employees"
+    ],
+    "classification": "public",
+    "status": "current"
+  },
+  {
+    "doc_id": "DOC-HR-004",
+    "relative_path": "synthetic/remote-work-policy-v1-2022.md",
+    "department": "HR",
+    "allowed_groups": [
+      "all-employees"
+    ],
+    "classification": "internal",
+    "status": "deprecated"
+  },
+  {
+    "doc_id": "DOC-HR-005",
+    "relative_path": "synthetic/remote-work-policy-v2-2025.md",
+    "department": "HR",
+    "allowed_groups": [
+      "all-employees"
+    ],
+    "classification": "internal",
+    "status": "current"
+  },
+  {
+    "doc_id": "DOC-HR-006",
+    "relative_path": "synthetic/salary-bands-2026.md",
+    "department": "HR",
+    "allowed_groups": [
+      "people-team",
+      "leadership"
+    ],
+    "classification": "restricted",
+    "status": "current"
+  },
+  {
+    "doc_id": "DOC-SEC-006",
+    "relative_path": "synthetic/security-incident-response-runbook.md",
+    "department": "Security",
+    "allowed_groups": [
+      "security-oncall"
+    ],
+    "classification": "restricted",
+    "status": "current"
+  },
+  {
+    "doc_id": "DOC-LEG-004",
+    "relative_path": "synthetic/sla-platform-v1-2022.md",
+    "department": "Legal",
+    "allowed_groups": [
+      "leadership"
+    ],
+    "classification": "restricted",
+    "status": "deprecated"
+  },
+  {
+    "doc_id": "DOC-LEG-005",
+    "relative_path": "synthetic/sla-platform-v2-2025.md",
+    "department": "Legal",
+    "allowed_groups": [
+      "leadership"
+    ],
+    "classification": "restricted",
+    "status": "current"
+  },
+  {
+    "doc_id": "DOC-LEG-006",
+    "relative_path": "synthetic/supplier-code-of-conduct.md",
+    "department": "Legal",
+    "allowed_groups": [
+      "all-employees"
+    ],
+    "classification": "public",
+    "status": "current"
+  },
+  {
+    "doc_id": "DOC-FIN-001",
+    "relative_path": "synthetic/travel-expenses-policy-v2-2023.md",
+    "department": "Finance",
+    "allowed_groups": [
+      "all-employees"
+    ],
+    "classification": "internal",
+    "status": "archived"
+  },
+  {
+    "doc_id": "DOC-FIN-002",
+    "relative_path": "synthetic/travel-expenses-policy-v3-2026.md",
+    "department": "Finance",
+    "allowed_groups": [
+      "all-employees"
+    ],
+    "classification": "internal",
+    "status": "current"
+  }
+]
