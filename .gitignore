@@ -7,3 +7,6 @@ docs/local/
 # Bytecode and pytest's last-run cache.
 __pycache__/
 .pytest_cache/
+
+# Project environment. The interpreter is Python 3.14, installed with uv.
+.venv/
