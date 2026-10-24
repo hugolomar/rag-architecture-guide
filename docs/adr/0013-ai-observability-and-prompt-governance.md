@@ -1,11 +1,11 @@
-# ADR 0012: AI Observability and Prompt Governance
+# ADR 0013: AI Observability and Prompt Governance
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-10-23
 
 ## Context
 
-ADR 0010 defines the telemetry baseline contract and ADR 0011 defines the system-observability
+ADR 0011 defines the telemetry baseline contract and ADR 0012 defines the system-observability
 stack. Those decisions cover operational signals, but they do not define semantic AI tracing,
 prompt lifecycle governance, or domain-specialist workflows.
 
@@ -42,8 +42,10 @@ For each query execution, record AI-semantic telemetry with at least:
 
 - AI traces must not store secrets, credentials, or raw authorization headers.
 - Restricted document content remains subject to data-minimization policy from ADR 0009.
-- For denied/trimmed evidence, store metadata-only audit fields (`doc_id`, reason, stage), not raw
-  restricted text.
+- A denied or trimmed chunk is filtered in Qdrant before it reaches the API, so its text never
+  arrives and cannot be sent to Langfuse. The trace records only the audit metadata the API has:
+  `doc_id`, reason, and stage. The same document can be allowed for another caller; that execution
+  still records identifiers, not the chunk text.
 - Prompt/response capture must support configurable redaction for sensitive fields.
 
 ### 4) Integration boundary
@@ -74,9 +76,9 @@ For each query execution, record AI-semantic telemetry with at least:
 
 3. **Phoenix as primary AI observability platform**
    - Pros: useful tracing and experimentation capabilities.
-   - Cons: weaker fit for the required prompt governance workflow for domain-specialist ownership in
-     this phase.
-   - Rejected for this stage.
+   - Cons: weaker fit for the prompt-governance workflow this system requires for domain-specialist
+     ownership.
+   - Rejected.
 
 ## Consequences
 

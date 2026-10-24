@@ -10,7 +10,7 @@ graph TD
 
   subgraph Runtime["RAG API runtime"]
     HTTP["HTTP boundary<br/>Input validation"]
-    Auth["Identity resolution<br/>from X-User-Id"]
+    Auth["Identity resolution<br/>from bearer token"]
     Retrieve["Hybrid retrieval orchestration"]
     Generate["Generation adapter"]
     Lite["LiteLLM in-process"]
@@ -42,7 +42,7 @@ graph TD
 
 Security invariants:
 
-- Identity authority is `X-User-Id` resolution, not caller-supplied groups.
+- Identity authority is bearer-token validation, not caller-supplied groups.
 - Access control is deterministic at retrieval time, before generation.
 - Generation only receives already-trimmed evidence.
 - Provider exposure starts only after security trimming.

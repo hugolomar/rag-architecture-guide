@@ -1,12 +1,12 @@
-# ADR 0015: Production Feedback Loop to Dataset
+# ADR 0016: Production Feedback Loop to Dataset
 
 - Status: Proposed
 - Date: 2026-10-23
 
 ## Context
 
-The project has evaluation suites and quality gates (note 03, ADR 0013) plus runtime and AI
-observability (ADRs 0010-0012). It needs a formal process to convert production failures and low
+The project has evaluation suites and quality gates (note 03, ADR 0014) plus runtime and AI
+observability (ADRs 0011-0013). It needs a formal process to convert production failures and low
 confidence traces into durable regression cases without leaking protected benchmark content.
 
 ## Decision
@@ -36,7 +36,7 @@ Adopt a governed feedback-to-dataset loop.
 
 ### 4) Data-handling rules
 
-- Incident-derived cases redact sensitive content according to ADR 0009 and ADR 0010.
+- Incident-derived cases redact sensitive content according to ADR 0009 and ADR 0011.
 - For restricted evidence, case artifacts keep identifiers and behavior expectations, not raw text.
 
 ## Rationale
@@ -69,4 +69,4 @@ Adopt a governed feedback-to-dataset loop.
 - **Positive:** clearer governance of suite evolution and hold-out integrity.
 - **Negative:** added triage overhead for case curation and promotion.
 - **Boundary:** this ADR does not define CI platform/job mechanics.
-- **Follow-up:** ADR 0016 defines Jenkins pipeline stages that enforce this lifecycle.
+- **Follow-up:** ADR 0017 defines Jenkins pipeline stages that enforce this lifecycle.

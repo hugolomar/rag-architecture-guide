@@ -8,7 +8,7 @@ Note 01 fixes what the corpus is for. Note 02 fixes the shape of the manifest. T
 
 Evaluation-driven development is the same order as test-driven development, applied to a RAG pipeline. The checks are written before ingestion, retrieval, and generation. The code is written to satisfy the checks.
 
-`evals/suites/` is that specification. Each case names a user from `data/users.json`, a question, the documents from `data/manifest.json` that may support the answer, and the behaviour that counts as a pass. There is no pipeline yet. The files are the contract the pipeline has to meet.
+`evals/suites/` is that specification. Each case names a user from `tests/fixtures/identity/users.json`, a question, the documents from `data/manifest.json` that may support the answer, and the behaviour that counts as a pass. There is no pipeline yet. The files are the contract the pipeline has to meet.
 
 The success criteria are the three goals in note 01: chunking that keeps a table row with its figure, a current document that wins over a deprecated or archived one, and a group filter that runs before any model sees text. One prohibited document in the context is a failure on its own. One prohibited keyword in the answer is a failure on its own.
 
@@ -20,7 +20,7 @@ Each suite file is a JSON array. One object is one case.
 
 | Field | What a pass looks like |
 |---|---|
-| `user_id`, `user_principal_name`, `user_groups` | Copied from `data/users.json`. Every person has `all-employees` plus the group of their function. |
+| `user_id`, `user_principal_name`, `user_groups` | Copied from `tests/fixtures/identity/users.json`. Every person has `all-employees` plus the group of their function. |
 | `target_stage` | `retrieval`, `security`, `generation`, or `end_to_end`. Selects which runner scores the case. It does not change the user's groups. |
 | `expected_doc_ids` | Documents the retrieval stage must return. Each one is visible to this user: their groups intersect `allowed_groups`. |
 | `prohibited_doc_ids` | Documents that must not enter the model context. One hit is a failure. |
@@ -114,7 +114,7 @@ A release runs the hold-out the same way, from the path in `RAG_PROTECTED_SUITE_
 
 A recall average cannot offset a leak. Latency budgets are added when a service exists. They are not a substitute for the document and keyword rules.
 
-After release, a wrong answer, a trace with a low confidence, or a complaint becomes a new case with the same fields and a user who already exists. The case goes into `dev_set.json` and is fixed there. A sibling that changes the user or the wording, and that was not used to choose the fix, goes into `val_set.json` so the next pull request catches the same failure. `protected_set.json` grows only with a case that has never been used to change the system. A case that names an unknown `doc_id` or an unknown user is not a valid case. New documents and new groups enter through `data/manifest.json` and `data/users.json` first.
+After release, a wrong answer, a trace with a low confidence, or a complaint becomes a new case with the same fields and a user who already exists. The case goes into `dev_set.json` and is fixed there. A sibling that changes the user or the wording, and that was not used to choose the fix, goes into `val_set.json` so the next pull request catches the same failure. `protected_set.json` grows only with a case that has never been used to change the system. A case that names an unknown `doc_id` or an unknown user is not a valid case. New documents and new groups enter through `data/manifest.json` and the identity fixture/IdP seed first.
 
 ## 7. Decisions made
 

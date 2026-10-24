@@ -1,11 +1,11 @@
-# ADR 0016: Jenkins CI Platform and Pipeline Implementation
+# ADR 0017: Jenkins CI Platform and Pipeline Implementation
 
 - Status: Proposed
 - Date: 2026-10-23
 
 ## Context
 
-ADRs 0013-0015 define evaluation policy, phase tooling, and feedback-loop governance. The project
+ADRs 0014-0016 define evaluation policy, phase tooling, and feedback-loop governance. The project
 needs a concrete CI platform and pipeline structure to enforce those rules in automated checks.
 
 ## Decision
@@ -22,7 +22,7 @@ Use **Jenkins** as the CI platform for this project stage.
 - **Stage B: PR validation gate**
   - run `val_set` phase-1 deterministic checks,
   - run phase-2 semantic checks (RAGAS subset/smoke profile),
-  - fail on hard-blocking criteria from ADR 0013.
+  - fail on hard-blocking criteria from ADR 0014.
 
 - **Stage C: mainline validation**
   - full `val_set` phase-1 + phase-2 run,
@@ -49,7 +49,7 @@ Use **Jenkins** as the CI platform for this project stage.
 
 - Jenkins provides mature staged pipelines and secret handling patterns suitable for mixed local/CI
   workflows.
-- Explicit stage boundaries mirror evaluation governance boundaries from ADR 0013.
+- Explicit stage boundaries mirror evaluation governance boundaries from ADR 0014.
 - Protected-suite injection via credentials preserves hold-out isolation from repository access.
 
 ## Alternatives Considered
@@ -75,6 +75,6 @@ Use **Jenkins** as the CI platform for this project stage.
 - **Positive:** protected benchmark handling is explicit and isolated.
 - **Negative:** Jenkins operational maintenance overhead.
 - **Negative:** additional work to optimize build time and agent caching.
-- **Boundary:** this ADR does not redefine gate semantics (ADR 0013) or evaluator role boundaries
-  (ADR 0014).
+- **Boundary:** this ADR does not redefine gate semantics (ADR 0014) or evaluator role boundaries
+  (ADR 0015).
 - **Follow-up:** add concrete Jenkinsfile/job templates and credentials mapping documentation.

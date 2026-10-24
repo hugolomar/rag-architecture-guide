@@ -1,6 +1,6 @@
 # AI observability and prompt governance flow
 
-Semantic AI tracing and prompt-governance flow from ADR 0012.
+Semantic AI tracing and prompt-governance flow from ADR 0013.
 
 ```mermaid
 sequenceDiagram
@@ -13,7 +13,7 @@ sequenceDiagram
   participant LF as Langfuse
   participant FB as User feedback
 
-  U->>API: Query + X-User-Id
+  U->>API: Query + Authorization: Bearer
   API->>RET: Retrieve filtered evidence
   RET-->>API: doc_ids/chunk_ids + ranking metadata
   API->>PROMPT: Resolve prompt version/tag
@@ -28,7 +28,7 @@ sequenceDiagram
   GEN->>LF: Trace generation metadata + latency + token usage
   FB->>LF: Thumbs up/down + optional note
 
-  Note over LF: Store metadata-only for denied/trimmed evidence.
+  Note over LF: Denied or trimmed text never reaches the API, so the trace stores doc_id, reason, and stage only.
   Note over LF: Apply redaction policy for sensitive prompt/response fields.
 ```
 

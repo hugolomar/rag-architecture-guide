@@ -78,5 +78,7 @@ Use **Qdrant** as the retrieval storage engine.
 - **Negative:** more explicit collection design (dense vectors, sparse vectors, payload indexes).
 - **Boundary note:** this ADR chooses the retrieval engine. It does not choose tokenizer rules,
   embedding model, model provider, or reranking strategy.
+- **Boundary note:** the official Qdrant Python client uses REST unless told otherwise, and can
+  switch to gRPC.
 - **Follow-up:** implement a Qdrant retrieval adapter behind the domain retrieval port and keep the
-  harness-facing retrieval signature stable (`retrieve_fn(query, user_id, top_k=5)`).
+  harness-facing retrieval signature stable (`retrieve_fn(query, user_id, top_k=3)`).

@@ -1,8 +1,8 @@
-"""Check the suites against the manifest and the user catalog.
+"""Check the suites against the manifest and the identity fixture catalog.
 
 These tests do not call ``retrieve_fn`` or ``generate_fn``. They pass while the
 pipeline is still a stub. A failure means a case and ``data/manifest.json`` or
-``data/users.json`` have diverged.
+``tests/fixtures/identity/users.json`` have diverged.
 """
 
 import json
@@ -29,7 +29,7 @@ def _users() -> dict[str, dict]:
 
     The catalog field is ``groups``. Cases copy that list into ``user_groups``.
     """
-    records = json.loads((ROOT / "data" / "users.json").read_text(encoding="utf-8"))
+    records = json.loads((ROOT / "tests" / "fixtures" / "identity" / "users.json").read_text(encoding="utf-8"))
     return {record["user_id"]: record for record in records}
 
 

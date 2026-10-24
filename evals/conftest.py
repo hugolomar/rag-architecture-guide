@@ -14,12 +14,12 @@ import pytest
 def retrieve_fn():
     """Return the phase 1 stub.
 
-    Signature: ``retrieve_fn(query, user_id, top_k=5) -> dict`` with
+    Signature: ``retrieve_fn(query, user_id, top_k=3) -> dict`` with
     ``retrieved_doc_ids`` and ``indexed_doc_ids``. The stub raises
     ``NotImplementedError`` before it can return either.
     """
 
-    def _stub_retrieve(query: str, user_id: str, top_k: int = 5) -> dict:
+    def _stub_retrieve(query: str, user_id: str, top_k: int = 3) -> dict:
         raise NotImplementedError("Phase 1 retrieval pipeline not connected yet.")
 
     return _stub_retrieve

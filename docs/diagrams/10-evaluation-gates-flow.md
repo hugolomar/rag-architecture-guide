@@ -1,6 +1,6 @@
 # Evaluation gates flow
 
-Pipeline and feedback-loop view based on ADR 0013, ADR 0014, ADR 0015, and ADR 0016.
+Pipeline and feedback-loop view based on ADR 0014, ADR 0015, ADR 0016, and ADR 0017.
 
 ```mermaid
 flowchart TD

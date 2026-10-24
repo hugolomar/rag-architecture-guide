@@ -103,7 +103,7 @@ def contains_keyword(text: str, keyword: str) -> bool:
     return re.search(pattern, text, flags=re.IGNORECASE) is not None
 
 
-def assert_phase1_retrieval(case: dict, retrieval_result: dict, top_k: int = 5) -> None:
+def assert_phase1_retrieval(case: dict, retrieval_result: dict, top_k: int = 3) -> None:
     """Score document ids. Raise ``AssertionError`` on the first broken rule.
 
     ``retrieval_result["retrieved_doc_ids"]`` is an ordered list, most relevant
@@ -220,9 +220,9 @@ def assert_phase2_generation(case: dict, gen_result: dict) -> None:
 def run_evaluation_case(case: dict, retrieve_fn, generate_fn) -> None:
     """Run the phases selected by ``case["target_stage"]``.
 
-    ``retrieve_fn(query, user_id, top_k=5)`` resolves the user itself. The case
+    ``retrieve_fn(query, user_id, top_k=3)`` resolves the user itself. The case
     does not hand over ``user_groups``. It returns ``retrieved_doc_ids`` and
-    ``indexed_doc_ids``.
+    ``indexed_doc_ids``. The harness passes ``top_k=3``, the API default.
 
     ``generate_fn(query, context_doc_ids, user_id)`` returns ``answer`` and
     ``behavior``. A generation-only case passes ``expected_doc_ids`` as the
@@ -232,7 +232,7 @@ def run_evaluation_case(case: dict, retrieve_fn, generate_fn) -> None:
     stage = case["target_stage"]
     retrieval = None
     if stage in PHASE1_STAGES:
-        retrieval = retrieve_fn(case["query"], case["user_id"])
+        retrieval = retrieve_fn(case["query"], case["user_id"], top_k=3)
         assert_phase1_retrieval(case, retrieval)
 
     if stage in PHASE2_STAGES:

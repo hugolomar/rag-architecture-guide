@@ -1,6 +1,6 @@
 # ADR 0005: Preprocessing and Embeddings Before Storage
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-10-23
 
 ## Context
@@ -34,7 +34,7 @@ Build both vectors in Python before storage.
   flushes/shuts down telemetry exporters, and exits.
 - **Model isolation:** changing the dense model requires a new collection and a new indexing run.
   Collection metadata stores model identity and vector dimensions.
-- **Acceptance checks:** candidates are rejected when phase-1 development cases miss expected
+- **Acceptance checks:** model candidates are rejected when phase-1 development cases miss expected
   semantic documents, or when adapter checks fail (dimension, finite values, query/document path
   separation, stored vector equality with produced vector).
 

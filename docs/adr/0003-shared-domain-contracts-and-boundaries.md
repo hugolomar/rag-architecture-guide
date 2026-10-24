@@ -20,8 +20,8 @@ cross-layer contracts.
 
 The shared objects are these:
 
-- **Identity.** A caller is a `user_id`. The caller's groups are resolved from that id. The query
-  does not supply them.
+- **Identity.** A caller is a `user_id`. The system resolves the caller's groups. The query does not
+  supply them.
 - **Governed document.** Identity is `doc_id`. The contract carries `allowed_groups`, `status`,
   `department`, and `classification` together. Only `allowed_groups` grants read access, by
   intersection with the caller's groups. `department` names the owner. `classification` names

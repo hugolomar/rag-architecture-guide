@@ -1,6 +1,6 @@
 # ADR 0009: Runtime Security and Trust Boundaries
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-10-23
 
 ## Context
@@ -19,8 +19,11 @@ Adopt a zero-trust runtime posture with deterministic pre-inference controls.
 - **Pre-inference security trimming is mandatory.** Only documents whose `allowed_groups` intersect
   caller groups can become model context. `department` and `classification` are attributes, not
   access grants.
-- **Identity context is system-resolved.** Caller groups are resolved from `user_id`; request text
-  and retrieved content do not change caller groups.
+- **Identity context is system-resolved.** Runtime caller groups come from the token `groups` claim
+  (ADR 0010). Deterministic suites still resolve them from `user_id` via the identity fixture.
+  Request text and retrieved content do not change caller groups.
+- **Identity tokens are validated before orchestration.** Bearer tokens must pass issuer, audience,
+  signature, and expiry checks (ADR 0010) before user context enters retrieval.
 - **Lifecycle enforcement is part of runtime filtering.** Retrieval excludes `archived` content and
   keeps `current`/`deprecated` behavior consistent with governed rules.
 - **Model context is untrusted data.** Retrieved chunks are treated as data, never as executable
@@ -50,7 +53,7 @@ Adopt a zero-trust runtime posture with deterministic pre-inference controls.
    - Cons: trust boundary violation and privilege-escalation risk.
    - Rejected.
 
-3. **Post-generation redaction as primary control**
+3. **Post-generation redaction as primary access control**
    - Pros: easier retrofit in some architectures.
    - Cons: sensitive context already exposed to model/provider before redaction.
    - Rejected.

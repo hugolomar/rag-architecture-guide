@@ -19,7 +19,7 @@ Note 01 decides that governance lives in the manifest and not in the files. This
 }
 ```
 
-`title`, `description` and `keywords` stay with the parser. Freshness pairs (`pair_id`, `superseded_by`) and `expected_docs` / `forbidden_docs` stay in `eval/`. The user's groups stay in `users.json`.
+`title`, `description` and `keywords` stay with the parser. Freshness pairs (`pair_id`, `superseded_by`) and `expected_docs` / `forbidden_docs` stay in `eval/`. User groups are resolved from the identity provider at runtime and come from `tests/fixtures/identity/users.json` in deterministic test runs.
 
 ## 2. Three fields with three jobs
 
@@ -89,7 +89,7 @@ The manifest is a stand-in for the JSON a connector would already have collected
 | `doc_id` | `driveItem.id`, stable when the file is renamed. | The Drive file id. | A human-readable id. The stability requirement is the same. |
 | `relative_path` | `parentReference.path` plus the name, used for display. The join key in production is the source id. | The file path inside the shared drive. | We join on the path because the files on disk are the source system. |
 
-`users.json` stands in for the identity provider. Every test user carries `all-employees` plus the groups of their function, the way Entra ID would put those groups in the access token. A user with only a function group would miss the policies limited to `all-employees`. `user_id` is an object id, in the style of Entra ID, and does not name the person's function. The five users are an employee (`all-employees`), an engineer (plus `engineering-core`), a people partner (plus `people-team`), a security on-call (plus `security-oncall`) and a leader (plus `leadership`). The evaluation questions that name one of these users come later. The ingestion service itself would run as its own application identity, with rights to read the sources and their ACLs, including HR and legal content that the developers of the pipeline do not personally open.
+`tests/fixtures/identity/users.json` is the deterministic identity fixture. It seeds local IdP realms for integration tests and keeps suite users stable offline. Every test user carries `all-employees` plus the groups of their function, the way Entra ID would put those groups in the access token. A user with only a function group would miss the policies limited to `all-employees`. `user_id` is an object id, in the style of Entra ID, and does not name the person's function. The five users are an employee (`all-employees`), an engineer (plus `engineering-core`), a people partner (plus `people-team`), a security on-call (plus `security-oncall`) and a leader (plus `leadership`). The evaluation questions that name one of these users come later. The ingestion service itself would run as its own application identity, with rights to read the sources and their ACLs, including HR and legal content that the developers of the pipeline do not personally open.
 
 Changing `allowed_groups` or moving a document to `archived` is the test equivalent of an ACL change or a deletion in SharePoint. The next ingestion has to update the index. Until it does, the previous chunks are what the query filter still sees.
 

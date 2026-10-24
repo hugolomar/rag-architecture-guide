@@ -40,7 +40,7 @@ def oracle_retrieve_fn(case: dict):
     Archived and prohibited ids are omitted from both lists.
     """
 
-    def _retrieve(query: str, user_id: str, top_k: int = 5) -> dict:
+    def _retrieve(query: str, user_id: str, top_k: int = 3) -> dict:
         retrieved = list(case.get("expected_doc_ids", []))
         indexed = list(case.get("expected_doc_ids", [])) + list(case.get("stays_indexed_doc_ids", []))
         return {
@@ -107,7 +107,7 @@ def test_leaky_retrieval_fails():
     assert cases
 
     def leaky_retrieve(case):
-        def _retrieve(query: str, user_id: str, top_k: int = 5) -> dict:
+        def _retrieve(query: str, user_id: str, top_k: int = 3) -> dict:
             retrieved = [case["prohibited_doc_ids"][0], *case.get("expected_doc_ids", [])]
             indexed = list(case.get("expected_doc_ids", [])) + list(case.get("stays_indexed_doc_ids", []))
             return {"retrieved_doc_ids": retrieved[:top_k], "indexed_doc_ids": indexed}
@@ -141,7 +141,7 @@ def test_empty_output_fails():
     cases = _all_cases()
     assert len(cases) == (27 if load_protected_suite() else 20)
 
-    def empty_retrieve(query: str, user_id: str, top_k: int = 5) -> dict:
+    def empty_retrieve(query: str, user_id: str, top_k: int = 3) -> dict:
         return {"retrieved_doc_ids": [], "indexed_doc_ids": []}
 
     def empty_generate(case):

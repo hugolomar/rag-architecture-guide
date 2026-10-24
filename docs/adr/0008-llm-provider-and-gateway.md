@@ -1,6 +1,6 @@
 # ADR 0008: LLM Provider and Gateway Strategy
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-10-23
 
 ## Context
@@ -61,7 +61,7 @@ Gemini Flash** as the initial provider for development and evaluation.
 
 - **Positive:** provider swaps can happen in adapter/config with minimal orchestration change.
 - **Positive:** no extra proxy container is required now.
-- **Negative:** generation payloads leave the system when using managed providers.
+- **Negative:** generation payloads leave the system when using managed providers. A local model would keep that text inside.
 - **Negative:** free-tier behavior and quotas are provider-managed and can change.
 - **Security note:** managed free tiers may use submitted content according to provider terms.
 - **Boundary:** this ADR does not choose production authentication, observability backend, or

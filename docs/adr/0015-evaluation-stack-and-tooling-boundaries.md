@@ -1,11 +1,11 @@
-# ADR 0014: Evaluation Stack and Tooling Boundaries
+# ADR 0015: Evaluation Stack and Tooling Boundaries
 
 - Status: Proposed
 - Date: 2026-10-23
 
 ## Context
 
-ADR 0013 defines quality-gate policy, but does not assign tooling per evaluation phase. The project
+ADR 0014 defines quality-gate policy, but does not assign tooling per evaluation phase. The project
 requires strict phase separation: deterministic retrieval/security checks first, semantic generation
 assessment second.
 
@@ -61,4 +61,4 @@ Define tooling boundaries by phase.
 - **Positive:** semantic quality is measured with an explicit phase-2 tool.
 - **Negative:** calibration and rubric maintenance effort for RAGAS.
 - **Boundary:** this ADR does not define CI platform implementation details.
-- **Follow-up:** ADR 0015 defines production feedback ingestion into suite evolution.
+- **Follow-up:** ADR 0016 defines production feedback ingestion into suite evolution.

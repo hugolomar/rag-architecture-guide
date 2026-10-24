@@ -1,4 +1,4 @@
-# ADR 0013: Evaluation Governance and Quality Gates
+# ADR 0014: Evaluation Governance and Quality Gates
 
 - Status: Proposed
 - Date: 2026-10-23
@@ -6,7 +6,7 @@
 ## Context
 
 Note 03 defines evaluation-first development and suite partitioning (`dev`, `val`, `protected`).
-ADRs 0007-0009 define API semantics and security invariants. ADR 0012 adds AI observability. The
+ADRs 0007-0010 define API semantics and security invariants. ADR 0013 adds AI observability. The
 project now needs explicit quality-gate policy for pull requests, mainline integration, and release.
 
 ## Decision
@@ -78,4 +78,4 @@ Thresholds for informational metrics are versioned and reviewed periodically.
 - **Positive:** explicit separation between blocking and informational signals.
 - **Negative:** release pipeline needs secret/protected suite provisioning.
 - **Boundary:** this ADR does not choose phase-2 semantic scoring tooling details.
-- **Follow-up:** ADR 0014 defines phase-specific tooling and metric interpretation.
+- **Follow-up:** ADR 0015 defines phase-specific tooling and metric interpretation.

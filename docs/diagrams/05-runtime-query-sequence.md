@@ -3,7 +3,8 @@
 Sequence view for one interactive query. This diagram complements container/component views by
 showing execution order and security gates from ADR 0007, ADR 0008, and ADR 0009.
 
-The caller sends `X-User-Id` and query text. The API validates input, resolves caller groups, and
+The caller sends bearer identity and query text. The API validates input, validates the token,
+resolves caller groups, and
 builds query vectors. Qdrant applies `allowed_groups` and lifecycle status filters before returning
 candidates. Generation uses only that surviving evidence through LiteLLM to Gemini.
 
@@ -11,17 +12,17 @@ candidates. Generation uses only that surviving evidence through LiteLLM to Gemi
 sequenceDiagram
   actor U as Employee
   participant API as FastAPI runtime
-  participant IdP as Identity resolver
+  participant IdP as Identity resolver (OIDC)
   participant V as FastEmbed (query)
   participant Q as Qdrant
   participant G as Generation adapter
   participant L as LiteLLM (in-process)
   participant M as Gemini provider
 
-  U->>API: POST /query (X-User-Id, query, top_k?)
+  U->>API: POST /query (Authorization: Bearer, query, top_k?)
   API->>API: Validate request (422 on schema/limits)
-  API->>IdP: Resolve caller from X-User-Id
-  IdP-->>API: user_id + user_groups (401 on unknown)
+  API->>IdP: Validate token and resolve caller claims
+  IdP-->>API: user_id + user_groups (401 on invalid/missing token)
   API->>V: Build query dense+sparse vectors
   V-->>API: query vectors
   API->>Q: Hybrid query + filters (allowed_groups,status)

@@ -35,9 +35,11 @@ data/
 │   ├── docker/               # real documents, as downloaded, unaltered
 │   └── synthetic/            # invented documents (legal, HR, security)
 ├── manifest.json             # governance metadata
-├── users.json                # test users and their permissions
 ├── eval/questions.jsonl      # evaluation questions
 └── processed/                # chunks and indexes, not versioned
+
+tests/
+└── fixtures/identity/users.json  # deterministic identity fixture and IdP seed
 ```
 
 The path under `raw/docker/` reproduces the docs.docker.com URL to avoid name collisions. Department, access level and status of every document, including the Docker pages (which stand in for internal engineering documentation), are defined only in the manifest.
@@ -73,7 +75,7 @@ The first two exist in any real project. The third is test scaffolding and has n
 |---|---|
 | `raw/` folder | Connector to SharePoint, Drive, Confluence, a docs repository... |
 | Manifest | Metadata and ACLs delivered by the connector (owner, groups with access, modification date, URL) or a data catalog |
-| `users.json` | Identity provider (company directory, SSO) |
+| `tests/fixtures/identity/users.json` | Deterministic identity fixture and local IdP seed |
 | Changing a document's access in the manifest | A permission change at the source, which must propagate to the index |
 | Running ingestion by hand | Periodic or event-driven sync, re-ingesting what changed |
 

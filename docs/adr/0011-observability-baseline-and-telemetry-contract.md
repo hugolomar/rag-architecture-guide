@@ -1,6 +1,6 @@
-# ADR 0010: Observability Baseline and Telemetry Contract
+# ADR 0011: Observability Baseline and Telemetry Contract
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-10-23
 
 ## Context
@@ -30,6 +30,9 @@ Adopt OpenTelemetry-based instrumentation and a minimum telemetry contract for a
   retrieval call, generation adapter call, provider call, and ingestion stages.
 - **Metrics:** HTTP status counters, API latency distributions, upstream failure counters, ingestion
   duration counters/histograms, and chunk/indexing counters.
+- **Note:** these metrics stay operational. A query has no business-event stream. Its business
+  outcome is the response `behavior`, recorded as AI-semantic telemetry (ADR 0013), not as a
+  business dashboard on the system metrics stack.
 - **Logs:** structured JSON logs on stdout, correlated to traces.
 
 ### 3) Correlation contract
@@ -48,8 +51,7 @@ Every relevant signal should carry correlation identifiers where applicable:
 - Never log restricted chunk content in observability payloads.
 - For denied/trimmed evidence, log metadata only (for example: `doc_id`, decision reason, stage),
   not document text.
-- Prompt/response capture, if enabled in future tooling, must follow redaction controls from the
-  security ADR.
+- Prompt/response capture, if enabled, must follow the data-minimization rules above.
 
 ### 5) Provider and stack neutrality
 
@@ -63,7 +65,7 @@ Every relevant signal should carry correlation identifiers where applicable:
 - OpenTelemetry gives a portable baseline independent from a specific vendor stack.
 - A minimum correlation contract allows joining logs, traces, and metrics across runtime/evals.
 - Ephemeral ingestion jobs require explicit flush/shutdown to avoid losing telemetry at process end.
-- Metadata-only audit for trimmed evidence preserves forensic value without leaking restricted text.
+- Metadata-only records for trimmed evidence preserve forensic value without leaking restricted text.
 
 ## Alternatives Considered
 
@@ -85,9 +87,6 @@ Every relevant signal should carry correlation identifiers where applicable:
 ## Consequences
 
 - **Positive:** unified, vendor-neutral baseline for runtime and ingestion observability.
-- **Positive:** stronger auditability of security trimming decisions without exposing restricted text.
+- **Positive:** safer operational telemetry for governed data (metadata-only, no restricted text exposure).
 - **Negative:** extra implementation work to maintain instrumentation consistency.
-- **Negative:** backend/tooling choices remain open and require follow-up ADRs.
-- **Boundary:** this ADR does not choose observability products or AI-tracing platform.
-- **Follow-up 1:** choose telemetry pipeline and storage backends (stack ADR).
-- **Follow-up 2:** define AI-semantic tracing scope, prompt governance capture, and FinOps signals.
+- **Boundary:** this ADR does not choose observability products or the AI-tracing platform. ADR 0012 chooses the operational stack. ADR 0013 chooses semantic tracing and prompt governance.
