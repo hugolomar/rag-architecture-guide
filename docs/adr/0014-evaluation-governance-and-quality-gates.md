@@ -1,6 +1,6 @@
 # ADR 0014: Evaluation Governance and Quality Gates
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-10-23
 
 ## Context
@@ -62,7 +62,7 @@ Thresholds for informational metrics are versioned and reviewed periodically.
    - Cons: slows local iteration and mixes tuning with release assurance.
    - Rejected.
 
-2. **Score-only aggregate gating**
+2. **One average score as the only gate**
    - Pros: simple dashboard metrics.
    - Cons: can hide severe security failures under average improvements.
    - Rejected.
@@ -76,6 +76,7 @@ Thresholds for informational metrics are versioned and reviewed periodically.
 
 - **Positive:** clear, enforceable governance for evaluation outcomes.
 - **Positive:** explicit separation between blocking and informational signals.
+- **Negative:** three suites and separate blocking and informational signals make the evaluation pipeline more complex than a single pass/fail score.
 - **Negative:** release pipeline needs secret/protected suite provisioning.
 - **Boundary:** this ADR does not choose phase-2 semantic scoring tooling details.
 - **Follow-up:** ADR 0015 defines phase-specific tooling and metric interpretation.

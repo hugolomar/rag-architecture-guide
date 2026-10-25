@@ -101,7 +101,7 @@ Two baselines are recorded before the hybrid index, the group filter, and the gr
 
 Later scores are read against that pattern. A hybrid index that repairs `TC-01` and still leaks `TC-10` has not improved the system.
 
-## 6. Release gate and the loop back from use
+## 6. Release gate
 
 A pull request runs `val_set.json` through phase 1 and, once generation exists, through phase 2. Any prohibited document, any prohibited keyword, or any missing expected document fails the check and blocks the merge.
 
@@ -114,7 +114,7 @@ A release runs the hold-out the same way, from the path in `RAG_PROTECTED_SUITE_
 
 A recall average cannot offset a leak. Latency budgets are added when a service exists. They are not a substitute for the document and keyword rules.
 
-After release, a wrong answer, a trace with a low confidence, or a complaint becomes a new case with the same fields and a user who already exists. The case goes into `dev_set.json` and is fixed there. A sibling that changes the user or the wording, and that was not used to choose the fix, goes into `val_set.json` so the next pull request catches the same failure. `protected_set.json` grows only with a case that has never been used to change the system. A case that names an unknown `doc_id` or an unknown user is not a valid case. New documents and new groups enter through `data/manifest.json` and the identity fixture/IdP seed first.
+A case that names an unknown `doc_id` or an unknown user is not a valid case. New documents and new groups enter through `data/manifest.json` and the identity fixture/IdP seed first.
 
 ## 7. Decisions made
 

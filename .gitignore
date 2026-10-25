@@ -10,3 +10,7 @@ __pycache__/
 
 # Project environment. The interpreter is Python 3.14, installed with uv.
 .venv/
+
+# Build output. The whole directory stays out of git.
+# The docs build writes artifacts/docs/site.
+artifacts/

@@ -1,6 +1,6 @@
 # ADR 0015: Evaluation Stack and Tooling Boundaries
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-10-23
 
 ## Context
@@ -23,13 +23,16 @@ Define tooling boundaries by phase.
 ### 2) Phase 2 (generation/semantic) tooling
 
 - Adopt **RAGAS** as semantic evaluator for phase-2 metrics.
-- Use RAGAS to score groundedness/faithfulness, answer relevance, and citation consistency.
-- Calibrate RAGAS prompts/rubrics against a reviewed sample before enforcing thresholds.
+- Use RAGAS to score faithfulness, answer relevance, and citation consistency.
+- Calibrate RAGAS rubrics against a reviewed sample before any threshold can fail a build.
+- On a pull request, record RAGAS scores and do not fail the merge on them.
+- After merge, on the mainline run, enforce faithfulness and citation-consistency thresholds only once rubrics are calibrated. Answer relevance stays informational.
+- Do not tune those thresholds or rubrics against `protected_set`.
 
 ### 3) Boundary rules
 
 - Phase 1 pass/fail must not depend on model-judge outputs.
-- Phase 2 metrics must not override hard security failures from phase 1.
+- A passing RAGAS score does not override a phase-1 hard failure.
 - Tool outputs are recorded as artifacts and linked to `trace_id`/`test_id` where available.
 
 ## Rationale
@@ -52,8 +55,8 @@ Define tooling boundaries by phase.
 
 3. **DeepEval as primary phase-2 tool**
    - Pros: strong testing integrations and safety scenarios.
-   - Cons: not selected as primary phase-2 semantic baseline for this project stage.
-   - Deferred.
+   - Cons: its default mode is a pytest assertion that fails the pipeline when a metric misses a threshold. Phase 2 here records scores on the pull request and enforces only calibrated faithfulness and citation thresholds on the mainline run.
+   - Rejected.
 
 ## Consequences
 
@@ -61,4 +64,5 @@ Define tooling boundaries by phase.
 - **Positive:** semantic quality is measured with an explicit phase-2 tool.
 - **Negative:** calibration and rubric maintenance effort for RAGAS.
 - **Boundary:** this ADR does not define CI platform implementation details.
-- **Follow-up:** ADR 0016 defines production feedback ingestion into suite evolution.
+- **Follow-up:** `docs/processes/eval-case-curation-from-production.md` records how a failure in
+  use becomes a suite case.

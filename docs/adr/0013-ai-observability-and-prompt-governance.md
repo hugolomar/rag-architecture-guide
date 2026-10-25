@@ -76,8 +76,7 @@ For each query execution, record AI-semantic telemetry with at least:
 
 3. **Phoenix as primary AI observability platform**
    - Pros: useful tracing and experimentation capabilities.
-   - Cons: weaker fit for the prompt-governance workflow this system requires for domain-specialist
-     ownership.
+   - Cons: weaker support for prompt versions owned by domain specialists.
    - Rejected.
 
 ## Consequences
