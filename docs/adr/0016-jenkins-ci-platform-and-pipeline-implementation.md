@@ -25,7 +25,11 @@ Stage execution is fail-fast: each stage runs only if the previous stage succeed
   - schema/contract checks (Spectral and the OpenAPI drift test from ADR 0007),
   - suite integrity tests (`evals/test_suite_integrity.py`),
   - harness self-check (`evals/test_harness_selfcheck.py`),
-  - unit tests of the project code, once that code exists.
+  - unit tests of the project code, once that code exists,
+  - structural checks for ports, models, and dependency direction (`lint-imports`), once the code they govern exists,
+  - SAST scan (`bandit`) on the project source,
+  - dependency vulnerability scan (`pip-audit`) against known CVEs,
+  - SonarQube scanner and quality gate (ADR 0018).
   - This stage does not run `val_set`, `dev_set`, or the protected suite, and it does not receive provider keys. A failure stops the pipeline before stage B.
 - **Stage B: PR validation gate**
   - trigger: pull request pipeline,
@@ -67,6 +71,23 @@ Stage execution is fail-fast: each stage runs only if the previous stage succeed
 - Include correlation metadata (`build_id`, commit SHA, branch, suite id, optional `trace_id` links).
 - Retain enough history for regression trend inspection and incident forensics.
 
+### 4) Code quality platform
+
+SonarQube Community Edition (`sonarqube:lts-community`) is the code quality and coverage platform.
+It runs as a container alongside the CI infrastructure. PostgreSQL is its database. Both containers
+are long-running services; SonarQube exposes a health check so the Jenkins agent waits for it to
+be ready before submitting analysis.
+
+The SonarQube scanner (`sonar-scanner`) runs as the last step of Stage A and waits for the quality
+gate result before Stage A is declared green. Coverage is collected by `pytest-cov` during the
+unit test step; the scanner picks up the `coverage.xml` report. Project configuration lives in
+`sonar-project.properties` at the repository root. The server URL and token are stored in Jenkins
+credentials and are available in Stage A only.
+
+Quality gate thresholds (new-code coverage, security hotspots reviewed, reliability and security
+ratings) are calibrated once the project has sufficient code. Until then the gate runs in
+report-only mode: the scanner submits the analysis and surfaces results without blocking the merge.
+
 ## Rationale
 
 - Jenkins provides mature staged pipelines and secret handling patterns suitable for mixed local/CI
@@ -75,6 +96,9 @@ Stage execution is fail-fast: each stage runs only if the previous stage succeed
 - Protected-suite injection via credentials preserves hold-out isolation from repository access.
 - The architecture site is published only after the gate for that pipeline is green. A docs failure skips publication and does not block the merge or revert `main`. The release job never builds the site.
 - MkDocs keeps the guide in Markdown. mkdocstrings is the API-extraction step, and it stays in the same build as the guide.
+- SonarQube Community Edition covers coverage trend analysis, security hotspot tracking, complexity,
+  and duplication in a single quality gate. Per-commit tools (`bandit`, `pip-audit`) produce
+  point-in-time results; SonarQube accumulates history across builds.
 
 ## Alternatives Considered
 
@@ -103,13 +127,30 @@ Stage execution is fail-fast: each stage runs only if the previous stage succeed
    - Cons: it generates API pages only and does not build the architecture guide.
    - Rejected.
 
+6. **SonarCloud (hosted) instead of self-hosted SonarQube**
+   - Pros: no infrastructure to maintain; free for public repositories.
+   - Cons: the protected suite and governed data must not leave the local environment. A hosted
+     platform requires careful exclusion rules and relies on a third-party service for a
+     security-sensitive project.
+   - Rejected.
+
+7. **Coverage-only quality gate with `pytest-cov` threshold in Jenkinsfile**
+   - Pros: zero additional infrastructure.
+   - Cons: no security hotspot tracking, no complexity analysis, no trend history, no duplication
+     detection. A single threshold is not a configurable quality gate.
+   - Rejected.
+
 ## Consequences
 
 - **Positive:** evaluation governance is enforceable in automated delivery flow.
 - **Positive:** protected benchmark handling is explicit and isolated.
 - **Positive:** the published architecture guide matches a commit that already passed its gate.
+- **Positive:** unified quality gate covering coverage, security hotspots, complexity, and
+  duplication in Stage A without a separate ADR.
 - **Negative:** Jenkins operational maintenance overhead.
 - **Negative:** additional work to optimize build time and agent caching.
+- **Negative:** SonarQube and PostgreSQL containers increase the infrastructure footprint of the
+  local and CI stack. SonarQube requires a warm-up period after container start.
 - **Negative:** Material for MkDocs is in critical maintenance through 2027-05-05. Its successor, Zensical, is not the build tool yet.
 - **Boundary:** this ADR does not redefine gate semantics (ADR 0014) or evaluator role boundaries
   (ADR 0015).
@@ -117,3 +158,7 @@ Stage execution is fail-fast: each stage runs only if the previous stage succeed
 - **Follow-up:** add `mkdocs`, `mkdocs-material`, and `mkdocstrings[python]` to the dev group, and add `mkdocs.yml`.
 - **Follow-up:** name the preview and canonical directories on the Jenkins host.
 - **Follow-up:** revisit Zensical when its stable line supports this MkDocs configuration, including mkdocstrings.
+- **Follow-up:** add `import-linter`, `bandit`, and `pip-audit` to the dev group in `pyproject.toml` and configure `import-linter` contracts once the source layout is established.
+- **Follow-up:** add SonarQube and PostgreSQL services to the infrastructure Compose file (ADR 0017).
+- **Follow-up:** add `sonar-project.properties` to the repository root.
+- **Follow-up:** configure quality gate thresholds and switch from report-only mode once the project has sufficient code coverage data.
