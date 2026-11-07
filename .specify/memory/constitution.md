@@ -1,18 +1,11 @@
 <!--
 SYNC IMPACT REPORT
-Version change: initial-template -> 1.0.0
-List of modified principles: Initial adoption from draft
-Added sections:
-- I. Domain limits and abstractions (clean/hexagonal core) (Articles 1-6)
-- II. Dependencies and environments (Article 7)
-- III. Security by design (Articles 8-12)
-- IV. Retrieval and evaluation (Articles 13-15)
-- V. Verification (Articles 16-19)
-- VI. Observability (Articles 20-22)
-- VII. Documentation (Articles 23-25)
-- VIII. Deployment (Articles 26-27)
-- IX. Governance (Articles 28-31)
-Removed sections: Template placeholders
+Version change: 1.0.0 -> 1.1.0
+List of modified principles:
+- Article 1 (Python baseline): Added mandatory guidance enforcing modern Python 3.14 idioms (PEP 604 native union syntax T | None, PEP 585 collections) and disallowing legacy typing constructs (typing.Optional, typing.Union, typing.List).
+Migration impact:
+- Source code in src/ updated to eliminate typing.Optional and legacy typing imports.
+- pyproject.toml configured with Ruff target-version py314 and rule UP (pyupgrade) to verify compliance automatically in Stage A CI.
 Follow-up TODOs: None
 -->
 
@@ -25,6 +18,8 @@ This constitution is the supreme architectural and engineering policy for this r
 ### Article 1 — Python baseline
 
 The Data Plane and the Runtime Plane run on Python 3.14. The series is pinned in `.python-version`. The patch may be the latest in that series.
+
+The codebase strictly targets Python 3.14 and must adhere to modern Python idioms and PEP standards (such as native union syntax `T | None`, built-in generic collections `list[T]`, and modern typing constructs). Legacy typing patterns (such as `typing.Optional`, `typing.Union`, or `typing.List`) are disallowed.
 
 ### Article 2 — Hexagonal architecture
 
@@ -228,4 +223,4 @@ The constitution follows semantic versioning. A MAJOR increment removes or redef
 
 Every plan, spec, and task set generated for this project includes a constitution compliance check. Every pull request review records pass or fail against the relevant articles. Non-compliance is resolved before merge or explicitly waived with documented rationale.
 
-**Version**: 1.0.0 | **Ratified**: 2026-10-27 | **Last Amended**: 2026-10-27
+**Version**: 1.1.0 | **Ratified**: 2026-10-27 | **Last Amended**: 2026-11-06

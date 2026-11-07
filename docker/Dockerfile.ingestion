@@ -1,0 +1,44 @@
+# Stage 1: Build & Dependency Resolution
+FROM python:3.14-slim AS builder
+
+WORKDIR /build
+
+# Install uv package manager
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
+
+# Copy dependency specifications
+COPY pyproject.toml uv.lock ./
+
+# Install locked dependencies into .venv without development packages
+RUN uv sync --frozen --no-dev
+
+# Stage 2: Minimal Production Runtime
+FROM python:3.14-slim AS runtime
+
+WORKDIR /app
+
+# Exclude build tools (uv, compilers) from runtime image per Constitution Article 26
+# Copy virtual environment directly from builder
+COPY --from=builder /build/.venv /app/.venv
+
+# Pre-cache FastEmbed ONNX models in runtime image to prevent startup downloads
+ENV PATH="/app/.venv/bin:$PATH"
+RUN python -c "from fastembed import TextEmbedding, SparseTextEmbedding; TextEmbedding('BAAI/bge-large-en-v1.5'); SparseTextEmbedding('Qdrant/bm25')"
+
+# Copy application source code
+COPY src /app/src
+
+# Default environment variables per contracts/ingestion-cli.md
+ENV RAG_DATA_DIR=/app/data/raw \
+    RAG_MANIFEST_PATH=/app/data/manifest.json \
+    QDRANT_HOST=qdrant \
+    QDRANT_PORT=6333 \
+    QDRANT_COLLECTION_NAME=governed_docs \
+    OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318 \
+    OTEL_SERVICE_NAME=rag-ingestion \
+    LOG_LEVEL=INFO \
+    PYTHONUNBUFFERED=1
+
+# Execute directly with the environment's python (never uv run in production)
+ENTRYPOINT ["python", "-m", "src.ingestion.runner"]
+

@@ -1,0 +1,47 @@
+"""Behavioral port definition for embedding and vectorization adapters.
+
+In accordance with Constitution Article 4, all cross-boundary contracts
+must inherit from abc.ABC and declare abstract methods.
+"""
+
+from abc import ABC, abstractmethod
+
+
+class EmbedderPort(ABC):
+    """Abstract behavioral port for generating dual vector representations.
+
+    Implementations provide semantic dense embeddings and exact written-token
+    sparse lexical vectors without leaking third-party SDK dependencies into
+    the domain core.
+    """
+
+    @abstractmethod
+    def embed_dense(self, texts: list[str]) -> list[list[float]]:
+        """Generate dense semantic vectors for a batch of texts.
+
+        Args:
+            texts: List of input strings to embed.
+
+        Returns:
+            List of 1024-dimensional float vectors matching input order.
+
+        Raises:
+            NotImplementedError: If not implemented by the adapter.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def embed_sparse(self, texts: list[str]) -> list[tuple[list[int], list[float]]]:
+        """Generate sparse BM25 token indices and weights for a batch of texts.
+
+        Args:
+            texts: List of input strings to vectorize.
+
+        Returns:
+            List of tuples (indices, values) representing BM25 token weights.
+
+        Raises:
+            NotImplementedError: If not implemented by the adapter.
+        """
+        raise NotImplementedError
+

@@ -1,0 +1,16 @@
+[importlinter]
+root_package = src
+include_external_packages = True
+
+[importlinter:contract:domain-isolation]
+name = Domain layer must not import infrastructure or ingestion
+type = forbidden
+source_modules =
+    src.domain
+forbidden_modules =
+    src.adapters
+    src.ingestion
+    qdrant_client
+    fastembed
+    opentelemetry
+

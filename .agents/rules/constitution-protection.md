@@ -1,0 +1,28 @@
+# Constitution Protection and Governance Rules
+
+The document `.specify/memory/constitution.md` is the supreme architectural and engineering policy for this repository (Article 28).
+
+## Mandatory Guidelines for AI Agents
+
+1. **NEVER Edit Directly & Mandatory Human Gate (Article 29)**:
+   Do NOT modify `.specify/memory/constitution.md` using generic file editing tools.
+   Autonomous, assumed, or self-approved modifications are STRICTLY PROHIBITED.
+   Before applying any change to the constitution under any circumstance, the agent MUST:
+   - Present the exact proposed text changes, the SemVer bump (MAJOR/MINOR/PATCH), and the migration impact in chat.
+   - STOP and explicitly ask the user for confirmation.
+   - NEVER touch the file until the user has explicitly confirmed approval for that constitutional change in their reply.
+
+2. **Technical Amendment Protocol (Article 29 & Article 30)**:
+   When an approved amendment is being applied, the agent MUST satisfy:
+   - **Semantic Versioning (Article 30)**:
+     - `MAJOR`: Removing or fundamentally redefining an existing principle.
+     - `MINOR`: Adding a new principle or materially expanding mandatory guidance.
+     - `PATCH`: Non-semantic wording clarifications or typo fixes.
+   - **Header Sync Report**: Update the `<!-- SYNC IMPACT REPORT ... -->` comment block at the top of the file, documenting:
+     - `Version change: <old> -> <new>`
+     - `List of modified principles`
+     - `Migration impact` on codebase and tooling.
+   - **Footer Metadata**: Synchronize the `**Version**` and `**Last Amended**` dates at the end of the document.
+
+3. **Spec Kit Skill Delegation**:
+   When amending the constitution or ratifying new articles, prioritize using the `/speckit-constitution` skill workflow.
