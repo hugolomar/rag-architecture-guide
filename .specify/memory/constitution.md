@@ -1,11 +1,12 @@
 <!--
 SYNC IMPACT REPORT
-Version change: 1.0.0 -> 1.1.0
+Version change: 1.1.0 -> 1.2.0
 List of modified principles:
-- Article 1 (Python baseline): Added mandatory guidance enforcing modern Python 3.14 idioms (PEP 604 native union syntax T | None, PEP 585 collections) and disallowing legacy typing constructs (typing.Optional, typing.Union, typing.List).
+- Article 2 (Hexagonal architecture): Added mandatory composition root and dependency injection policy. Orchestrator workflows must receive abstract ports explicitly without concrete defaults; concrete adapter instantiation is strictly confined to outermost composition roots.
 Migration impact:
-- Source code in src/ updated to eliminate typing.Optional and legacy typing imports.
-- pyproject.toml configured with Ruff target-version py314 and rule UP (pyupgrade) to verify compliance automatically in Stage A CI.
+- Ingestion pipeline decoupled from concrete adapters and isolated behind abstract ports.
+- Composition root entrypoint separated to handle infrastructure wiring and execution lifecycle.
+- Import linter updated with pipeline isolation contract.
 Follow-up TODOs: None
 -->
 
@@ -25,7 +26,9 @@ The codebase strictly targets Python 3.14 and must adhere to modern Python idiom
 
 The domain stays at the center: governed knowledge and who may read it. Business rules, entities, and value objects live there. The domain does not import an infrastructure package. Dependency inversion is mandatory at the boundary. Orchestration depends on domain ports, not on a provider SDK.
 
-Inbound adapters call the domain. The HTTP API is one. The evaluation harness is another, calling the same retrieval and generation ports without going through HTTP. Ingestion is the inbound path that writes governed chunks.
+Orchestrator workflows and application use cases must receive all dependencies as explicit, abstract ports. They must never import, instantiate, or provide fallback defaults to concrete infrastructure adapters. The instantiation and wiring of concrete adapters is strictly confined to Composition Roots (the outermost execution boundaries where an entrypoint or application process is initialized). Framework-level dependency injection (such as HTTP request-scoped injectors) remains strictly within presentation boundaries and never leaks into orchestration or domain logic.
+
+Inbound adapters call the domain. The HTTP API is one. The evaluation harness is another, calling the same retrieval and generation ports without going through HTTP. The ingestion batch entrypoint is the inbound path that writes governed chunks.
 
 Outbound adapters implement the ports. The retrieval store, the identity provider, and the model gateway are outbound adapters.
 
@@ -223,4 +226,4 @@ The constitution follows semantic versioning. A MAJOR increment removes or redef
 
 Every plan, spec, and task set generated for this project includes a constitution compliance check. Every pull request review records pass or fail against the relevant articles. Non-compliance is resolved before merge or explicitly waived with documented rationale.
 
-**Version**: 1.1.0 | **Ratified**: 2026-10-27 | **Last Amended**: 2026-11-06
+**Version**: 1.2.0 | **Ratified**: 2026-10-27 | **Last Amended**: 2026-11-07

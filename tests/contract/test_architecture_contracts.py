@@ -51,3 +51,25 @@ def test_behavioral_ports_are_abstract_classes() -> None:
         assert issubclass(port, ABC), f"{port} must inherit from abc.ABC"
         assert hasattr(port, "__abstractmethods__"), f"{port} has no abstract methods"
         assert len(port.__abstractmethods__) > 0, f"{port} must declare at least one abstract method"
+
+
+def test_pipeline_orchestration_has_zero_concrete_adapter_imports() -> None:
+    """Enforce Constitution Article 2: pipeline orchestrator must not import concrete adapters."""
+    pipeline_file = Path("src/ingestion/pipeline.py")
+    assert pipeline_file.exists(), "src/ingestion/pipeline.py does not exist"
+
+    forbidden_roots = {"src.adapters.storage", "src.adapters.embeddings", "qdrant_client", "fastembed"}
+
+    tree = ast.parse(pipeline_file.read_text(encoding="utf-8"), filename=str(pipeline_file))
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                assert alias.name not in forbidden_roots, (
+                    f"Architecture violation in pipeline.py: forbidden import '{alias.name}'"
+                )
+        elif isinstance(node, ast.ImportFrom):
+            if node.module:
+                assert not any(node.module.startswith(root) for root in forbidden_roots), (
+                    f"Architecture violation in pipeline.py: forbidden from-import '{node.module}'"
+                )
+

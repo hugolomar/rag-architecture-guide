@@ -82,7 +82,7 @@ description: "Task list for Governed Document Ingestion Pipeline implementation"
 - [X] T019 [US2] Implement `TablePreservingChunker` in `src/ingestion/chunker.py` identifying Markdown table blocks (`| ... |`), keeping tables within 500-800 token windows intact, splitting oversized tables across rows while repeating column headers, and assigning inherited governance metadata to each `GovernedChunk` (depends on T018)
 - [X] T020 [US2] Implement `FastEmbedAdapter` inheriting from `EmbedderPort` in `src/adapters/embeddings/fastembed_adapter.py` using `fastembed` TextEmbedding (`BAAI/bge-large-en-v1.5`, 1024 dims) and SparseTextEmbedding (`Qdrant/bm25`) to produce `VectorizedChunk` instances (depends on T005, T018)
 - [X] T021 [US2] Implement `QdrantStorageAdapter` inheriting from `ChunkStorageWriterPort` in `src/adapters/storage/qdrant_adapter.py` creating the collection per `contracts/qdrant-collection.json` with named vectors (`dense` 1024 Cosine, `sparse` idf) and payload keyword indexes (`doc_id`, `allowed_groups`, `status`, `department`, `classification`), and batch upserting points with governance payloads (depends on T005, T018)
-- [X] T022 [US2] Integrate parsing, chunking, embedding, and storage indexing in `src/ingestion/runner.py` to process active canonical documents into Qdrant (depends on T014, T019, T020, T021)
+- [X] T022 [US2] Integrate parsing, chunking, embedding, and storage indexing in `src/ingestion/pipeline.py` to process active canonical documents into Qdrant (depends on T014, T019, T020, T021)
 
 **Checkpoint**: User Stories 1 and 2 complete and independently testable. Run `pytest tests/unit/test_table_chunker.py tests/integration/test_fastembed_adapter.py tests/integration/test_qdrant_writer.py`.
 
@@ -102,8 +102,8 @@ description: "Task list for Governed Document Ingestion Pipeline implementation"
 ### Implementation for User Story 3
 
 - [X] T025 [P] [US3] Implement OpenTelemetry adapter and structured JSON log formatter in `src/adapters/telemetry/otel_emitter.py` generating a unique `run_id`, initializing `TracerProvider` with stage spans, `MeterProvider` with progress counters (`ingestion.documents.processed`, `ingestion.chunks.created`, `ingestion.documents.rejected`), and explicit `flush_and_shutdown()` method per Constitution Articles 20 and 22
-- [X] T026 [US3] Integrate stage spans and metric counters into `src/ingestion/runner.py` wrapping manifest validation, parsing, chunking, embedding, and storage upsert within child spans of root span `ingestion.run` (depends on T022, T025)
-- [X] T027 [US3] Implement CLI exit code handling (0: Success, 1: Schema Failure, 2: File Mismatch, 3: Store Failure, 4: Telemetry Failure) and guaranteed `finally` telemetry flush in `src/ingestion/runner.py` per `contracts/ingestion-cli.md` (depends on T025, T026)
+- [X] T026 [US3] Integrate stage spans and metric counters into `src/ingestion/pipeline.py` wrapping manifest validation, parsing, chunking, embedding, and storage upsert within child spans of root span `ingestion.run` (depends on T022, T025)
+- [X] T027 [US3] Implement CLI composition root entrypoint, exit code handling (0: Success, 1: Schema Failure, 2: File Mismatch, 3: Store Failure, 4: Telemetry Failure), and guaranteed `finally` telemetry flush in `src/ingestion/cli.py` per `contracts/ingestion-cli.md` (depends on T025, T026)
 
 **Checkpoint**: User Story 3 complete. Batch execution logs structured JSON with `run_id` and flushes all spans/metrics before process termination.
 
@@ -121,7 +121,7 @@ description: "Task list for Governed Document Ingestion Pipeline implementation"
 
 ### Implementation for User Story 4
 
-- [X] T029 [P] [US4] Create multi-stage containerfile in `docker/Dockerfile.ingestion` with builder stage running `uv sync --frozen --no-dev` and runtime stage based on `python:3.14-slim` copying `/app/.venv`, pre-caching FastEmbed models into `/root/.cache/fastembed`, and executing directly with `python -m src.ingestion.runner` without `uv` per Constitution Article 26
+- [X] T029 [P] [US4] Create multi-stage containerfile in `docker/Dockerfile.ingestion` with builder stage running `uv sync --frozen --no-dev` and runtime stage based on `python:3.14-slim` copying `/app/.venv`, pre-caching FastEmbed models into `/root/.cache/fastembed`, and executing directly with `python -m src.ingestion.cli` without `uv` per Constitution Article 26
 - [X] T030 [US4] Create container orchestration in `docker/docker-compose.yml` declaring Qdrant service with healthcheck and one-shot `ingestion` service mounting `data/` and passing environment variables per `contracts/ingestion-cli.md` and Constitution Article 27
 - [X] T031 [US4] Validate containerized batch execution and zero-archived count against running Qdrant service following `specs/001-document-ingestion/quickstart.md` (depends on T029, T030)
 
@@ -148,8 +148,8 @@ description: "Task list for Governed Document Ingestion Pipeline implementation"
 - **User Stories (Phase 3+)**: All depend on Foundational phase completion.
   - **User Story 1 (P1)**: Can start after Foundational (Phase 2) - No dependencies on other stories. 🎯 MVP.
   - **User Story 2 (P1)**: Depends on User Story 1 domain models and parsing components.
-  - **User Story 3 (P2)**: Depends on User Story 2 runner loop to wrap pipeline stages with telemetry.
-  - **User Story 4 (P3)**: Depends on User Story 3 runner and exit codes to package into container.
+  - **User Story 3 (P2)**: Depends on User Story 2 pipeline to wrap pipeline stages with telemetry and wire in CLI.
+  - **User Story 4 (P3)**: Depends on User Story 3 CLI and exit codes to package into container.
 - **Polish (Phase 7)**: Depends on all user stories being complete.
 
 ### User Story Dependencies

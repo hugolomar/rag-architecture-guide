@@ -116,7 +116,8 @@ src/
     ├── config.py                    # Pydantic Settings (paths, collection name, model names)
     ├── parser.py                    # Markdown parser (frontmatter extraction)
     ├── chunker.py                   # Structure-preserving chunker (Markdown tables intact)
-    └── runner.py                    # Orchestrator CLI entrypoint (__main__)
+    ├── pipeline.py                  # Domain orchestrator workflow (pure port dependencies)
+    └── cli.py                       # Composition root CLI entrypoint (__main__)
 
 tests/
 ├── unit/                            # Pure domain and logic tests (no network/db)

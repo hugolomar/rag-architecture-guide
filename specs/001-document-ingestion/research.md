@@ -107,7 +107,7 @@ Instrument the ingestion process using the official `opentelemetry-sdk`:
 ### Decision
 Construct a multi-stage Dockerfile (`docker/Dockerfile.ingestion`):
 - **Stage 1 (Builder)**: Base `python:3.14-slim`. Installs `uv`, copies `pyproject.toml` and `uv.lock`, and runs `uv sync --frozen --no-dev`.
-- **Stage 2 (Runtime)**: Base `python:3.14-slim`. Copies the compiled virtual environment from the builder to `/app/.venv`. Pre-downloads or bundles the FastEmbed ONNX model cache into `/root/.cache/fastembed`. Sets `PATH="/app/.venv/bin:$PATH"` and executes `python -m src.ingestion.runner`.
+- **Stage 2 (Runtime)**: Base `python:3.14-slim`. Copies the compiled virtual environment from the builder to `/app/.venv`. Pre-downloads or bundles the FastEmbed ONNX model cache into `/root/.cache/fastembed`. Sets `PATH="/app/.venv/bin:$PATH"` and executes `python -m src.ingestion.cli`.
 - **Exclusion**: Build tools, compilers, and `uv` are excluded from the runtime stage (Article 26).
 
 ### Rationale

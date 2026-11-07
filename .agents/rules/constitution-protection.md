@@ -1,3 +1,8 @@
+---
+description: Project Constitution Governance and Protection Rules
+trigger: always_on
+---
+
 # Constitution Protection and Governance Rules
 
 The document `.specify/memory/constitution.md` is the supreme architectural and engineering policy for this repository (Article 28).

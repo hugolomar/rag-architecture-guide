@@ -54,7 +54,7 @@ uv run pytest tests/integration -v
 
 Run the batch ingestion CLI on the host:
 ```bash
-uv run python -m src.ingestion.runner
+uv run python -m src.ingestion.cli
 ```
 
 Or execute via Docker Compose:

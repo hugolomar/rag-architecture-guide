@@ -1,14 +1,11 @@
-"""Batch Ingestion Pipeline CLI and Orchestrator.
+"""Batch Ingestion Pipeline Orchestrator.
 
 Implements the end-to-end data plane vertical slice with strict OpenTelemetry
-lifecycle management, structured JSON logging, and exit code contracts.
+lifecycle management and domain port contracts.
 """
 
 from pathlib import Path
-import sys
 
-from src.adapters.embeddings.fastembed_adapter import FastEmbedAdapter
-from src.adapters.storage.qdrant_adapter import QdrantStorageAdapter
 from src.adapters.telemetry.otel_emitter import TelemetryManager
 from src.domain.manifest import load_and_validate_manifest
 from src.domain.models import GovernedChunk, VectorizedChunk
@@ -20,25 +17,22 @@ from src.ingestion.parser import parse_markdown_document
 
 
 def run_ingestion_pipeline(
-    config: IngestionConfig | None = None,
-    embedder: EmbedderPort | None = None,
-    storage: ChunkStorageWriterPort | None = None,
+    config: IngestionConfig,
+    embedder: EmbedderPort,
+    storage: ChunkStorageWriterPort,
     telemetry: TelemetryManager | None = None,
 ) -> dict[str, int]:
     """Execute the observable batch document ingestion workflow.
 
     Args:
-        config: Pipeline runtime configuration (defaults to environment settings).
-        embedder: Optional injected EmbedderPort adapter.
-        storage: Optional injected ChunkStorageWriterPort adapter.
-        telemetry: Optional injected TelemetryManager.
+        config: Pipeline runtime configuration.
+        embedder: Injected EmbedderPort adapter for dual vector computation.
+        storage: Injected ChunkStorageWriterPort adapter for collection persistence.
+        telemetry: Optional injected TelemetryManager (defaults to instance from config).
 
     Returns:
         Summary dict containing counts of processed documents, chunks, and points.
     """
-    if config is None:
-        config = IngestionConfig()
-
     if telemetry is None:
         telemetry = TelemetryManager(
             service_name=config.otel_service_name,
@@ -99,9 +93,6 @@ def run_ingestion_pipeline(
             telemetry.record_chunks_created(len(all_chunks))
 
         # 4. Dual Embedding (FR-008)
-        if embedder is None:
-            embedder = FastEmbedAdapter()
-
         with telemetry.start_stage_span("embeddings.compute") as span:
             if hasattr(embedder, "vectorize_chunks"):
                 vectorized_chunks: list[VectorizedChunk] = embedder.vectorize_chunks(all_chunks)
@@ -126,9 +117,6 @@ def run_ingestion_pipeline(
             )
 
         # 5. Storage Persistence (FR-009)
-        if storage is None:
-            storage = QdrantStorageAdapter(host=config.qdrant_host, port=config.qdrant_port)
-
         with telemetry.start_stage_span("storage.upsert") as span:
             storage.ensure_collection(config.qdrant_collection_name)
             total_upserted = storage.upsert_chunks(config.qdrant_collection_name, vectorized_chunks)
@@ -149,45 +137,3 @@ def run_ingestion_pipeline(
         "points_indexed": total_upserted,
     }
 
-
-def main() -> int:
-    """CLI Entrypoint with explicit exit codes and guaranteed telemetry flush."""
-    config = IngestionConfig()
-    telemetry = TelemetryManager(
-        service_name=config.otel_service_name,
-        log_level=config.log_level,
-    )
-
-    exit_code = 0
-    try:
-        run_ingestion_pipeline(config=config, telemetry=telemetry)
-        exit_code = 0
-    except ValueError as exc:
-        # Schema / manifest validation failure (Exit Code 1)
-        telemetry.log("ERROR", f"Manifest schema validation failure: {exc}", stage="manifest")
-        exit_code = 1
-    except FileNotFoundError as exc:
-        # Corpus file mismatch / missing file (Exit Code 2)
-        telemetry.log("ERROR", f"Corpus file mismatch or missing file: {exc}", stage="parse")
-        exit_code = 2
-    except ConnectionError as exc:
-        # Vector store connection / operation failure (Exit Code 3)
-        telemetry.log("ERROR", f"Vector store storage failure: {exc}", stage="storage")
-        exit_code = 3
-    except Exception as exc:
-        # Generic failure
-        telemetry.log("ERROR", f"Unexpected batch ingestion failure: {exc}", stage="general")
-        exit_code = 3
-    finally:
-        try:
-            telemetry.flush_and_shutdown()
-        except Exception as flush_exc:
-            print(f"Failed to flush telemetry: {flush_exc}", file=sys.stderr)
-            if exit_code == 0:
-                exit_code = 4
-
-    return exit_code
-
-
-if __name__ == "__main__":
-    sys.exit(main())

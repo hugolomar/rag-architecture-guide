@@ -40,5 +40,5 @@ ENV RAG_DATA_DIR=/app/data/raw \
     PYTHONUNBUFFERED=1
 
 # Execute directly with the environment's python (never uv run in production)
-ENTRYPOINT ["python", "-m", "src.ingestion.runner"]
+ENTRYPOINT ["python", "-m", "src.ingestion.cli"]
 

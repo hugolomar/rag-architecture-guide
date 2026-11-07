@@ -14,3 +14,13 @@ forbidden_modules =
     fastembed
     opentelemetry
 
+[importlinter:contract:pipeline-isolation]
+name = Pipeline orchestration must not import concrete storage or embedding adapters
+type = forbidden
+source_modules =
+    src.ingestion.pipeline
+forbidden_modules =
+    src.adapters.storage
+    src.adapters.embeddings
+    qdrant_client
+    fastembed

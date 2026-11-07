@@ -13,7 +13,7 @@ from src.domain.enums import IdPGroup, LifecycleStatus
 from src.domain.models import GovernedChunk, VectorizedChunk
 from src.domain.ports.embeddings import EmbedderPort
 from src.ingestion.config import IngestionConfig
-from src.ingestion.runner import run_ingestion_pipeline
+from src.ingestion.pipeline import run_ingestion_pipeline
 
 
 class FastMockEmbedder(EmbedderPort):

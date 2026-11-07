@@ -1,7 +1,7 @@
 # Ingestion Batch CLI Contract
 
 **Interface Type**: Command Line Interface / Container Entrypoint  
-**Module**: `src.ingestion.runner`  
+**Module**: `src.ingestion.cli`  
 
 ---
 
@@ -9,7 +9,7 @@
 
 ### Host execution (via uv)
 ```bash
-uv run python -m src.ingestion.runner
+uv run python -m src.ingestion.cli
 ```
 
 ### Container execution (Production / Compose)
