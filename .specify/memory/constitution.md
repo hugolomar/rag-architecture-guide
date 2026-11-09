@@ -1,12 +1,10 @@
 <!--
 SYNC IMPACT REPORT
-Version change: 1.1.0 -> 1.2.0
+Version change: 1.2.0 -> 1.2.1
 List of modified principles:
-- Article 2 (Hexagonal architecture): Added mandatory composition root and dependency injection policy. Orchestrator workflows must receive abstract ports explicitly without concrete defaults; concrete adapter instantiation is strictly confined to outermost composition roots.
+- Article 14 (Written-token and semantic retrieval): Clarified that embedding model identity and vector dimensions are governed by the shared embedder adapter implementation across ingestion and query paths rather than disparate external configuration.
 Migration impact:
-- Ingestion pipeline decoupled from concrete adapters and isolated behind abstract ports.
-- Composition root entrypoint separated to handle infrastructure wiring and execution lifecycle.
-- Import linter updated with pipeline isolation contract.
+- Clarification patch. EmbedderPort exposes output dimensionality via property; storage adapters receive vector dimensions from the embedder at the composition root.
 Follow-up TODOs: None
 -->
 
@@ -100,7 +98,7 @@ Pipeline responses conform to one of four mutually exclusive behaviors: `ground_
 
 Retrieval must support both semantic matching (by meaning) and exact written-token matching (flags, configuration keys, error codes, and identifiers). Semantic similarity alone does not satisfy an exact-token query.
 
-Both representations are computed before storage. The query path uses the exact same model and channel-specific transforms as ingestion. The embedding model identity and vector dimensions are governed by a single project-wide configuration. Changing the embedding model requires creating a new collection and re-indexing the corpus; mixing vectors from different models in the same collection is prohibited.
+Both representations are computed before storage. The query path uses the exact same model and channel-specific transforms as ingestion. The embedding model identity and vector dimensions are governed by the shared embedder adapter implementation across both ingestion and query paths. Changing the embedding model requires creating a new collection and re-indexing the corpus; mixing vectors from different models in the same collection is prohibited.
 
 ### Article 15 — Fail loud on unimplemented ports
 
@@ -226,4 +224,4 @@ The constitution follows semantic versioning. A MAJOR increment removes or redef
 
 Every plan, spec, and task set generated for this project includes a constitution compliance check. Every pull request review records pass or fail against the relevant articles. Non-compliance is resolved before merge or explicitly waived with documented rationale.
 
-**Version**: 1.2.0 | **Ratified**: 2026-10-27 | **Last Amended**: 2026-11-07
+**Version**: 1.2.1 | **Ratified**: 2026-10-27 | **Last Amended**: 2026-11-09

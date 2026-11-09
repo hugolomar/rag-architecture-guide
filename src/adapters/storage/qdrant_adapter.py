@@ -23,17 +23,20 @@ class QdrantStorageAdapter(ChunkStorageWriterPort):
 
     def __init__(
         self,
+        vector_size: int,
         host: str = "localhost",
         port: int = 6333,
         client: QdrantClient | None = None,
     ) -> None:
-        """Initialize with either an existing QdrantClient or connection parameters.
+        """Initialize with target vector dimensionality and either client or connection parameters.
 
         Args:
+            vector_size: Dimensionality of dense vectors to be stored in collections.
             host: Qdrant service host.
             port: Qdrant REST port.
             client: Optional injected QdrantClient (useful for testing or in-memory mode).
         """
+        self.vector_size = vector_size
         if client is not None:
             self.client = client
         else:
@@ -54,7 +57,7 @@ class QdrantStorageAdapter(ChunkStorageWriterPort):
                 collection_name=collection_name,
                 vectors_config={
                     "dense": models.VectorParams(
-                        size=1024,
+                        size=self.vector_size,
                         distance=models.Distance.COSINE,
                     )
                 },

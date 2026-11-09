@@ -33,6 +33,11 @@ class FastEmbedAdapter(EmbedderPort):
         self._sparse_model: SparseTextEmbedding | None = None
 
     @property
+    def dimension(self) -> int:
+        """Dimensionality of dense vectors produced by the active dense model."""
+        return 1024
+
+    @property
     def dense_model(self) -> TextEmbedding:
         """Lazily initialize the dense ONNX model."""
         if self._dense_model is None:

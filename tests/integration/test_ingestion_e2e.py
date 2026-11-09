@@ -20,6 +20,10 @@ from src.ingestion.pipeline import run_ingestion_pipeline
 class FastMockEmbedder(EmbedderPort):
     """Fast mock embedder for deterministic end-to-end testing."""
 
+    @property
+    def dimension(self) -> int:
+        return 1024
+
     def embed_dense(self, texts: list[str]) -> list[list[float]]:
         return [[0.05] * 1024 for _ in texts]
 
@@ -82,8 +86,8 @@ def test_end_to_end_batch_ingestion(tmp_path: Path) -> None:
     )
 
     client = QdrantClient(":memory:")
-    storage = QdrantStorageAdapter(client=client)
     embedder = FastMockEmbedder()
+    storage = QdrantStorageAdapter(client=client, vector_size=embedder.dimension)
 
     results = run_ingestion_pipeline(
         config=config,

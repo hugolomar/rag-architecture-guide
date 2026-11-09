@@ -18,6 +18,19 @@ class EmbedderPort(ABC):
     the domain core.
     """
 
+    @property
+    @abstractmethod
+    def dimension(self) -> int:
+        """Dimensionality of dense vectors produced by this embedder.
+
+        Returns:
+            Integer vector dimensionality matching the active model output.
+
+        Raises:
+            NotImplementedError: If not implemented by the adapter.
+        """
+        raise NotImplementedError
+
     @abstractmethod
     def embed_dense(self, texts: list[str]) -> list[list[float]]:
         """Generate dense semantic vectors for a batch of texts.
@@ -26,7 +39,7 @@ class EmbedderPort(ABC):
             texts: List of input strings to embed.
 
         Returns:
-            List of 1024-dimensional float vectors matching input order.
+            List of dense float vectors matching input order.
 
         Raises:
             NotImplementedError: If not implemented by the adapter.

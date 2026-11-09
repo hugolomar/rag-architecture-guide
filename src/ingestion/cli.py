@@ -27,10 +27,13 @@ def main() -> int:
         # NOTE(Architecture): As the Composition Root, this entrypoint wires baseline
         # concrete adapters (FastEmbedAdapter per ADR 0005, QdrantStorageAdapter per ADR 0006).
         # To test or benchmark alternative adapters (e.g. Postgres or OpenAI), wire the new
-        # instance here or evolve to a factory pattern per docs/notes/05-adapter-swapping-and-factory-evolution.md.
-        # The core orchestrator (src.ingestion.pipeline) requires zero modifications.
+        # instance directly here. The core orchestrator (src.ingestion.pipeline) requires zero modifications.
         embedder = FastEmbedAdapter()
-        storage = QdrantStorageAdapter(host=config.qdrant_host, port=config.qdrant_port)
+        storage = QdrantStorageAdapter(
+            host=config.qdrant_host,
+            port=config.qdrant_port,
+            vector_size=embedder.dimension,
+        )
 
         run_ingestion_pipeline(
             config=config,

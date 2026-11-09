@@ -94,12 +94,12 @@ class VectorizedChunk(BaseModel):
     """The enriched chunk containing dual vector embeddings prepared for storage.
 
     In accordance with Constitution Article 14, every chunk is represented
-    by both a 1024-dimensional dense semantic vector and sparse BM25 token weights.
+    by both a dense semantic vector and sparse lexical token weights.
     """
 
     chunk: GovernedChunk = Field(..., description="The underlying governed chunk.")
-    dense_vector: list[float] = Field(..., description="1024-dim dense embedding from FastEmbed BGE.")
-    sparse_indices: list[int] = Field(..., description="BM25 token indices.")
-    sparse_values: list[float] = Field(..., description="BM25 token weights.")
+    dense_vector: list[float] = Field(..., description="Dense semantic embedding vector.")
+    sparse_indices: list[int] = Field(..., description="Sparse lexical token indices.")
+    sparse_values: list[float] = Field(..., description="Sparse lexical token weights.")
 
     model_config = ConfigDict(extra="forbid")

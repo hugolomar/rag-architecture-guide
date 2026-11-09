@@ -104,9 +104,9 @@ The enriched chunk containing dual vector embeddings prepared for Qdrant upsert.
 ```python
 class VectorizedChunk(BaseModel):
     chunk: GovernedChunk
-    dense_vector: list[float] = Field(description="1024-dim dense embedding from FastEmbed BGE")
-    sparse_indices: list[int] = Field(description="BM25 token indices")
-    sparse_values: list[float] = Field(description="BM25 token weights")
+    dense_vector: list[float] = Field(description="Dense semantic embedding vector")
+    sparse_indices: list[int] = Field(description="Sparse lexical token indices")
+    sparse_values: list[float] = Field(description="Sparse lexical token weights")
 ```
 
 ---

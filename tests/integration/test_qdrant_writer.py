@@ -15,14 +15,14 @@ from src.domain.ports.storage import ChunkStorageWriterPort
 def test_qdrant_adapter_inherits_from_port() -> None:
     """Verify that QdrantStorageAdapter strictly satisfies ChunkStorageWriterPort."""
     client = QdrantClient(":memory:")
-    adapter = QdrantStorageAdapter(client=client)
+    adapter = QdrantStorageAdapter(client=client, vector_size=1024)
     assert isinstance(adapter, ChunkStorageWriterPort)
 
 
 def test_qdrant_adapter_ensure_collection_and_upsert() -> None:
     """Verify collection initialization, named dual-vector upsert, and payload retrieval."""
     client = QdrantClient(":memory:")
-    adapter = QdrantStorageAdapter(client=client)
+    adapter = QdrantStorageAdapter(client=client, vector_size=1024)
     collection_name = "test_governed_docs"
 
     # 1. Initialize collection
