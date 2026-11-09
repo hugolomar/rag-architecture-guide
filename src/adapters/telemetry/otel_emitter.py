@@ -7,21 +7,18 @@ In accordance with Constitution Articles 20 and 22, emits:
 4. Guaranteed zero-loss flush and shutdown lifecycle.
 """
 
-from datetime import datetime, timezone
 import json
 import logging
 import re
 import sys
-from typing import Any
 import uuid
+from datetime import UTC, datetime
+from typing import Any
 
-from opentelemetry import metrics, trace
+from opentelemetry import trace
 from opentelemetry.sdk.metrics import MeterProvider
-from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
-
 
 # Sanitization patterns to prevent credential leaks (Constitution Article 22)
 SENSITIVE_PATTERNS = [
@@ -48,7 +45,7 @@ class JsonLogFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
         """Format the log record as a structured JSON string."""
         log_entry: dict[str, Any] = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "level": record.levelname,
             "run_id": self.run_id,
             "stage": getattr(record, "stage", "general"),
@@ -151,13 +148,13 @@ class TelemetryManager:
             self.tracer_provider.force_flush()
             self.tracer_provider.shutdown()
         except Exception as exc:
-            print(f"Warning: Tracer flush error: {exc}", file=sys.stderr)
+            sys.stderr.write(f"Warning: Tracer flush error: {exc}\n")
 
         try:
             self.meter_provider.force_flush()
             self.meter_provider.shutdown()
         except Exception as exc:
-            print(f"Warning: Meter flush error: {exc}", file=sys.stderr)
+            sys.stderr.write(f"Warning: Meter flush error: {exc}\n")
 
         try:
             self._handler.flush()

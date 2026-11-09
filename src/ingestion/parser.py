@@ -5,7 +5,9 @@ FR-005 and constructs CanonicalDocument domain instances.
 """
 
 from pathlib import Path
+
 import frontmatter
+
 from src.domain.models import CanonicalDocument, ManifestRecord
 
 

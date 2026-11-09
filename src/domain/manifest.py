@@ -6,6 +6,7 @@ according to document lifecycle invariants (FR-001, FR-002, FR-003, FR-004).
 
 import json
 from pathlib import Path
+
 from src.domain.enums import LifecycleStatus
 from src.domain.models import ManifestRecord
 

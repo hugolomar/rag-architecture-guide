@@ -5,11 +5,12 @@ storage, asserting on document throughput, dual vectors, and zero archived point
 """
 
 import json
+from collections.abc import Sequence
 from pathlib import Path
-import pytest
+
 from qdrant_client import QdrantClient
+
 from src.adapters.storage.qdrant_adapter import QdrantStorageAdapter
-from src.domain.enums import IdPGroup, LifecycleStatus
 from src.domain.models import GovernedChunk, VectorizedChunk
 from src.domain.ports.embeddings import EmbedderPort
 from src.ingestion.config import IngestionConfig
@@ -25,7 +26,7 @@ class FastMockEmbedder(EmbedderPort):
     def embed_sparse(self, texts: list[str]) -> list[tuple[list[int], list[float]]]:
         return [([1, 2, 3], [1.0, 2.0, 3.0]) for _ in texts]
 
-    def vectorize_chunks(self, chunks: list[GovernedChunk]) -> list[VectorizedChunk]:
+    def vectorize_chunks(self, chunks: Sequence[GovernedChunk]) -> list[VectorizedChunk]:
         return [
             VectorizedChunk(
                 chunk=c,

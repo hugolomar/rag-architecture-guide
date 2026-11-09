@@ -4,7 +4,6 @@ Verifies that stage spans, metrics, and providers flush cleanly prior to
 process termination with zero telemetry loss.
 """
 
-import pytest
 from src.adapters.telemetry.otel_emitter import TelemetryManager
 
 

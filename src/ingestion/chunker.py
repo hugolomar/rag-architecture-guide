@@ -5,7 +5,6 @@ and keeps them intact within single chunks, repeating table headers across
 continuation chunks if a table exceeds the target chunk size.
 """
 
-from collections.abc import Sequence
 from src.domain.models import CanonicalDocument, GovernedChunk
 
 
@@ -127,7 +126,7 @@ class TablePreservingChunker:
 
     def _chunk_table_block(self, table_text: str) -> list[str]:
         """Chunk a table block, repeating headers if table exceeds target limit."""
-        lines = [l for l in table_text.splitlines() if l.strip()]
+        lines = [line for line in table_text.splitlines() if line.strip()]
         if len(lines) <= 2:
             return [table_text]
 

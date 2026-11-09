@@ -4,8 +4,8 @@ Verifies collection creation matching contracts/qdrant-collection.json,
 dual vector persistence (named dense and sparse vectors), and payload filtering.
 """
 
-import pytest
 from qdrant_client import QdrantClient
+
 from src.adapters.storage.qdrant_adapter import QdrantStorageAdapter
 from src.domain.enums import Classification, Department, IdPGroup, LifecycleStatus
 from src.domain.models import GovernedChunk, VectorizedChunk

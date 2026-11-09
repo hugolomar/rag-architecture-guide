@@ -5,7 +5,10 @@ In accordance with Constitution Article 14 and ADR 0005, generates dual represen
 - Sparse: Qdrant/bm25 (lexical token weights)
 """
 
+from collections.abc import Sequence
+
 from fastembed import SparseTextEmbedding, TextEmbedding
+
 from src.domain.models import GovernedChunk, VectorizedChunk
 from src.domain.ports.embeddings import EmbedderPort
 
@@ -74,11 +77,11 @@ class FastEmbedAdapter(EmbedderPort):
             results.append((emb.indices.tolist(), emb.values.tolist()))
         return results
 
-    def vectorize_chunks(self, chunks: list[GovernedChunk]) -> list[VectorizedChunk]:
+    def vectorize_chunks(self, chunks: Sequence[GovernedChunk]) -> list[VectorizedChunk]:
         """Convert governed text chunks into enriched VectorizedChunk instances.
 
         Args:
-            chunks: List of GovernedChunk models to vectorize.
+            chunks: Sequence of GovernedChunk models to vectorize.
 
         Returns:
             List of VectorizedChunk instances with dense and sparse representations.

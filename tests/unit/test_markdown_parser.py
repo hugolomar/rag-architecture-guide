@@ -5,7 +5,7 @@ Tests separation of metadata frontmatter from document body content
 """
 
 from pathlib import Path
-import pytest
+
 from src.domain.enums import Classification, Department, IdPGroup, LifecycleStatus
 from src.domain.models import ManifestRecord
 from src.ingestion.parser import parse_markdown_document

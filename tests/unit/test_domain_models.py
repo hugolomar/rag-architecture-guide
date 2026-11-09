@@ -6,6 +6,7 @@ boundary validation) and data-model.md specifications.
 
 import pytest
 from pydantic import ValidationError
+
 from src.domain.enums import Classification, Department, IdPGroup, LifecycleStatus
 from src.domain.models import CanonicalDocument, ManifestRecord
 

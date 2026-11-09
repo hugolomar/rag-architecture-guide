@@ -42,7 +42,7 @@ def run_ingestion_pipeline(
     manifest_path = Path(config.rag_manifest_path)
     raw_dir = Path(config.rag_data_dir)
 
-    with telemetry.start_stage_span("run") as root_span:
+    with telemetry.start_stage_span("run"):
         telemetry.log("INFO", "Initiating governed document ingestion batch", stage="init")
 
         # 1. Manifest Validation & Lifecycle Filter (FR-001, FR-002, FR-003, FR-004)
@@ -94,21 +94,7 @@ def run_ingestion_pipeline(
 
         # 4. Dual Embedding (FR-008)
         with telemetry.start_stage_span("embeddings.compute") as span:
-            if hasattr(embedder, "vectorize_chunks"):
-                vectorized_chunks: list[VectorizedChunk] = embedder.vectorize_chunks(all_chunks)
-            else:
-                texts = [c.text for c in all_chunks]
-                dense_vectors = embedder.embed_dense(texts)
-                sparse_vectors = embedder.embed_sparse(texts)
-                vectorized_chunks = [
-                    VectorizedChunk(
-                        chunk=chunk,
-                        dense_vector=dense,
-                        sparse_indices=sparse[0],
-                        sparse_values=sparse[1],
-                    )
-                    for chunk, dense, sparse in zip(all_chunks, dense_vectors, sparse_vectors)
-                ]
+            vectorized_chunks: list[VectorizedChunk] = embedder.vectorize_chunks(all_chunks)
             span.set_attribute("vectorized_count", len(vectorized_chunks))
             telemetry.log(
                 "INFO",

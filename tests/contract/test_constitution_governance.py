@@ -5,9 +5,9 @@ In accordance with Constitution Article 19 (Executable architecture) and Section
 and semantic versioning metadata are automatically verified before merges.
 """
 
-from pathlib import Path
 import re
 import unittest
+from pathlib import Path
 
 
 class TestConstitutionGovernance(unittest.TestCase):

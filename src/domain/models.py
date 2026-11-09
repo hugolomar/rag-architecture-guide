@@ -5,6 +5,7 @@ canonical domain representations with strict boundary validation via Pydantic v2
 """
 
 from pydantic import BaseModel, ConfigDict, Field
+
 from src.domain.enums import Classification, Department, IdPGroup, LifecycleStatus
 
 

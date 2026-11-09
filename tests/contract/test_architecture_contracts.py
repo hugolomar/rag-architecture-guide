@@ -9,7 +9,7 @@ import ast
 import inspect
 from abc import ABC
 from pathlib import Path
-import pytest
+
 from src.domain.ports.embeddings import EmbedderPort
 from src.domain.ports.storage import ChunkStorageWriterPort
 

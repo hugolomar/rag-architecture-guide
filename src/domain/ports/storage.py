@@ -5,7 +5,9 @@ must inherit from abc.ABC and declare abstract methods.
 """
 
 from abc import ABC, abstractmethod
-from typing import Any
+from collections.abc import Sequence
+
+from src.domain.models import VectorizedChunk
 
 
 class ChunkStorageWriterPort(ABC):
@@ -28,12 +30,12 @@ class ChunkStorageWriterPort(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def upsert_chunks(self, collection_name: str, chunks: list[Any]) -> int:
+    def upsert_chunks(self, collection_name: str, chunks: Sequence[VectorizedChunk]) -> int:
         """Persist a batch of vectorized chunks into the collection.
 
         Args:
             collection_name: Target collection name.
-            chunks: List of VectorizedChunk instances to index.
+            chunks: Sequence of VectorizedChunk instances to index.
 
         Returns:
             Number of points successfully persisted.

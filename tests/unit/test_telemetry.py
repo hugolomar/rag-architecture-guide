@@ -4,9 +4,9 @@ Verifies that structured logs produce JSON on stdout with run_id, stage,
 and ensure confidential document text or credentials are not leaked.
 """
 
-import io
 import json
 import logging
+
 from src.adapters.telemetry.otel_emitter import (
     JsonLogFormatter,
     TelemetryManager,

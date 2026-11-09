@@ -59,7 +59,7 @@ def main() -> int:
         try:
             telemetry.flush_and_shutdown()
         except Exception as flush_exc:
-            print(f"Failed to flush telemetry: {flush_exc}", file=sys.stderr)
+            sys.stderr.write(f"Failed to flush telemetry: {flush_exc}\n")
             if exit_code == 0:
                 exit_code = 4
 

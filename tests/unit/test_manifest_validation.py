@@ -6,8 +6,10 @@ Access Rules).
 
 import json
 from pathlib import Path
+
 import pytest
-from src.domain.enums import Classification, Department, IdPGroup, LifecycleStatus
+
+from src.domain.enums import LifecycleStatus
 from src.domain.manifest import load_and_validate_manifest
 
 

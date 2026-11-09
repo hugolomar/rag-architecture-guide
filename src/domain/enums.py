@@ -5,10 +5,10 @@ lifecycle, sensitivity classification, ownership, and caller access groups
 in accordance with Constitution Article 5 and ADR 0004.
 """
 
-from enum import Enum
+from enum import StrEnum
 
 
-class Department(str, Enum):
+class Department(StrEnum):
     """Owning department of the document.
 
     Department ownership classifies the business origin of the knowledge
@@ -22,7 +22,7 @@ class Department(str, Enum):
     LEGAL = "Legal"
 
 
-class Classification(str, Enum):
+class Classification(StrEnum):
     """Information sensitivity classification of the document.
 
     Sensitivity classification documents handling requirements but does
@@ -34,7 +34,7 @@ class Classification(str, Enum):
     RESTRICTED = "restricted"
 
 
-class LifecycleStatus(str, Enum):
+class LifecycleStatus(StrEnum):
     """Document lifecycle state governing indexing and retrieval eligibility.
 
     - current: Active authoritative document; primary grounding evidence.
@@ -48,7 +48,7 @@ class LifecycleStatus(str, Enum):
     ARCHIVED = "archived"
 
 
-class IdPGroup(str, Enum):
+class IdPGroup(StrEnum):
     """Identity provider groups that cross the access boundary.
 
     These closed groups match the identity authority roles and determine

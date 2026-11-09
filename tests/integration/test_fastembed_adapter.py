@@ -5,7 +5,9 @@ indices and weights using FastEmbed.
 """
 
 import math
+
 import pytest
+
 from src.adapters.embeddings.fastembed_adapter import FastEmbedAdapter
 from src.domain.ports.embeddings import EmbedderPort
 

@@ -6,6 +6,7 @@ exclusively via environment variables.
 """
 
 from pathlib import Path
+
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 

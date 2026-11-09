@@ -5,14 +5,14 @@ initializes hybrid collections with named dense and sparse vectors, creates
 governance payload indexes, and persists vectorized chunks with full metadata.
 """
 
-from collections.abc import Sequence
-from typing import Any
 import uuid
+from collections.abc import Sequence
+
 from qdrant_client import QdrantClient
 from qdrant_client.http import models
+
 from src.domain.models import VectorizedChunk
 from src.domain.ports.storage import ChunkStorageWriterPort
-
 
 # Deterministic namespace for chunk point UUID generation
 CHUNK_UUID_NAMESPACE = uuid.UUID("a2c7e0f1-4b82-4f31-897b-9c8e1a4d5e2f")
@@ -79,12 +79,12 @@ class QdrantStorageAdapter(ChunkStorageWriterPort):
                 # Index may already exist; safe to continue
                 pass
 
-    def upsert_chunks(self, collection_name: str, chunks: Sequence[Any]) -> int:
+    def upsert_chunks(self, collection_name: str, chunks: Sequence[VectorizedChunk]) -> int:
         """Persist a batch of vectorized chunks into Qdrant.
 
         Args:
             collection_name: Target collection name.
-            chunks: List of VectorizedChunk instances.
+            chunks: Sequence of VectorizedChunk instances.
 
         Returns:
             Number of points successfully upserted.
@@ -94,7 +94,6 @@ class QdrantStorageAdapter(ChunkStorageWriterPort):
 
         points: list[models.PointStruct] = []
         for vchunk in chunks:
-            assert isinstance(vchunk, VectorizedChunk), f"Expected VectorizedChunk, got {type(vchunk)}"
             chunk = vchunk.chunk
 
             # Generate deterministic UUID from chunk_id for idempotency
@@ -103,10 +102,10 @@ class QdrantStorageAdapter(ChunkStorageWriterPort):
             payload = {
                 "chunk_id": chunk.chunk_id,
                 "doc_id": chunk.doc_id,
-                "allowed_groups": [g.value if hasattr(g, "value") else str(g) for g in chunk.allowed_groups],
-                "status": chunk.status.value if hasattr(chunk.status, "value") else str(chunk.status),
-                "department": chunk.department.value if hasattr(chunk.department, "value") else str(chunk.department),
-                "classification": chunk.classification.value if hasattr(chunk.classification, "value") else str(chunk.classification),
+                "allowed_groups": [g.value for g in chunk.allowed_groups],
+                "status": chunk.status.value,
+                "department": chunk.department.value,
+                "classification": chunk.classification.value,
                 "chunk_index": chunk.chunk_index,
                 "text": chunk.text,
                 "is_tabular": chunk.is_tabular,

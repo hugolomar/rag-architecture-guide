@@ -7,6 +7,7 @@ closed catalogs fail before ingestion begins.
 
 import json
 from pathlib import Path
+
 from src.domain.enums import Classification, Department, IdPGroup, LifecycleStatus
 from src.domain.models import ManifestRecord
 

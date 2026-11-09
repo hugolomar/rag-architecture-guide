@@ -5,6 +5,9 @@ must inherit from abc.ABC and declare abstract methods.
 """
 
 from abc import ABC, abstractmethod
+from collections.abc import Sequence
+
+from src.domain.models import GovernedChunk, VectorizedChunk
 
 
 class EmbedderPort(ABC):
@@ -39,6 +42,21 @@ class EmbedderPort(ABC):
 
         Returns:
             List of tuples (indices, values) representing BM25 token weights.
+
+        Raises:
+            NotImplementedError: If not implemented by the adapter.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def vectorize_chunks(self, chunks: Sequence[GovernedChunk]) -> list[VectorizedChunk]:
+        """Convert governed text chunks into enriched VectorizedChunk instances.
+
+        Args:
+            chunks: Sequence of GovernedChunk models to vectorize.
+
+        Returns:
+            List of VectorizedChunk instances with dense and sparse representations.
 
         Raises:
             NotImplementedError: If not implemented by the adapter.
