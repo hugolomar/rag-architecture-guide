@@ -10,6 +10,7 @@ import sys
 from src.adapters.embeddings.fastembed_adapter import FastEmbedAdapter
 from src.adapters.storage.qdrant_adapter import QdrantStorageAdapter
 from src.adapters.telemetry.otel_emitter import TelemetryManager
+from src.ingestion.chunker import TablePreservingChunker
 from src.ingestion.config import IngestionConfig
 from src.ingestion.pipeline import run_ingestion_pipeline
 
@@ -25,20 +26,24 @@ def main() -> int:
     exit_code = 0
     try:
         # NOTE(Architecture): As the Composition Root, this entrypoint wires baseline
-        # concrete adapters (FastEmbedAdapter per ADR 0005, QdrantStorageAdapter per ADR 0006).
-        # To test or benchmark alternative adapters (e.g. Postgres or OpenAI), wire the new
-        # instance directly here. The core orchestrator (src.ingestion.pipeline) requires zero modifications.
+        # concrete adapters (FastEmbedAdapter per ADR 0005, QdrantStorageAdapter per ADR 0006)
+        # and chunking strategies (TablePreservingChunker per FR-006).
+        # To test or benchmark alternative adapters (e.g. Postgres or OpenAI) or alternative
+        # chunkers (e.g. SemanticChunker), wire the new instance directly here.
+        # The core orchestrator (src.ingestion.pipeline) requires zero modifications.
         embedder = FastEmbedAdapter()
         storage = QdrantStorageAdapter(
             host=config.qdrant_host,
             port=config.qdrant_port,
             vector_size=embedder.dimension,
         )
+        chunker = TablePreservingChunker()
 
         run_ingestion_pipeline(
             config=config,
             embedder=embedder,
             storage=storage,
+            chunker=chunker,
             telemetry=telemetry,
         )
         exit_code = 0

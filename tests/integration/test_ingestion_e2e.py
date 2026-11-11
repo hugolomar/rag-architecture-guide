@@ -13,6 +13,7 @@ from qdrant_client import QdrantClient
 from src.adapters.storage.qdrant_adapter import QdrantStorageAdapter
 from src.domain.models import GovernedChunk, VectorizedChunk
 from src.domain.ports.embeddings import EmbedderPort
+from src.ingestion.chunker import TablePreservingChunker
 from src.ingestion.config import IngestionConfig
 from src.ingestion.pipeline import run_ingestion_pipeline
 
@@ -88,11 +89,13 @@ def test_end_to_end_batch_ingestion(tmp_path: Path) -> None:
     client = QdrantClient(":memory:")
     embedder = FastMockEmbedder()
     storage = QdrantStorageAdapter(client=client, vector_size=embedder.dimension)
+    chunker = TablePreservingChunker()
 
     results = run_ingestion_pipeline(
         config=config,
         embedder=embedder,
         storage=storage,
+        chunker=chunker,
     )
 
     assert results["active_documents"] == 2

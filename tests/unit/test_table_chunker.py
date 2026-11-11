@@ -6,7 +6,13 @@ split across rows with repeated headers, and chunks inherit governance metadata.
 
 from src.domain.enums import Classification, Department, IdPGroup, LifecycleStatus
 from src.domain.models import CanonicalDocument
-from src.ingestion.chunker import TablePreservingChunker
+from src.ingestion.chunker import DocumentChunker, TablePreservingChunker
+
+
+def test_table_preserving_chunker_satisfies_contract() -> None:
+    """Verify that TablePreservingChunker implements the DocumentChunker strategy."""
+    chunker = TablePreservingChunker()
+    assert isinstance(chunker, DocumentChunker)
 
 
 def _build_doc(content: str) -> CanonicalDocument:
@@ -76,3 +82,16 @@ def test_chunker_repeats_headers_on_oversized_table() -> None:
         assert "| Metric ID | Service | SLA Target | Escalation Tier |" in chunk.text
         assert "|---|---|---|---|" in chunk.text
         assert chunk.doc_id == "DOC-ENG-001"
+
+
+def test_custom_chunker_strategy_can_be_implemented() -> None:
+    """Verify that custom chunking strategies can implement DocumentChunker."""
+
+    class SingleChunkStrategy(DocumentChunker):
+        def chunk_document(self, doc: CanonicalDocument) -> list:
+            return []
+
+    custom = SingleChunkStrategy()
+    assert isinstance(custom, DocumentChunker)
+    doc = _build_doc("Sample content")
+    assert custom.chunk_document(doc) == []

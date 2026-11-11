@@ -115,9 +115,9 @@ src/
     ├── __init__.py
     ├── config.py                    # Pydantic Settings (paths, collection name, model names)
     ├── parser.py                    # Markdown parser (frontmatter extraction)
-    ├── chunker.py                   # Structure-preserving chunker (Markdown tables intact)
-    ├── pipeline.py                  # Domain orchestrator workflow (pure port dependencies)
-    └── cli.py                       # Composition root CLI entrypoint (__main__)
+    ├── chunker.py                   # Strategy contract (DocumentChunker) & table-preserving default (TablePreservingChunker)
+    ├── pipeline.py                  # Domain orchestrator workflow (injected ports and chunker strategy)
+    └── cli.py                       # Composition root CLI entrypoint (wires concrete adapters & chunker)
 
 tests/
 ├── unit/                            # Pure domain and logic tests (no network/db)
@@ -154,5 +154,6 @@ Standard single-project hexagonal architecture separating the pure business doma
 | Decision / Pattern | Why Needed | Simpler Alternative Rejected Because |
 | :--- | :--- | :--- |
 | **Dual vectorization (Dense + BM25)** | Required by Article 14 and ADR 0005 to support semantic similarity and exact-token recall. | Dense-only search fails on flags, error codes, and configuration parameters. |
+| **Pluggable DocumentChunker Strategy** | Enables evaluation and swapping of chunking strategies without coupling orchestrator logic to concrete splitting algorithms. | Hardcoding TablePreservingChunker directly into pipeline.py prevents clean dependency injection and A/B benchmarking. |
 | **Multi-stage Dockerfile** | Required by Article 26 to exclude build tools (`uv`, compilers) from runtime image. | Single-stage image unnecessarily inflates image size and introduces build-time security attack surface. |
 | **Explicit Telemetry Flush** | Required by Article 20 and ADR 0011 because ingestion is an ephemeral batch process. | Standard default telemetry buffers drop in-flight spans and metrics when the process exits. |

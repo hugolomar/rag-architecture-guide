@@ -9,12 +9,13 @@
 ## 1. Table-Preserving Markdown Chunking
 
 ### Decision
-Implement a custom Markdown structure-aware chunker that identifies Markdown tables (`| ... |`) and treats each complete table as an indivisible structural block. If a table fits within the target chunk token window (e.g., 500-800 tokens), it is stored as a single chunk with its preceding heading. If an oversized table exceeds the chunk limit, the chunker splits along row boundaries while automatically prepending the table column headers to every continuation chunk.
+Define an abstract strategy contract `DocumentChunker` and implement a default Markdown structure-aware chunker (`TablePreservingChunker`) that identifies Markdown tables (`| ... |`) and treats each complete table as an indivisible structural block. If a table fits within the target chunk token window (e.g., 500-800 tokens), it is stored as a single chunk with its preceding heading. If an oversized table exceeds the chunk limit, the chunker splits along row boundaries while automatically prepending the table column headers to every continuation chunk.
 
 ### Rationale
 - Standard character-based or recursive token splitters break tables across arbitrary character limits, separating numerical cells and row items from their column headers.
 - Quantitative policies (such as salary bands, SLA response times, and expense limits) lose all relational meaning when a row is detached from its header.
 - Prepending headers on oversized table splits ensures that every chunk remains semantically interpretable both for dense embedding models and BM25 token matching.
+- Defining `DocumentChunker` as an abstract strategy contract decouples the batch orchestrator (`pipeline.py`) from concrete chunking heuristics, allowing seamless experimentation with alternative chunkers or overlap parameters via dependency injection without code modifications to the ingestion pipeline.
 
 ### Alternatives Considered
 - **LangChain `MarkdownHeaderTextSplitter`**: Splits by headers only; does not guarantee table integrity or handle table rows specially.

@@ -11,7 +11,7 @@ from src.domain.manifest import load_and_validate_manifest
 from src.domain.models import GovernedChunk, VectorizedChunk
 from src.domain.ports.embeddings import EmbedderPort
 from src.domain.ports.storage import ChunkStorageWriterPort
-from src.ingestion.chunker import TablePreservingChunker
+from src.ingestion.chunker import DocumentChunker
 from src.ingestion.config import IngestionConfig
 from src.ingestion.parser import parse_markdown_document
 
@@ -20,6 +20,7 @@ def run_ingestion_pipeline(
     config: IngestionConfig,
     embedder: EmbedderPort,
     storage: ChunkStorageWriterPort,
+    chunker: DocumentChunker,
     telemetry: TelemetryManager | None = None,
 ) -> dict[str, int]:
     """Execute the observable batch document ingestion workflow.
@@ -28,6 +29,7 @@ def run_ingestion_pipeline(
         config: Pipeline runtime configuration.
         embedder: Injected EmbedderPort adapter for dual vector computation.
         storage: Injected ChunkStorageWriterPort adapter for collection persistence.
+        chunker: Injected DocumentChunker strategy for document splitting.
         telemetry: Optional injected TelemetryManager (defaults to instance from config).
 
     Returns:
@@ -80,7 +82,6 @@ def run_ingestion_pipeline(
         # 3. Structure-Preserving Chunking (FR-006, FR-007)
         all_chunks: list[GovernedChunk] = []
         with telemetry.start_stage_span("document.chunk") as span:
-            chunker = TablePreservingChunker()
             for doc in canonical_docs:
                 chunks = chunker.chunk_document(doc)
                 all_chunks.extend(chunks)

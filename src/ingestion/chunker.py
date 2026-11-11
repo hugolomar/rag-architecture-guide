@@ -1,14 +1,33 @@
-"""Structure-preserving Markdown chunker.
+"""Pluggable Markdown chunking strategy and structure-preserving implementation.
 
-In accordance with FR-006 and ADR 0005, this chunker identifies Markdown tables
-and keeps them intact within single chunks, repeating table headers across
-continuation chunks if a table exceeds the target chunk size.
+In accordance with FR-006 and ADR 0005, this module defines the abstract
+DocumentChunker strategy contract and the TablePreservingChunker baseline,
+which identifies Markdown tables and keeps them intact within single chunks,
+repeating table headers across continuation chunks if a table exceeds the target chunk size.
 """
+
+from abc import ABC, abstractmethod
 
 from src.domain.models import CanonicalDocument, GovernedChunk
 
 
-class TablePreservingChunker:
+class DocumentChunker(ABC):
+    """Abstract strategy contract for splitting canonical documents into governed chunks."""
+
+    @abstractmethod
+    def chunk_document(self, doc: CanonicalDocument) -> list[GovernedChunk]:
+        """Split a canonical document into a sequence of governed chunks.
+
+        Args:
+            doc: CanonicalDocument with validated governance attributes.
+
+        Returns:
+            List of GovernedChunk instances in reading order.
+        """
+        raise NotImplementedError
+
+
+class TablePreservingChunker(DocumentChunker):
     """Chunks Markdown documents while strictly preserving table integrity.
 
     Assigns inherited governance metadata to each generated GovernedChunk (FR-007).
