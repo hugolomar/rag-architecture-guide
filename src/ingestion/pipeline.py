@@ -7,12 +7,12 @@ lifecycle management and domain port contracts.
 from pathlib import Path
 
 from src.adapters.telemetry.otel_emitter import TelemetryManager
-from src.domain.manifest import load_and_validate_manifest
 from src.domain.models import GovernedChunk, VectorizedChunk
 from src.domain.ports.embeddings import EmbedderPort
 from src.domain.ports.storage import ChunkStorageWriterPort
 from src.ingestion.chunker import DocumentChunker
 from src.ingestion.config import IngestionConfig
+from src.ingestion.manifest_loader import load_and_validate_manifest
 from src.ingestion.parser import parse_markdown_document
 
 
