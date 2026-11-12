@@ -1,45 +1,20 @@
-"""Architectural contract tests enforcing Constitution Articles 2, 4, and 19.
+"""Architectural contract tests enforcing Constitution Articles 4 and 19.
 
-This module programmatically enforces clean hexagonal architecture boundaries:
-1. Domain layer must have zero imports from adapters, ingestion, or third-party infrastructure.
-2. Cross-layer behavioral contracts must be abc.ABC classes with abstract methods.
+This module programmatically enforces clean hexagonal architecture contracts:
+1. Cross-layer behavioral contracts must be abc.ABC classes with abstract methods.
+2. Concrete adapters must explicitly inherit from their respective domain ports.
+
+Layer boundaries and inward dependency direction are verified declaratively by
+import-linter (lint-imports) per .importlinter in Stage A.
 """
 
-import ast
 import inspect
 from abc import ABC
-from pathlib import Path
 
+from src.adapters.embeddings.fastembed_adapter import FastEmbedAdapter
+from src.adapters.storage.qdrant_adapter import QdrantStorageAdapter
 from src.domain.ports.embeddings import EmbedderPort
 from src.domain.ports.storage import ChunkStorageWriterPort
-
-
-def test_domain_has_zero_infrastructure_imports() -> None:
-    """Enforce Constitution Articles 2 and 19 via AST analysis.
-
-    Scans every Python file in src/domain/ and asserts that no import references
-    src.adapters, src.ingestion, qdrant_client, fastembed, or opentelemetry.
-    """
-    domain_dir = Path("src/domain")
-    assert domain_dir.exists(), "src/domain directory does not exist"
-
-    forbidden_roots = {"src.adapters", "adapters", "src.ingestion", "ingestion", "qdrant_client", "fastembed", "opentelemetry"}
-
-    for py_file in domain_dir.rglob("*.py"):
-        tree = ast.parse(py_file.read_text(encoding="utf-8"), filename=str(py_file))
-        for node in ast.walk(tree):
-            if isinstance(node, ast.Import):
-                for alias in node.names:
-                    root = alias.name.split(".")[0]
-                    assert alias.name not in forbidden_roots and root not in forbidden_roots, (
-                        f"Architecture violation in {py_file}: forbidden import '{alias.name}'"
-                    )
-            elif isinstance(node, ast.ImportFrom):
-                if node.module:
-                    root = node.module.split(".")[0]
-                    assert node.module not in forbidden_roots and root not in forbidden_roots, (
-                        f"Architecture violation in {py_file}: forbidden from-import '{node.module}'"
-                    )
 
 
 def test_behavioral_ports_are_abstract_classes() -> None:
@@ -53,23 +28,15 @@ def test_behavioral_ports_are_abstract_classes() -> None:
         assert len(port.__abstractmethods__) > 0, f"{port} must declare at least one abstract method"
 
 
-def test_pipeline_orchestration_has_zero_concrete_adapter_imports() -> None:
-    """Enforce Constitution Article 2: pipeline orchestrator must not import concrete adapters."""
-    pipeline_file = Path("src/ingestion/pipeline.py")
-    assert pipeline_file.exists(), "src/ingestion/pipeline.py does not exist"
+def test_concrete_adapters_inherit_from_domain_ports() -> None:
+    """Enforce Constitution Article 4: adapters must inherit from ports, duck typing is forbidden."""
+    adapter_port_pairs = [
+        (FastEmbedAdapter, EmbedderPort),
+        (QdrantStorageAdapter, ChunkStorageWriterPort),
+    ]
 
-    forbidden_roots = {"src.adapters.storage", "src.adapters.embeddings", "qdrant_client", "fastembed"}
-
-    tree = ast.parse(pipeline_file.read_text(encoding="utf-8"), filename=str(pipeline_file))
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Import):
-            for alias in node.names:
-                assert alias.name not in forbidden_roots, (
-                    f"Architecture violation in pipeline.py: forbidden import '{alias.name}'"
-                )
-        elif isinstance(node, ast.ImportFrom):
-            if node.module:
-                assert not any(node.module.startswith(root) for root in forbidden_roots), (
-                    f"Architecture violation in pipeline.py: forbidden from-import '{node.module}'"
-                )
-
+    for adapter_cls, port_cls in adapter_port_pairs:
+        assert inspect.isclass(adapter_cls), f"{adapter_cls} is not a class"
+        assert issubclass(adapter_cls, port_cls), (
+            f"Architecture violation: {adapter_cls.__name__} must inherit from {port_cls.__name__}"
+        )

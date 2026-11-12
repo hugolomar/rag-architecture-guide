@@ -1,11 +1,14 @@
 <!--
 SYNC IMPACT REPORT
-Version change: 1.2.0 -> 1.2.1
+Version change: 1.2.1 -> 1.2.2
 List of modified principles:
-- Article 14 (Written-token and semantic retrieval): Clarified that embedding model identity and vector dimensions are governed by the shared embedder adapter implementation across ingestion and query paths rather than disparate external configuration.
+- Article 16 (Testing pyramid and test-first development): Removed specific tool example (Qdrant) to reinforce pure invariant of real infrastructure execution over in-memory mocks.
+- Article 19 (Executable architecture): Clarified verification mechanisms separating static import-graph analysis (for layer boundaries) from structural contract tests (for port interfaces and inheritance).
+- Article 26 (Container packaging and process boundaries): Retained FastAPI as baseline API platform runtime while generalizing outbound container service names to architectural roles.
+- Article 27 (Runtime orchestration and lifecycle): Standardized long-running service references to architectural roles.
 Migration impact:
-- Clarification patch. EmbedderPort exposes output dimensionality via property; storage adapters receive vector dimensions from the embedder at the composition root.
-Follow-up TODOs: None
+- Clarification patch. Reaffirms pure rule invariants without binding constitutional articles to outbound tool brands.
+Follow-up TODOs: Align tests/contract/test_architecture_contracts.py and quickstart.md.
 -->
 
 # Enterprise Governed RAG Constitution
@@ -112,7 +115,7 @@ All implementation follows test-first development: tests exist and fail before i
 
 The testing strategy consists of distinct, non-overlapping levels:
 - **Unit tests:** specify pure domain rules, schema constraints, and isolated adapter translation logic.
-- **Integration tests:** verify adapters against real infrastructure (such as a running Qdrant instance) rather than in-memory mocks. Behavior that depends on external storage or engines must be proven against the real dependency.
+- **Integration tests:** verify adapters against real infrastructure instances rather than in-memory mocks. Behavior that depends on external storage or engines must be proven against the real dependency.
 - **End-to-end (E2E) tests:** verify the complete pipeline: raw document ingestion, vector indexing, HTTP API request with OIDC identity, retrieval with security trimming, and model generation.
 - **Evaluation suites:** govern probabilistic retrieval quality, grounding, and security leak policies against golden benchmark cases.
 
@@ -135,7 +138,7 @@ The second gate runs the validation suite with provider access. A prohibited doc
 
 Architectural constraints are enforced by automated tooling in CI, never by convention, documentation, or diagrams alone.
 
-Every structural rule in this constitution—including layer boundaries, inward dependency direction, and port inheritance—must have an associated automated check (such as `import-linter` or structural contract tests). A constraint lacking an automated enforcement check is considered unenforced.
+Every structural rule in this constitution must have an associated automated check. Module boundaries and inward dependency direction are verified via static import-graph analysis; port contracts and adapter inheritance are verified via structural contract tests. A constraint lacking an automated enforcement check is considered unenforced.
 
 ## VI. Observability
 
@@ -191,7 +194,7 @@ Documentation, API specifications, and architectural diagrams must remain in con
 ### Article 26 — Container packaging and process boundaries
 
 Deployable processes run as container images:
-- **Deployable units:** The API is packaged as a single image running the stateless FastAPI runtime with the model gateway (LiteLLM) embedded in-process. Ingestion is packaged as an image executing a one-shot batch process that terminates upon completion. The retrieval store (Qdrant), identity provider (Keycloak), observability stack (OTel Collector, Loki, Tempo, Prometheus, Grafana), and decoupled Web UI each run in their own dedicated containers.
+- **Deployable units:** The API is packaged as a single image running the stateless FastAPI runtime with the model gateway embedded in-process. Ingestion is packaged as an image executing a one-shot batch process that terminates upon completion. The retrieval store, identity provider, observability stack, and decoupled Web UI each run in their own dedicated containers.
 - **Non-services:** The shared domain package and evaluation harness are software libraries and test suites, not deployable network services.
 - **Multi-stage image hygiene:** Images built by this project use multi-stage Dockerfiles. The build stage installs dependencies via `uv sync` from `uv.lock`. The runtime stage copies the virtual environment and bundled ONNX embedding models (preloaded from the project's single model configuration, never hardcoded in Dockerfiles), executing directly with the environment's `python` (never `uv run` in production). Build tools (`uv`, compilers) are excluded from runtime images.
 - **Upstream images:** Upstream services are consumed as published; rebuilding upstream images is prohibited.
@@ -203,7 +206,7 @@ The entire runtime stack starts with a single command (`docker compose up` or a 
 Container definitions are environment-agnostic; all runtime configuration is injected exclusively via environment variables.
 
 Service lifecycles are strictly differentiated:
-- **Long-running services** (API, Qdrant, Keycloak, Observability) expose health check endpoints for startup orchestration. The API health check reports process liveness only; it does not grant access or bypass authentication or retrieval.
+- **Long-running services** (API, retrieval store, identity provider, observability stack) expose health check endpoints for startup orchestration. The API health check reports process liveness only; it does not grant access or bypass authentication or retrieval.
 - **Batch processes** (ingestion) must not expose a health endpoint. Completion status is determined strictly by process exit code after all OpenTelemetry exporters are flushed and shut down.
 
 ## IX. Governance
@@ -224,4 +227,4 @@ The constitution follows semantic versioning. A MAJOR increment removes or redef
 
 Every plan, spec, and task set generated for this project includes a constitution compliance check. Every pull request review records pass or fail against the relevant articles. Non-compliance is resolved before merge or explicitly waived with documented rationale.
 
-**Version**: 1.2.1 | **Ratified**: 2026-10-27 | **Last Amended**: 2026-11-09
+**Version**: 1.2.2 | **Ratified**: 2026-10-27 | **Last Amended**: 2026-11-12

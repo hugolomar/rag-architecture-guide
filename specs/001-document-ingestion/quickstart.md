@@ -36,11 +36,14 @@ curl http://localhost:6333/healthz
 
 ---
 
-## 3. Run Ingestion Tests (Test-First)
+## 3. Verify Architecture & Run Ingestion Tests
 
-Before running the batch process, verify all contract, unit, and integration tests pass:
+Before running the batch process, verify architectural boundaries and ensure all unit, contract, and integration tests pass:
 
 ```bash
+# Verify architectural boundaries (Constitution Article 19 & ADR 0016)
+uv run lint-imports
+
 # Run unit & contract tests
 uv run pytest tests/unit tests/contract -v
 

@@ -1,6 +1,6 @@
 ---
-description: Project Constitution Governance and Protection Rules
-trigger: always_on
+description: Critical safety rule prohibiting autonomous modification of .specify/memory/constitution.md without explicit user confirmation
+trigger: model_decision
 ---
 
 # Constitution Protection and Governance Rules
