@@ -20,22 +20,25 @@ class FastEmbedAdapter(EmbedderPort):
         self,
         dense_model_name: str = "BAAI/bge-large-en-v1.5",
         sparse_model_name: str = "Qdrant/bm25",
+        dimension: int = 1024,
     ) -> None:
         """Initialize the FastEmbed models with lazy loading.
 
         Args:
             dense_model_name: HuggingFace identifier for dense ONNX embedding model.
             sparse_model_name: Identifier for sparse BM25 model.
+            dimension: Dimensionality of dense vectors produced by the configured model.
         """
         self.dense_model_name = dense_model_name
         self.sparse_model_name = sparse_model_name
+        self._dimension = dimension
         self._dense_model: TextEmbedding | None = None
         self._sparse_model: SparseTextEmbedding | None = None
 
     @property
     def dimension(self) -> int:
         """Dimensionality of dense vectors produced by the active dense model."""
-        return 1024
+        return self._dimension
 
     @property
     def dense_model(self) -> TextEmbedding:

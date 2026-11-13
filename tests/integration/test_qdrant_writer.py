@@ -28,6 +28,8 @@ def test_qdrant_adapter_ensure_collection_and_upsert() -> None:
     # 1. Initialize collection
     adapter.ensure_collection(collection_name)
     collection_info = client.get_collection(collection_name)
+    assert collection_info.config.params.vectors is not None
+    assert isinstance(collection_info.config.params.vectors, dict)
     assert "dense" in collection_info.config.params.vectors
 
     # 2. Build vectorized chunks
@@ -75,13 +77,23 @@ def test_qdrant_adapter_ensure_collection_and_upsert() -> None:
     points, _ = client.scroll(collection_name=collection_name, limit=10, with_vectors=True, with_payload=True)
     assert len(points) == 2
 
-    point_map = {p.payload["chunk_id"]: p for p in points}
+    point_map = {}
+    for p in points:
+        assert p.payload is not None
+        point_map[p.payload["chunk_id"]] = p
+
     assert "DOC-ENG-001#c0" in point_map
     assert "DOC-HR-001#c0" in point_map
 
     p1 = point_map["DOC-ENG-001#c0"]
+    assert p1.payload is not None
     assert p1.payload["allowed_groups"] == ["engineering-core"]
     assert p1.payload["status"] == "current"
-    assert len(p1.vector["dense"]) == 1024
-    assert len(p1.vector["sparse"].indices) == 3
+    assert isinstance(p1.vector, dict)
+    dense_vec = p1.vector["dense"]
+    assert isinstance(dense_vec, list)
+    assert len(dense_vec) == 1024
+    sparse_vec = p1.vector["sparse"]
+    assert hasattr(sparse_vec, "indices")
+    assert len(sparse_vec.indices) == 3
 

@@ -110,13 +110,23 @@ def test_end_to_end_batch_ingestion(tmp_path: Path) -> None:
         with_vectors=True,
     )
 
-    doc_ids_in_store = {p.payload["doc_id"] for p in points}
+    doc_ids_in_store = set()
+    for p in points:
+        assert p.payload is not None
+        doc_ids_in_store.add(p.payload["doc_id"])
+
     assert "DOC-HR-001" in doc_ids_in_store
     assert "DOC-SEC-002" in doc_ids_in_store
     assert "DOC-LEG-003" not in doc_ids_in_store, "Archived document leaked into index!"
 
     for p in points:
+        assert p.payload is not None
         assert p.payload["status"] in ("current", "deprecated")
-        assert len(p.vector["dense"]) == 1024
-        assert len(p.vector["sparse"].indices) > 0
+        assert isinstance(p.vector, dict)
+        dense_vec = p.vector["dense"]
+        assert isinstance(dense_vec, list)
+        assert len(dense_vec) == 1024
+        sparse_vec = p.vector["sparse"]
+        assert hasattr(sparse_vec, "indices")
+        assert len(sparse_vec.indices) > 0
 

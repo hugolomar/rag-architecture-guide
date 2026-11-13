@@ -6,7 +6,7 @@ description: "Task list for Governed Document Ingestion Pipeline implementation"
 
 **Input**: Design documents from `/specs/001-document-ingestion/`
 **Prerequisites**: [plan.md](plan.md), [spec.md](spec.md), [research.md](research.md), [data-model.md](data-model.md), [contracts/](contracts/)
-**Constitution Compliance**: Enforces Constitution v1.0.0 (Articles 1-27), including hexagonal architecture, test-first development, zero-trust trimming, dual-vector indexing, zero telemetry loss, and container packaging.
+**Constitution Compliance**: Enforces Constitution v2.0.0 (Articles 1-16), including hexagonal architecture, composition roots, test-first development, zero-trust trimming, dual-vector indexing, zero telemetry loss, and container packaging.
 
 ## Format: `[ID] [P?] [Story] Description`
 
@@ -56,8 +56,8 @@ description: "Task list for Governed Document Ingestion Pipeline implementation"
 
 ### Implementation for User Story 1
 
-- [X] T012 [P] [US1] Implement `ManifestRecord` and `CanonicalDocument` models in `src/domain/models.py` with verbatim field constraints from `data-model.md` (`doc_id` regex `^DOC-[A-Z]{3,4}-[0-9]{3}$`, required `relative_path`, `department: Department`, `allowed_groups: list[IdPGroup]` with `minItems: 1`, `classification: Classification`, `status: LifecycleStatus`, `title: str`, `content: str`, `keywords: list[str]` default empty list)
-- [X] T013 [US1] Implement manifest loader and lifecycle filter in `src/domain/manifest.py` validating `data/manifest.json` against `ManifestRecord`, dropping documents where `status == LifecycleStatus.ARCHIVED`, and raising explicit errors on uncataloged files or invalid values (depends on T012)
+- [X] T012 [P] [US1] Implement `ManifestRecord` and `CanonicalDocument` models in `src/domain/models.py` with verbatim field constraints from `data-model.md` (`doc_id` regex `^DOC-[A-Z]{2,4}-[0-9]{3}$`, required `relative_path`, `department: Department`, `allowed_groups: list[IdPGroup]` with `minItems: 1`, `classification: Classification`, `status: LifecycleStatus`, `title: str`, `content: str`, `keywords: list[str]` default empty list)
+- [X] T013 [US1] Implement in-memory manifest validator in `src/domain/manifest.py` (`validate_and_partition_manifest`) and filesystem loader in `src/ingestion/manifest_loader.py` validating `data/manifest.json`, verifying file existence, dropping documents where `status == LifecycleStatus.ARCHIVED`, and raising explicit errors on uncataloged files or invalid values (depends on T012)
 - [X] T014 [US1] Implement Markdown parser in `src/ingestion/parser.py` using `python-frontmatter` to separate YAML frontmatter from Markdown body and construct `CanonicalDocument` instances for all active manifest entries (depends on T012, T013)
 
 **Checkpoint**: User Story 1 complete and independently testable. Run `pytest tests/unit/test_domain_models.py tests/unit/test_manifest_validation.py tests/unit/test_markdown_parser.py tests/contract/test_manifest_contract.py`.

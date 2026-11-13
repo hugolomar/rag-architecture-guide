@@ -5,7 +5,7 @@ split across rows with repeated headers, and chunks inherit governance metadata.
 """
 
 from src.domain.enums import Classification, Department, IdPGroup, LifecycleStatus
-from src.domain.models import CanonicalDocument
+from src.domain.models import CanonicalDocument, GovernedChunk
 from src.ingestion.chunker import DocumentChunker, TablePreservingChunker
 
 
@@ -88,7 +88,7 @@ def test_custom_chunker_strategy_can_be_implemented() -> None:
     """Verify that custom chunking strategies can implement DocumentChunker."""
 
     class SingleChunkStrategy(DocumentChunker):
-        def chunk_document(self, doc: CanonicalDocument) -> list:
+        def chunk_document(self, doc: CanonicalDocument) -> list[GovernedChunk]:
             return []
 
     custom = SingleChunkStrategy()

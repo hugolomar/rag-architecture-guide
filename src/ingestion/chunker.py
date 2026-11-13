@@ -108,15 +108,26 @@ class TablePreservingChunker(DocumentChunker):
         return governed_chunks
 
     def _split_into_blocks(self, content: str) -> list[tuple[str, bool]]:
-        """Separate Markdown into tabular blocks and standard prose blocks."""
+        """Separate Markdown into tabular blocks and standard prose blocks.
+
+        Guarantees that lines inside fenced code blocks (```) are never misidentified
+        as Markdown tables, and table rows are recognized even if trailing pipes are omitted.
+        """
         lines = content.splitlines()
         blocks: list[tuple[str, bool]] = []
         current_lines: list[str] = []
         in_table = False
+        in_code_block = False
 
         for line in lines:
             stripped = line.strip()
-            is_table_line = stripped.startswith("|") and stripped.endswith("|")
+
+            # Track fenced code blocks to prevent confusing bash pipes with tables
+            if stripped.startswith("```"):
+                in_code_block = not in_code_block
+
+            # Table row heuristic: requires pipe and not inside a code block
+            is_table_line = not in_code_block and stripped.startswith("|") and (stripped.endswith("|") or "|" in stripped[1:])
 
             if is_table_line:
                 if not in_table:
