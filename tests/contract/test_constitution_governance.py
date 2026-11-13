@@ -70,12 +70,10 @@ class TestConstitutionGovernance(unittest.TestCase):
         )
 
     def test_constitution_governance_articles_intact(self) -> None:
-        """Verify that foundational Governance articles (Articles 28-31) are present."""
+        """Verify that foundational Governance articles (Articles 15-16) are present."""
         required_articles = [
-            "Article 28 — Supremacy",
-            "Article 29 — Amendment procedure",
-            "Article 30 — Versioning",
-            "Article 31 — Compliance",
+            "Article 15 — Supremacy",
+            "Article 16 — Amendment procedure, versioning, and compliance",
         ]
 
         for article in required_articles:
