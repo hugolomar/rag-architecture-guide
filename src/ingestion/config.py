@@ -1,6 +1,6 @@
 """Pipeline and environment configuration model.
 
-In accordance with Constitution Article 27, container definitions and batch
+In accordance with Constitution Article 14, container definitions and batch
 processes are environment-agnostic; all runtime configuration is injected
 exclusively via environment variables.
 """
@@ -65,4 +65,3 @@ class IngestionConfig(BaseSettings):
         extra="ignore",
         populate_by_name=True,
     )
-

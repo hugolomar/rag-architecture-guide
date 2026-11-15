@@ -123,4 +123,3 @@ def run_ingestion_pipeline(
         "chunks_generated": len(all_chunks),
         "points_indexed": total_upserted,
     }
-

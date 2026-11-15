@@ -127,7 +127,11 @@ class TablePreservingChunker(DocumentChunker):
                 in_code_block = not in_code_block
 
             # Table row heuristic: requires pipe and not inside a code block
-            is_table_line = not in_code_block and stripped.startswith("|") and (stripped.endswith("|") or "|" in stripped[1:])
+            is_table_line = (
+                not in_code_block
+                and stripped.startswith("|")
+                and (stripped.endswith("|") or "|" in stripped[1:])
+            )
 
             if is_table_line:
                 if not in_table:
@@ -190,4 +194,3 @@ class TablePreservingChunker(DocumentChunker):
             chunks.append(chunk_str)
 
         return chunks
-

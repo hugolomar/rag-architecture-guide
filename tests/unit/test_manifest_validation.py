@@ -1,7 +1,7 @@
 """Unit tests for domain manifest validation and ingestion filesystem loader.
 
 Tests acceptance scenarios for User Story 1 (Enforce Governance and Manifest
-Access Rules).
+Access Rules, Articles 4 & 7).
 """
 
 import json
@@ -12,6 +12,8 @@ import pytest
 from src.domain.enums import LifecycleStatus
 from src.domain.manifest import validate_and_partition_manifest
 from src.ingestion.manifest_loader import load_and_validate_manifest
+
+pytestmark = pytest.mark.unit
 
 
 def test_validate_manifest_excludes_archived_in_memory() -> None:
@@ -72,6 +74,13 @@ def test_validate_manifest_fail_loud_on_invalid_catalog_value_in_memory() -> Non
         validate_and_partition_manifest(manifest_data)
 
 
+def test_validate_manifest_empty_list_returns_empty_partitions() -> None:
+    """Verify that an empty manifest partition yields empty active and archived lists."""
+    active_docs, archived_docs = validate_and_partition_manifest([])
+    assert active_docs == []
+    assert archived_docs == []
+
+
 def test_load_valid_manifest_from_disk(tmp_path: Path) -> None:
     """Verify filesystem loader reads manifest.json and checks referenced files."""
     raw_dir = tmp_path / "raw"
@@ -106,7 +115,7 @@ def test_load_valid_manifest_from_disk(tmp_path: Path) -> None:
     assert len(archived_docs) == 1
 
 
-def test_load_manifest_fail_loud_on_missing_file(tmp_path: Path) -> None:
+def test_load_manifest_fail_loud_on_missing_referenced_file(tmp_path: Path) -> None:
     """Verify fail loud when manifest references a non-existent file on disk."""
     raw_dir = tmp_path / "raw"
     raw_dir.mkdir()
@@ -126,3 +135,12 @@ def test_load_manifest_fail_loud_on_missing_file(tmp_path: Path) -> None:
     with pytest.raises(FileNotFoundError):
         load_and_validate_manifest(manifest_file, raw_dir)
 
+
+def test_load_manifest_fail_loud_on_missing_manifest_file(tmp_path: Path) -> None:
+    """Verify fail loud when manifest.json itself does not exist on disk."""
+    raw_dir = tmp_path / "raw"
+    raw_dir.mkdir()
+    non_existent_manifest = tmp_path / "missing_manifest.json"
+
+    with pytest.raises(FileNotFoundError):
+        load_and_validate_manifest(non_existent_manifest, raw_dir)

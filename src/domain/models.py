@@ -1,6 +1,6 @@
 """Domain models for governed enterprise documents and chunks.
 
-In accordance with Constitution Articles 2, 3, and 5, this module defines the
+In accordance with Constitution Articles 2, 3, and 4, this module defines the
 canonical domain representations with strict boundary validation via Pydantic v2.
 """
 
@@ -14,7 +14,7 @@ class ManifestRecord(BaseModel):
 
     Validates identifiers against the corporate pattern and checks that
     departments, classifications, lifecycle statuses, and identity groups
-    belong to strictly closed taxonomies (Constitution Article 5).
+    belong to strictly closed taxonomies (Constitution Article 4).
     """
 
     doc_id: str = Field(
@@ -73,13 +73,15 @@ class CanonicalDocument(BaseModel):
 class GovernedChunk(BaseModel):
     """An indivisible segment of text that inherits its parent document governance.
 
-    In accordance with Constitution Article 5 and FR-007, every chunk carries
+    In accordance with Constitution Article 4 and FR-007, every chunk carries
     the parent document's doc_id, allowed_groups, and status inseparably.
     """
 
     chunk_id: str = Field(..., description="Deterministic ID: {doc_id}#c{chunk_index}")
     doc_id: str = Field(..., description="Parent document identifier.")
-    allowed_groups: list[IdPGroup] = Field(..., min_length=1, description="Inherited access groups.")
+    allowed_groups: list[IdPGroup] = Field(
+        ..., min_length=1, description="Inherited access groups."
+    )
     status: LifecycleStatus = Field(..., description="Inherited lifecycle status.")
     department: Department = Field(..., description="Inherited owning department.")
     classification: Classification = Field(..., description="Inherited classification.")
@@ -93,7 +95,7 @@ class GovernedChunk(BaseModel):
 class VectorizedChunk(BaseModel):
     """The enriched chunk containing dual vector embeddings prepared for storage.
 
-    In accordance with Constitution Article 14, every chunk is represented
+    In accordance with Constitution Article 10, every chunk is represented
     by both a dense semantic vector and sparse lexical token weights.
     """
 

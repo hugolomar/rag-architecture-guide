@@ -47,4 +47,3 @@ def load_and_validate_manifest(
             )
 
     return active_records, archived_records
-

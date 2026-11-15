@@ -42,4 +42,3 @@ def validate_and_partition_manifest(
             active_records.append(record)
 
     return active_records, archived_records
-

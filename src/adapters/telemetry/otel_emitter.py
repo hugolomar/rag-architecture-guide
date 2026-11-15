@@ -20,10 +20,13 @@ from opentelemetry.sdk.metrics import MeterProvider
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 
-# Sanitization patterns to prevent credential leaks (Constitution Article 22)
+# Sanitization patterns to prevent credential leaks (Constitution Article 13)
 SENSITIVE_PATTERNS = [
     (re.compile(r"Bearer\s+[A-Za-z0-9\-._~+/]+=*", re.IGNORECASE), "Bearer [REDACTED]"),
-    (re.compile(r"(password|secret|token|api_key)\s*[:=\s]\s*[^\s,]+", re.IGNORECASE), r"\1=[REDACTED]"),
+    (
+        re.compile(r"(password|secret|token|api_key)\s*[:=\s]\s*[^\s,]+", re.IGNORECASE),
+        r"\1=[REDACTED]",
+    ),
 ]
 
 
@@ -124,7 +127,9 @@ class TelemetryManager:
 
     def start_stage_span(self, stage_name: str) -> trace.Span:
         """Create and start a trace span for an ingestion pipeline stage."""
-        span_name = f"ingestion.{stage_name}" if not stage_name.startswith("ingestion.") else stage_name
+        span_name = (
+            f"ingestion.{stage_name}" if not stage_name.startswith("ingestion.") else stage_name
+        )
         span = self.tracer.start_span(span_name)
         span.set_attribute("run_id", self.run_id)
         span.set_attribute("stage", stage_name)

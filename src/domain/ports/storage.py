@@ -1,6 +1,6 @@
 """Behavioral port definition for chunk storage writers.
 
-In accordance with Constitution Article 4, all cross-boundary contracts
+In accordance with Constitution Article 3, all cross-boundary contracts
 must inherit from abc.ABC and declare abstract methods.
 """
 
@@ -44,4 +44,3 @@ class ChunkStorageWriterPort(ABC):
             NotImplementedError: If not implemented by the adapter.
         """
         raise NotImplementedError
-

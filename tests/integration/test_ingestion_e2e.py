@@ -1,55 +1,43 @@
-"""End-to-end integration test for the ingestion pipeline (Article 16, US4).
+"""End-to-end integration test for the batch ingestion pipeline.
 
-Executes the complete batch pipeline from raw documents to populated Qdrant
-storage, asserting on document throughput, dual vectors, and zero archived points.
+Verifies complete execution from raw documents to populated Qdrant storage,
+enforcing:
+- Zero-trust exclusion of archived documents (Articles 7 & 13, SC-002)
+- Strict pipeline summary metrics (Article 11, US4)
+- Deterministic dual vector persistence (dense BGE + sparse BM25)
 """
 
 import json
-from collections.abc import Sequence
 from pathlib import Path
 
+import pytest
 from qdrant_client import QdrantClient
 
+from src.adapters.embeddings.fastembed_adapter import FastEmbedAdapter
 from src.adapters.storage.qdrant_adapter import QdrantStorageAdapter
-from src.domain.models import GovernedChunk, VectorizedChunk
-from src.domain.ports.embeddings import EmbedderPort
 from src.ingestion.chunker import TablePreservingChunker
 from src.ingestion.config import IngestionConfig
 from src.ingestion.pipeline import run_ingestion_pipeline
 
-
-class FastMockEmbedder(EmbedderPort):
-    """Fast mock embedder for deterministic end-to-end testing."""
-
-    @property
-    def dimension(self) -> int:
-        return 1024
-
-    def embed_dense(self, texts: list[str]) -> list[list[float]]:
-        return [[0.05] * 1024 for _ in texts]
-
-    def embed_sparse(self, texts: list[str]) -> list[tuple[list[int], list[float]]]:
-        return [([1, 2, 3], [1.0, 2.0, 3.0]) for _ in texts]
-
-    def vectorize_chunks(self, chunks: Sequence[GovernedChunk]) -> list[VectorizedChunk]:
-        return [
-            VectorizedChunk(
-                chunk=c,
-                dense_vector=[0.05] * 1024,
-                sparse_indices=[1, 2, 3],
-                sparse_values=[1.0, 2.0, 3.0],
-            )
-            for c in chunks
-        ]
+pytestmark = pytest.mark.integration
 
 
 def test_end_to_end_batch_ingestion(tmp_path: Path) -> None:
-    """Verify complete batch ingestion cycle with in-memory Qdrant storage."""
+    """Verify complete batch ingestion cycle with real FastEmbed and in-memory Qdrant."""
     raw_dir = tmp_path / "raw"
     raw_dir.mkdir()
-    (raw_dir / "corp1.md").write_text("# Remote Policy\n| Dept | Hours |\n|---|---|\n| HR | 40 |\n", encoding="utf-8")
-    (raw_dir / "corp2.md").write_text("# Deprecated Security Rule\nRule body text.\n", encoding="utf-8")
-    (raw_dir / "corp3.md").write_text("# Archived Legacy Doc\nShould never be indexed.\n", encoding="utf-8")
+    (raw_dir / "corp1.md").write_text(
+        "# Remote Policy\n| Dept | Hours |\n|---|---|\n| HR | 40 |\n",
+        encoding="utf-8",
+    )
+    (raw_dir / "corp2.md").write_text(
+        "# Deprecated Security Rule\nRule body text.\n",
+        encoding="utf-8",
+    )
+    (raw_dir / "corp3.md").write_text(
+        "# Archived Legacy Doc\nShould never be indexed.\n",
+        encoding="utf-8",
+    )
 
     manifest = [
         {
@@ -87,7 +75,7 @@ def test_end_to_end_batch_ingestion(tmp_path: Path) -> None:
     )
 
     client = QdrantClient(":memory:")
-    embedder = FastMockEmbedder()
+    embedder = FastEmbedAdapter()
     storage = QdrantStorageAdapter(client=client, vector_size=embedder.dimension)
     chunker = TablePreservingChunker()
 
@@ -101,6 +89,7 @@ def test_end_to_end_batch_ingestion(tmp_path: Path) -> None:
     assert results["active_documents"] == 2
     assert results["archived_documents"] == 1
     assert results["points_indexed"] >= 2
+    assert results["chunks_generated"] == results["points_indexed"]
 
     # Verify SC-002: Exactly 0% archived documents indexed
     points, _ = client.scroll(
@@ -110,23 +99,22 @@ def test_end_to_end_batch_ingestion(tmp_path: Path) -> None:
         with_vectors=True,
     )
 
-    doc_ids_in_store = set()
-    for p in points:
-        assert p.payload is not None
-        doc_ids_in_store.add(p.payload["doc_id"])
+    assert len(points) >= 2, "Expected at least 2 points indexed in Qdrant collection"
 
-    assert "DOC-HR-001" in doc_ids_in_store
-    assert "DOC-SEC-002" in doc_ids_in_store
-    assert "DOC-LEG-003" not in doc_ids_in_store, "Archived document leaked into index!"
+    # Symmetric set comparison guarantees active docs exist and NO leaked archived docs
+    doc_ids_in_store = {p.payload["doc_id"] for p in points if p.payload and "doc_id" in p.payload}
+    assert doc_ids_in_store == {"DOC-HR-001", "DOC-SEC-002"}
 
     for p in points:
         assert p.payload is not None
         assert p.payload["status"] in ("current", "deprecated")
+        assert "is_tabular" in p.payload
         assert isinstance(p.vector, dict)
         dense_vec = p.vector["dense"]
         assert isinstance(dense_vec, list)
-        assert len(dense_vec) == 1024
+        assert len(dense_vec) == embedder.dimension
         sparse_vec = p.vector["sparse"]
         assert hasattr(sparse_vec, "indices")
+        assert hasattr(sparse_vec, "values")
         assert len(sparse_vec.indices) > 0
-
+        assert len(sparse_vec.indices) == len(sparse_vec.values)

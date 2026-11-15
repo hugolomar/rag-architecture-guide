@@ -20,9 +20,9 @@ description: "Task list for Governed Document Ingestion Pipeline implementation"
 
 **Purpose**: Project initialization, dependency management, and architecture validation tooling
 
-- [X] T001 Configure project dependencies in `pyproject.toml` using uv (`pydantic>=2.0`, `fastembed>=0.4`, `qdrant-client>=1.12`, `opentelemetry-api>=1.28`, `opentelemetry-sdk>=1.28`, `python-frontmatter>=1.1`, `pydantic-settings>=2.0`, dev dependencies `pytest>=9.1`, `pytest-cov`, `import-linter`, `testcontainers`) and lock with `uv lock` per Constitution Article 7
+- [X] T001 Configure project dependencies in `pyproject.toml` using uv (`pydantic>=2.0`, `fastembed>=0.4`, `qdrant-client>=1.12`, `opentelemetry-api>=1.28`, `opentelemetry-sdk>=1.28`, `python-frontmatter>=1.1`, `pydantic-settings>=2.0`, dev dependencies `pytest>=9.1`, `pytest-cov`, `import-linter`, `testcontainers`) and lock with `uv lock` per Constitution Article 6
 - [X] T002 [P] Create directory structure per implementation plan: `src/domain/ports/`, `src/adapters/embeddings/`, `src/adapters/storage/`, `src/adapters/telemetry/`, `src/ingestion/`, `tests/unit/`, `tests/contract/`, `tests/integration/`, and `docker/`
-- [X] T003 [P] Configure architectural boundary enforcement in `.importlinter` to verify Constitution Articles 2, 3, and 19 (ensuring `src.domain` has zero imports from `src.adapters`, `src.ingestion`, or third-party storage/vector libraries)
+- [X] T003 [P] Configure architectural boundary enforcement in `.importlinter` to verify Constitution Articles 2, 3, and 12 (ensuring `src.domain` has zero imports from `src.adapters`, `src.ingestion`, or third-party storage/vector libraries)
 
 ---
 
@@ -32,8 +32,8 @@ description: "Task list for Governed Document Ingestion Pipeline implementation"
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [X] T004 [P] Define closed governance catalog enums in `src/domain/enums.py`: `Department` (values: `"HR"`, `"Engineering"`, `"Security"`, `"Finance"`, `"Legal"`), `Classification` (values: `"public"`, `"internal"`, `"restricted"`), `LifecycleStatus` (values: `"current"`, `"deprecated"`, `"archived"`), and `IdPGroup` (values: `"all-employees"`, `"people-team"`, `"engineering-core"`, `"security-oncall"`, `"leadership"`) per Constitution Article 5
-- [X] T005 [P] Define abstract behavioral ports in `src/domain/ports/embeddings.py` (`EmbedderPort` with `abc.ABC` and `@abstractmethod` for dense and sparse vector generation) and `src/domain/ports/storage.py` (`ChunkStorageWriterPort` with `abc.ABC` and `@abstractmethod` for collection initialization and point upsert) per Constitution Article 4
+- [X] T004 [P] Define closed governance catalog enums in `src/domain/enums.py`: `Department` (values: `"HR"`, `"Engineering"`, `"Security"`, `"Finance"`, `"Legal"`), `Classification` (values: `"public"`, `"internal"`, `"restricted"`), `LifecycleStatus` (values: `"current"`, `"deprecated"`, `"archived"`), and `IdPGroup` (values: `"all-employees"`, `"people-team"`, `"engineering-core"`, `"security-oncall"`, `"leadership"`) per Constitution Article 4
+- [X] T005 [P] Define abstract behavioral ports in `src/domain/ports/embeddings.py` (`EmbedderPort` with `abc.ABC` and `@abstractmethod` for dense and sparse vector generation) and `src/domain/ports/storage.py` (`ChunkStorageWriterPort` with `abc.ABC` and `@abstractmethod` for collection initialization and point upsert) per Constitution Article 3
 - [X] T006 [P] Define environment and pipeline configuration model in `src/ingestion/config.py` using `pydantic_settings.BaseSettings` for `RAG_DATA_DIR` (default: `"data/raw"`), `RAG_MANIFEST_PATH` (default: `"data/manifest.json"`), `QDRANT_HOST` (default: `"localhost"`), `QDRANT_PORT` (default: `6333`), `QDRANT_COLLECTION_NAME` (default: `"governed_docs"`), `OTEL_EXPORTER_OTLP_ENDPOINT` (default: `"http://localhost:4318"`), `OTEL_SERVICE_NAME` (default: `"rag-ingestion"`), and `LOG_LEVEL` (default: `"INFO"`) per `contracts/ingestion-cli.md`
 - [X] T007 [P] Implement architectural contract test in `tests/contract/test_architecture_contracts.py` using `import-linter` to enforce that `src/domain/` has zero infrastructure imports and all adapters inherit directly from `src/domain/ports/`
 
@@ -47,12 +47,12 @@ description: "Task list for Governed Document Ingestion Pipeline implementation"
 
 **Independent Test**: Run validation stage against valid, malformed, and out-of-catalog manifest records; verify valid documents proceed, invalid fail loud, and archived documents are completely excluded.
 
-### Tests for User Story 1 (Test-First per Constitution Article 16) ⚠️
+### Tests for User Story 1 (Test-First per Constitution Article 11) ⚠️
 
-- [X] T008 [P] [US1] Create unit tests for domain enums and validation rules in `tests/unit/test_domain_models.py` verifying fail-loud behavior on invalid catalog values and strict enum containment
-- [X] T009 [P] [US1] Create contract test for `data/manifest.json` against `specs/001-document-ingestion/contracts/manifest.schema.json` in `tests/contract/test_manifest_contract.py` verifying real corpus manifest compliance
-- [X] T010 [P] [US1] Create unit tests for manifest parsing and fail-loud validation in `tests/unit/test_manifest_validation.py` verifying schema validation, missing file detection, and exclusion of `status == "archived"`
-- [X] T011 [P] [US1] Create unit tests for Markdown frontmatter parsing and body extraction in `tests/unit/test_markdown_parser.py`
+- [X] T008 [P] [US1] Create unit tests for domain enums, models, and boundary validation in `tests/unit/test_domain_models.py` verifying strict enum containment, fail-loud validation on regex/empty groups/unknown values, `extra='forbid'` prohibition of undocumented fields (Article 4), and non-negative chunk index enforcement
+- [X] T009 [P] [US1] Create contract test for `data/manifest.json` in `tests/contract/test_manifest_contract.py` using module-scoped fixture, Pydantic `TypeAdapter(list[ManifestRecord])` batch schema validation, and aggregated missing file assertions
+- [X] T010 [P] [US1] Create unit tests for manifest parsing and fail-loud validation in `tests/unit/test_manifest_validation.py` verifying in-memory active/archived partitioning, empty manifest handling, missing referenced file detection, and missing manifest file rejection
+- [X] T011 [P] [US1] Create unit tests for Markdown frontmatter parsing and body extraction in `tests/unit/test_markdown_parser.py` verifying YAML frontmatter extraction, title precedence hierarchy (frontmatter -> heading -> file stem), tag parsing formats, and missing file rejection
 
 ### Implementation for User Story 1
 
@@ -70,11 +70,11 @@ description: "Task list for Governed Document Ingestion Pipeline implementation"
 
 **Independent Test**: Run chunker and indexing engine against Markdown documents containing complex tables and technical flags; verify table rows preserve header context, chunks inherit parent governance metadata, and both dense and sparse vectors are stored with payloads in Qdrant.
 
-### Tests for User Story 2 (Test-First per Constitution Article 16) ⚠️
+### Tests for User Story 2 (Test-First per Constitution Article 11) ⚠️
 
-- [X] T015 [P] [US2] Create unit tests for table-preserving chunking in `tests/unit/test_table_chunker.py` verifying that Markdown tables remain intact in single chunks and oversized tables split along row boundaries with repeated headers
-- [X] T016 [P] [US2] Create integration tests for FastEmbed adapter in `tests/integration/test_fastembed_adapter.py` verifying 1024-dim dense vector generation (`BAAI/bge-large-en-v1.5`), sparse BM25 indices/values (`Qdrant/bm25`), and finite float values
-- [X] T017 [P] [US2] Create integration tests for Qdrant storage adapter in `tests/integration/test_qdrant_writer.py` against running Qdrant instance verifying collection initialization per `contracts/qdrant-collection.json`, point upsert with dual vectors, payload filtering by `allowed_groups` and `status`, and zero `archived` points
+- [X] T015 [P] [US2] Create unit tests for table-preserving chunking in `tests/unit/test_table_chunker.py` verifying strategy contract conformance, intact table preservation, oversized table splitting with repeated headers, pure prose chunking, and empty/whitespace document handling
+- [X] T016 [P] [US2] Create integration tests for FastEmbed adapter in `tests/integration/test_fastembed_adapter.py` using module-scoped embedder fixture, verifying dense vector generation, sparse BM25 indices/values, dimension consistency, and `vectorize_chunks` GovernedChunk enrichment
+- [X] T017 [P] [US2] Create integration tests for Qdrant storage adapter in `tests/integration/test_qdrant_writer.py` using embedded in-memory Qdrant (`:memory:` per Constitution Article 11) verifying port conformance (Article 3), collection initialization idempotency, dual-vector upsert (dense and sparse), and payload retrieval by `allowed_groups` and `status`
 
 ### Implementation for User Story 2
 
@@ -94,14 +94,14 @@ description: "Task list for Governed Document Ingestion Pipeline implementation"
 
 **Independent Test**: Execute batch run with telemetry listener or stdout inspection; confirm structured JSON logs carry `run_id`, all stage spans close, counters match processed totals, and exporters flush cleanly prior to process exit code 0 (or non-zero on error).
 
-### Tests for User Story 3 (Test-First per Constitution Article 16) ⚠️
+### Tests for User Story 3 (Test-First per Constitution Article 11) ⚠️
 
-- [X] T023 [P] [US3] Create unit tests for structured JSON logging and sensitive data scrubbing in `tests/unit/test_telemetry.py` verifying newline-delimited JSON on stdout with `run_id`, `stage`, `level`, `timestamp`, and ensuring document text/secrets are masked
-- [X] T024 [P] [US3] Create integration tests for OTel tracer, stage spans, metric counters, and flush lifecycle in `tests/integration/test_telemetry_flush.py` verifying that `force_flush()` and `shutdown()` are called before process exit
+- [X] T023 [P] [US3] Create unit tests for structured JSON logging and sensitive data scrubbing in `tests/unit/test_telemetry.py` verifying newline-delimited JSON with `run_id`, `stage`, `level`, `timestamp`, extra numerical attributes (`doc_count`, `chunks_indexed`), multi-credential pattern masking (`Bearer`, `password`, `api_key`), and explicit vs generated `run_id` lifecycle
+- [X] T024 [P] [US3] Create integration tests for OTel tracer, stage spans, structured logging, and flush lifecycle in `tests/integration/test_telemetry_flush.py` verifying via `capsys` that stdout emits structured JSON logs with `run_id`, closed stage spans record attributes and `end_time`, metric instruments record progress, and providers terminate cleanly with `_is_shutdown` guarantees per Constitution Article 13
 
 ### Implementation for User Story 3
 
-- [X] T025 [P] [US3] Implement OpenTelemetry adapter and structured JSON log formatter in `src/adapters/telemetry/otel_emitter.py` generating a unique `run_id`, initializing `TracerProvider` with stage spans, `MeterProvider` with progress counters (`ingestion.documents.processed`, `ingestion.chunks.created`, `ingestion.documents.rejected`), and explicit `flush_and_shutdown()` method per Constitution Articles 20 and 22
+- [X] T025 [P] [US3] Implement OpenTelemetry adapter and structured JSON log formatter in `src/adapters/telemetry/otel_emitter.py` generating a unique `run_id`, initializing `TracerProvider` with stage spans, `MeterProvider` with progress counters (`ingestion.documents.processed`, `ingestion.chunks.created`, `ingestion.documents.rejected`), and explicit `flush_and_shutdown()` method per Constitution Article 13
 - [X] T026 [US3] Integrate stage spans and metric counters into `src/ingestion/pipeline.py` wrapping manifest validation, parsing, chunking, embedding, and storage upsert within child spans of root span `ingestion.run` (depends on T022, T025)
 - [X] T027 [US3] Implement CLI composition root entrypoint, exit code handling (0: Success, 1: Schema Failure, 2: File Mismatch, 3: Store Failure, 4: Telemetry Failure), and guaranteed `finally` telemetry flush in `src/ingestion/cli.py` per `contracts/ingestion-cli.md` (depends on T025, T026)
 
@@ -115,14 +115,14 @@ description: "Task list for Governed Document Ingestion Pipeline implementation"
 
 **Independent Test**: Execute container orchestration command in a clean environment; verify storage starts, one-shot ingestion container runs to completion, populates collection, and exits with code 0 while Qdrant remains healthy.
 
-### Tests for User Story 4 (Test-First per Constitution Article 16) ⚠️
+### Tests for User Story 4 (Test-First per Constitution Article 11) ⚠️
 
-- [X] T028 [P] [US4] Create end-to-end integration test in `tests/integration/test_ingestion_e2e.py` executing the complete batch pipeline from raw files to populated Qdrant collection, validating point counts, dual vector shapes, payload metadata, and zero archived documents
+- [X] T028 [P] [US4] Create end-to-end integration test in `tests/integration/test_ingestion_e2e.py` executing complete batch pipeline with real FastEmbedAdapter and in-memory Qdrant, validating point counts, dual vector shapes, anti-vacuous pass guarantees, and zero archived documents (Articles 7, 10, 11, 13, SC-002)
 
 ### Implementation for User Story 4
 
-- [X] T029 [P] [US4] Create multi-stage containerfile in `docker/Dockerfile.ingestion` with builder stage running `uv sync --frozen --no-dev` and runtime stage based on `python:3.14-slim` copying `/app/.venv`, pre-caching FastEmbed models into `/root/.cache/fastembed`, and executing directly with `python -m src.ingestion.cli` without `uv` per Constitution Article 26
-- [X] T030 [US4] Create container orchestration in `docker/docker-compose.yml` declaring Qdrant service with healthcheck and one-shot `ingestion` service mounting `data/` and passing environment variables per `contracts/ingestion-cli.md` and Constitution Article 27
+- [X] T029 [P] [US4] Create multi-stage containerfile in `docker/Dockerfile.ingestion` with builder stage running `uv sync --frozen --no-dev` and runtime stage based on `python:3.14-slim` copying `/app/.venv`, pre-caching FastEmbed models into `/root/.cache/fastembed`, and executing directly with `python -m src.ingestion.cli` without `uv` per Constitution Article 14
+- [X] T030 [US4] Create container orchestration in `docker/docker-compose.yml` declaring Qdrant service with healthcheck and one-shot `ingestion` service mounting `data/` and passing environment variables per `contracts/ingestion-cli.md` and Constitution Article 14
 - [X] T031 [US4] Validate containerized batch execution and zero-archived count against running Qdrant service following `specs/001-document-ingestion/quickstart.md` (depends on T029, T030)
 
 **Checkpoint**: User Story 4 complete. Full stack runs reproducibly via `docker compose -f docker/docker-compose.yml run --rm ingestion`.
@@ -133,9 +133,10 @@ description: "Task list for Governed Document Ingestion Pipeline implementation"
 
 **Purpose**: Documentation compliance, complete test suite execution, and corpus validation
 
-- [X] T032 [P] Validate documentation and PEP 257 Google-style docstrings across `src/domain/`, `src/adapters/`, and `src/ingestion/` per Constitution Article 23
+- [X] T032 [P] Validate documentation and PEP 257 Google-style docstrings across `src/domain/`, `src/adapters/`, and `src/ingestion/` per Constitution Article 12
 - [X] T033 [P] Execute full test suite (`pytest tests/unit tests/contract tests/integration -v --cov=src`) and verify 100% pass rate
 - [X] T034 Run full end-to-end validation against the 36-document corpus following `specs/001-document-ingestion/quickstart.md` verifying > 300 points indexed, dual vectors present, and exactly 0 `archived` points in Qdrant
+- [X] T035 [P] Audit and refactor contract test suites (`tests/contract/`) to enforce idiomatic pytest fixtures, `@pytest.mark.parametrize` failure isolation, and Pydantic batch validation
 
 ---
 
@@ -166,7 +167,7 @@ flowchart TD
 
 ### Within Each User Story
 
-- Tests MUST be written first and fail before implementation (Constitution Article 16).
+- Tests MUST be written first and fail before implementation (Constitution Article 11).
 - Abstract ports and domain models before adapter implementations.
 - Adapters before orchestrator pipeline integration.
 - Story complete and verified before moving to next priority.
@@ -238,5 +239,5 @@ Task T021: "Implement QdrantStorageAdapter in src/adapters/storage/qdrant_adapte
 - `[P]` tasks target different files with no uncompleted dependencies.
 - `[Story]` labels (`[US1]`, `[US2]`, `[US3]`, `[US4]`) are restricted exclusively to user story phases.
 - Field constraints and closed catalogs are quoted verbatim from `data-model.md`.
-- All tests are written test-first per Constitution Article 16.
+- All tests are written test-first per Constitution Article 11.
 

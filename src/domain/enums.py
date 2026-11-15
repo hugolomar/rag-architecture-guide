@@ -2,7 +2,7 @@
 
 This module defines the non-extensible domain taxonomies governing document
 lifecycle, sensitivity classification, ownership, and caller access groups
-in accordance with Constitution Article 5 and ADR 0004.
+in accordance with Constitution Article 4 and ADR 0004.
 """
 
 from enum import StrEnum
@@ -12,7 +12,7 @@ class Department(StrEnum):
     """Owning department of the document.
 
     Department ownership classifies the business origin of the knowledge
-    but does not confer access permissions on its own (Constitution Article 5).
+    but does not confer access permissions on its own (Constitution Article 4).
     """
 
     HR = "HR"
@@ -26,7 +26,7 @@ class Classification(StrEnum):
     """Information sensitivity classification of the document.
 
     Sensitivity classification documents handling requirements but does
-    not grant access on its own (Constitution Article 5).
+    not grant access on its own (Constitution Article 4).
     """
 
     PUBLIC = "public"
@@ -61,4 +61,3 @@ class IdPGroup(StrEnum):
     ENGINEERING_CORE = "engineering-core"
     SECURITY_ONCALL = "security-oncall"
     LEADERSHIP = "leadership"
-

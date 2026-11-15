@@ -143,4 +143,3 @@ class QdrantStorageAdapter(ChunkStorageWriterPort):
             total_upserted += len(batch)
 
         return total_upserted
-

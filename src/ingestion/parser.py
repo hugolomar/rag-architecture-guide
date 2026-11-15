@@ -64,4 +64,3 @@ def parse_markdown_document(
         content=post.content.strip(),
         keywords=keywords,
     )
-

@@ -1,6 +1,6 @@
 """FastEmbed vectorization adapter implementing EmbedderPort.
 
-In accordance with Constitution Article 14 and ADR 0005, generates dual representations:
+In accordance with Constitution Article 10 and ADR 0005, generates dual representations:
 - Dense: BAAI/bge-large-en-v1.5 (1024 dimensions, ONNX runtime)
 - Sparse: Qdrant/bm25 (lexical token weights)
 """
@@ -113,4 +113,3 @@ class FastEmbedAdapter(EmbedderPort):
             )
 
         return vectorized
-

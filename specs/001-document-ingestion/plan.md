@@ -26,10 +26,10 @@ The pipeline parses Markdown documents from `data/raw/`, validates them against 
 **Storage**: Qdrant vector database (running locally or in Docker). Single collection with named dense vector (`dense`), named sparse vector (`sparse`), and governance payload (`doc_id`, `allowed_groups`, `status`, `text`).
 
 **Testing**: 
-- `pytest>=9.1` (test runner)
+- `pytest>=9.1` (strict idiomatic test runner; module-level `pytestmark` suite categorization (`unit`, `contract`, `integration`), module-scoped fixtures for file I/O, `@pytest.mark.parametrize` for defect isolation, and Pydantic `TypeAdapter` batch schema validation without redundant manual assertions)
 - `pytest-cov` (coverage)
-- `import-linter` (automated architecture boundary enforcement - Constitution Article 19)
-- `testcontainers-python` / local Docker (integration tests against real Qdrant - Constitution Article 16)
+- `import-linter` (automated architecture boundary enforcement - Constitution Article 12)
+- `testcontainers-python` / local Docker (integration tests against real Qdrant - Constitution Article 11)
 
 **Target Platform**: Linux container (multi-stage Dockerfile running directly with Python 3.14 runtime - ADR 0017).
 
@@ -52,17 +52,17 @@ The pipeline parses Markdown documents from `data/raw/`, validates them against 
 
 | Article / Principle | Status | Compliance Details in this Plan |
 | :--- | :---: | :--- |
-| **Article 1 (Python baseline)** | **PASS** | Target interpreter is Python 3.14 as specified in `.python-version`. |
-| **Article 2 & 3 (Hexagonal Architecture & Shared Domain)** | **PASS** | `src/domain/` is defined as a clean standalone package containing canonical models and enums. Ingestion imports domain models; domain models import zero external libraries. |
-| **Article 4 (Behavioral Ports)** | **PASS** | Behavioral ports across boundaries are declared as `abc.ABC` with `@abstractmethod`. |
-| **Article 5 (Data Contracts & Boundary Validation)** | **PASS** | Boundary data validated via Pydantic v2. Closed catalogs (`Department`, `Classification`, `LifecycleStatus`, `IdPGroup`) are strict enums. `allowed_groups` is required on every chunk. |
-| **Article 7 (uv)** | **PASS** | Dependencies managed exclusively through `pyproject.toml` and locked in `uv.lock`. |
-| **Article 8, 9, 10 (Zero Trust & Lifecycle Invariants)** | **PASS** | `archived` documents completely excluded; `current` and `deprecated` retained. `allowed_groups` attached inseparably to each chunk. |
-| **Article 14 (Written-token and semantic retrieval)** | **PASS** | Dual vectors produced per chunk: dense (meaning) and sparse BM25 (exact written tokens). FastEmbed transforms match query requirements. |
-| **Article 16 & 17 (Testing Pyramid & Contract Tests)** | **PASS** | Test-first approach. Unit tests for domain models, contract test for `manifest.json`, and integration tests against real Qdrant (no mocks). |
-| **Article 19 (Executable Architecture)** | **PASS** | Enforced by `import-linter` contracts in CI to prevent domain leakage. |
-| **Article 20 & 22 (Observability Baseline & Hygiene)** | **PASS** | OpenTelemetry SDK emits JSON logs to stdout with `run_id`, stage spans (parse, chunk, embed, index), and metrics. Explicit flush before exit. No sensitive content in telemetry. |
-| **Article 26 & 27 (Packaging & Lifecycle)** | **PASS** | Multi-stage Dockerfile for ingestion. Compose coordinates Qdrant and the batch container. Batch exits with status code 0 and has no healthcheck endpoint. |
+| **Article 1 (Python baseline and strict typing)** | **PASS** | Target interpreter is Python 3.14 as specified in `.python-version`. Strict static typing via `mypy --strict`. |
+| **Article 2 (Hexagonal Architecture & Composition Roots)** | **PASS** | `src/domain/` is defined as a clean standalone package containing canonical models and enums with zero external imports. Adapters wired strictly in CLI composition root. |
+| **Article 3 (Behavioral Ports & Nominal Subtyping)** | **PASS** | Behavioral ports across boundaries are declared as `abc.ABC` with `@abstractmethod`. Adapters explicitly subclass domain ports; duck typing prohibited. |
+| **Article 4 (Data Contracts & Boundary Validation)** | **PASS** | Boundary data validated via Pydantic v2 `ManifestRecord` and `CanonicalDocument`. Closed catalogs (`Department`, `Classification`, `LifecycleStatus`, `IdPGroup`) are strict enums. |
+| **Article 6 (Single dependency authority)** | **PASS** | Dependencies managed exclusively through `pyproject.toml` and locked in `uv.lock`. |
+| **Article 7 (Zero Trust & Security Trimming)** | **PASS** | `archived` documents completely excluded; `current` and `deprecated` retained. `allowed_groups` attached inseparably to each chunk. |
+| **Article 10 (Dual written-token and semantic retrieval)** | **PASS** | Dual vectors produced per chunk: dense (meaning) and sparse BM25 (exact written tokens). FastEmbed transforms match query requirements. |
+| **Article 11 (Testing Pyramid & Real Infrastructure)** | **PASS** | Test-first approach. Unit tests for domain models, contract tests for `manifest.json` and ports, and integration tests against real Qdrant (no mocks). |
+| **Article 12 (Executable Architecture & Quality Gates)** | **PASS** | Enforced by `import-linter` contracts in CI to prevent domain leakage and structural contract tests in `tests/contract/`. |
+| **Article 13 (Observability Baseline & Data Hygiene)** | **PASS** | OpenTelemetry SDK emits JSON logs to stdout with `run_id`, stage spans (parse, chunk, embed, index), and metrics. Explicit flush before exit. No sensitive content in telemetry. |
+| **Article 14 (Container Packaging & Lifecycle)** | **PASS** | Multi-stage Dockerfile for ingestion. Compose coordinates Qdrant and the batch container. Batch exits with status code 0 and has no healthcheck endpoint. |
 
 ---
 
@@ -134,7 +134,7 @@ tests/
 └── integration/                     # Tests against real dependencies (Qdrant & FastEmbed)
     ├── test_fastembed_adapter.py    # Vector dimension, finiteness, and token recall
     ├── test_qdrant_writer.py        # Point upsert, dual vectors, and payload filters in real Qdrant
-    ├── test_telemetry_flush.py      # Verifies OTel tracer, metrics, and flush-on-exit lifecycle
+    ├── test_telemetry_flush.py      # Verifies OTel tracer attributes, capsys stdout JSON logs, and provider shutdown
     └── test_ingestion_e2e.py        # Complete batch run against sample corpus and Qdrant
 
 docker/
@@ -153,7 +153,7 @@ Standard single-project hexagonal architecture separating the pure business doma
 
 | Decision / Pattern | Why Needed | Simpler Alternative Rejected Because |
 | :--- | :--- | :--- |
-| **Dual vectorization (Dense + BM25)** | Required by Article 14 and ADR 0005 to support semantic similarity and exact-token recall. | Dense-only search fails on flags, error codes, and configuration parameters. |
+| **Dual vectorization (Dense + BM25)** | Required by Article 10 and ADR 0005 to support semantic similarity and exact-token recall. | Dense-only search fails on flags, error codes, and configuration parameters. |
 | **Pluggable DocumentChunker Strategy** | Enables evaluation and swapping of chunking strategies without coupling orchestrator logic to concrete splitting algorithms. | Hardcoding TablePreservingChunker directly into pipeline.py prevents clean dependency injection and A/B benchmarking. |
-| **Multi-stage Dockerfile** | Required by Article 26 to exclude build tools (`uv`, compilers) from runtime image. | Single-stage image unnecessarily inflates image size and introduces build-time security attack surface. |
-| **Explicit Telemetry Flush** | Required by Article 20 and ADR 0011 because ingestion is an ephemeral batch process. | Standard default telemetry buffers drop in-flight spans and metrics when the process exits. |
+| **Multi-stage Dockerfile** | Required by Article 14 to exclude build tools (`uv`, compilers) from runtime image. | Single-stage image unnecessarily inflates image size and introduces build-time security attack surface. |
+| **Explicit Telemetry Flush** | Required by Article 13 and ADR 0011 because ingestion is an ephemeral batch process. | Standard default telemetry buffers drop in-flight spans and metrics when the process exits. |

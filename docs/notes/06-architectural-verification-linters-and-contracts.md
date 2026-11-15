@@ -2,7 +2,7 @@
 
 **Date:** 2026-11-12 · **Status:** decided
 
-In accordance with Constitution Articles 2, 4, 18, and 19 (ratified in Constitution v1.2.2) and ADR 0016, this note records the official technical separation of responsibilities for architectural verification: which structural concerns belong to static import linters (`import-linter`), which belong to executable contract tests (`pytest` + `inspect`), and how automated quality gates enforce these boundaries in local development and CI.
+In accordance with Constitution Articles 2, 3, 11, and 12 (ratified in Constitution v2.0.0, formerly Articles 2, 4, 18, and 19) and ADR 0016, this note records the official technical separation of responsibilities for architectural verification: which structural concerns belong to static import linters (`import-linter`), which belong to executable contract tests (`pytest` + `inspect`), and how automated quality gates enforce these boundaries in local development and CI.
 
 ---
 
@@ -13,7 +13,7 @@ The repository enforces clean hexagonal architecture. However, an initial implem
 1. **Dual source of truth and maintenance drift:** Rules already declared in `.importlinter` were duplicated in ad-hoc AST walking logic.
 2. **Tool mismatch:** AST traversal over individual files is prone to false negatives with relative imports, nested packages, or transitive dependencies (`domain` → `utils` → `infra`), while static import linters cannot inspect class definitions, inheritance hierarchies, or `@abstractmethod` decorators.
 
-To resolve this ambiguity, Constitution Article 19 formally distinguishes between **static import-graph analysis** and **structural contract tests**.
+To resolve this ambiguity, Constitution Article 12 formally distinguishes between **static import-graph analysis** and **structural contract tests**.
 
 ---
 
@@ -23,10 +23,10 @@ Architectural enforcement is partitioned across three non-overlapping layers:
 
 | Responsibility | Target of Verification | Enforcing Tool | Execution Mechanism | Constitution Reference |
 | :--- | :--- | :--- | :--- | :--- |
-| **Layer & module isolation** | Inward dependency direction; no leakage of infrastructure or adapters into domain or orchestration | `import-linter` | Static graph analysis (`uv run lint-imports`) | Articles 2, 19 · ADR 0016 |
-| **Class contract structure** | Ports inherit from `abc.ABC` with `@abstractmethod`; concrete adapters explicitly inherit from domain ports | `pytest` + `inspect` | In-memory reflection in `tests/contract/` | Articles 4, 19 |
-| **Interface type safety** | Signature compatibility, return types (`Sequence[VectorizedChunk]`), and strict domain enums | `mypy --strict` | Static type checking (`uv run mypy src tests`) | Articles 1, 5 · ADR 0016 |
-| **External boundary drift** | Governance manifest schema compliance and API OpenAPI contracts | `pytest` + `pydantic` / `spectral` | Contract tests in `tests/contract/` | Articles 5, 17 · ADR 0007 |
+| **Layer & module isolation** | Inward dependency direction; no leakage of infrastructure or adapters into domain or orchestration | `import-linter` | Static graph analysis (`uv run lint-imports`) | Articles 2, 12 · ADR 0016 |
+| **Class contract structure** | Ports inherit from `abc.ABC` with `@abstractmethod`; concrete adapters explicitly inherit from domain ports | `pytest` + `inspect` | In-memory reflection in `tests/contract/` | Articles 3, 12 |
+| **Interface type safety** | Signature compatibility, return types (`Sequence[VectorizedChunk]`), and strict domain enums | `mypy --strict` | Static type checking (`uv run mypy src tests`) | Articles 1, 4 · ADR 0016 |
+| **External boundary drift** | Governance manifest schema compliance and API OpenAPI contracts | `pytest` + `pydantic` / `spectral` | Contract tests in `tests/contract/` | Articles 4, 12 · ADR 0007 |
 
 ---
 
@@ -58,12 +58,25 @@ uv run lint-imports
 `pytest` contract tests verify object-level and runtime structural properties that static linters cannot evaluate:
 
 ### 1. Abstract Port Validation (`test_behavioral_ports_are_abstract_classes`)
-- Verifies that cross-layer seams (`EmbedderPort`, `ChunkStorageWriterPort`) are classes, inherit from `abc.ABC`, and declare non-empty `__abstractmethods__` (Article 4).
+- Verifies that cross-layer seams (`EmbedderPort`, `ChunkStorageWriterPort`) are classes, inherit from `abc.ABC`, and declare non-empty `__abstractmethods__` (Article 3).
 - Ensures that interfaces cannot be instantiated directly without an implementation.
 
 ### 2. Strict Adapter Subclassing (`test_concrete_adapters_inherit_from_domain_ports`)
 - Verifies that concrete adapters (`FastEmbedAdapter`, `QdrantStorageAdapter`) explicitly subclass their respective domain ports (`issubclass(adapter_cls, port_cls)`).
-- Enforces the constitutional rule that **duck typing is strictly prohibited across layer boundaries** (Article 4: *"An adapter must inherit from the port. A class that merely exposes methods of the same name does not satisfy the port"*).
+- Enforces the constitutional rule that **duck typing is strictly prohibited across layer boundaries** (Article 3: *"An adapter must inherit from the port. A class that merely exposes methods of the same name does not satisfy the port"*).
+
+### 3. Test Isolation and Parametrization Discipline
+Contract tests must always use `@pytest.mark.parametrize` across verified ports and adapter-port pairs rather than aggregating assertions inside iterative loops (`for`/`while`):
+- **Failure isolation:** Prevents assertion short-circuiting where an early failure masks defects in subsequent adapters or ports.
+- **Granular CI reporting:** Generates discrete test results per port/adapter in Jenkins JUnit reports and SonarQube quality gates.
+
+### 4. Explicit Suite Categorization via `pytestmark`
+To ensure clean discoverability and allow granular execution via Pytest markers (`-m`) without repetitive function decorators, every test module explicitly declares its suite category at the module level:
+- `tests/unit/*.py` declares `pytestmark = pytest.mark.unit`
+- `tests/contract/*.py` declares `pytestmark = pytest.mark.contract`
+- `tests/integration/*.py` declares `pytestmark = pytest.mark.integration`
+
+This enables running suites either by path (`pytest tests/unit`) or by marker (`pytest -m unit`, `pytest -m "not integration"` for fast local offline runs).
 
 **Execution Command:**
 ```bash
