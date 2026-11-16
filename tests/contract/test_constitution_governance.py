@@ -15,6 +15,11 @@ pytestmark = pytest.mark.contract
 CONSTITUTION_PATH = Path(".specify/memory/constitution.md")
 
 
+# ==============================================================================
+# Constitution File Integrity & Fixture Setup
+# ==============================================================================
+
+
 @pytest.fixture(scope="module")
 def constitution_content() -> str:
     """Load constitution content once for all governance tests."""
@@ -27,6 +32,11 @@ def constitution_content() -> str:
 def test_constitution_file_not_empty(constitution_content: str) -> None:
     """Verify that the constitution file is non-empty."""
     assert len(constitution_content.strip()) > 0, "Constitution file cannot be empty"
+
+
+# ==============================================================================
+# Versioning & Sync Impact Report Governance
+# ==============================================================================
 
 
 def test_constitution_sync_impact_report_present(constitution_content: str) -> None:
@@ -71,6 +81,11 @@ def test_constitution_version_footer_matches_sync_report(constitution_content: s
     assert last_amended_match is not None, (
         "Constitution footer missing valid '**Last Amended**: YYYY-MM-DD'"
     )
+
+
+# ==============================================================================
+# Mandatory Governance Articles Verification (Articles 15-16)
+# ==============================================================================
 
 
 @pytest.mark.parametrize(

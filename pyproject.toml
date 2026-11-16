@@ -36,6 +36,7 @@ select = [
     "S101",  # flake8-bandit (prohibits assert in runtime)
     "T20",   # flake8-print (prohibits print in production code)
     "PT009", # flake8-pytest-style (prohibits unittest assertions in tests)
+    "PT011", # flake8-pytest-style (prohibits broad pytest.raises without match)
 ]
 ignore = [
     "E501",  # line length handled by formatter

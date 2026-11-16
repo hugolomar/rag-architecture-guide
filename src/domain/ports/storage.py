@@ -13,6 +13,13 @@ from src.domain.models import VectorizedChunk
 class ChunkStorageWriterPort(ABC):
     """Abstract behavioral port for indexing governed vectorized chunks.
 
+    Architectural Pattern:
+        Acts as the write-side Repository port (under Ports & Adapters / DDD)
+        abstracting retrieval and vector stores (e.g., Qdrant) from ingestion orchestration.
+        Following CQRS (Command Query Responsibility Segregation), this port is
+        strictly write-only; read-side similarity search and evidence retrieval are
+        segregated into a dedicated retriever port.
+
     Outbound storage adapters implement this port to persist dual-vector
     points with governance metadata into retrieval stores such as Qdrant.
     """

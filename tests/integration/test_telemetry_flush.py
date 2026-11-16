@@ -13,6 +13,11 @@ from src.adapters.telemetry.otel_emitter import TelemetryManager
 pytestmark = pytest.mark.integration
 
 
+# ==============================================================================
+# OpenTelemetry Flush & Shutdown Lifecycle Integration Tests
+# ==============================================================================
+
+
 def test_telemetry_stage_spans_metrics_and_flush(capsys: pytest.CaptureFixture[str]) -> None:
     """Verify trace span attributes, structured log JSON output, and provider shutdown."""
     mgr = TelemetryManager(service_name="test-ingestion-flush")

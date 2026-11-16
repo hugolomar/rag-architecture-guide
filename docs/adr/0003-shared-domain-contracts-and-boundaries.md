@@ -32,8 +32,9 @@ The shared objects are these:
   An answer carries one behavior: `ground_answer`, `deny_access`, `abstain`, or `clarify`. Those
   four stay distinct.
 
-Closed catalogs, which document is readable by which groups, and the Python class names stay in the
-project notes. ADR 0004 decides how these contracts are modeled.
+Closed catalogs and governance metadata field semantics are defined in Note 02.
+ADR 0004 decides how these contracts are modeled, and feature specifications
+(such as `data-model.md`) define concrete classes.
 
 - Infrastructure adapters (vector store, lexical index, model gateway, external APIs) must
   translate provider payloads into domain contracts at the boundary.
@@ -41,6 +42,9 @@ project notes. ADR 0004 decides how these contracts are modeled.
 - Security and lifecycle semantics are first-class fields in those contracts, not side channels.
 - Runtime orchestration is allowed to depend on domain contracts and port interfaces only; it does
   not depend directly on provider SDK models.
+- Storage boundaries follow the Repository Pattern segregated by responsibility (CQRS):
+  ingestion and mutation workflows depend strictly on write-side persistence ports,
+  while query and generation workflows depend strictly on read-side retrieval ports.
 - **Dependency injection and composition roots:**
   - Application workflows and orchestrators (such as batch pipelines and query use cases)
     use explicit, manual dependency injection via function arguments or `__init__` constructors.

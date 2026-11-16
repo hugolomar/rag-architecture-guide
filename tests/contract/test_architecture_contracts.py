@@ -21,6 +21,11 @@ from src.domain.ports.storage import ChunkStorageWriterPort
 pytestmark = pytest.mark.contract
 
 
+# ==============================================================================
+# Behavioral Ports Contract Tests (Article 3)
+# ==============================================================================
+
+
 @pytest.mark.parametrize(
     "port",
     [
@@ -34,6 +39,11 @@ def test_behavioral_ports_are_abstract_classes(port: type) -> None:
     assert issubclass(port, ABC), f"{port} must inherit from abc.ABC"
     assert hasattr(port, "__abstractmethods__"), f"{port} has no abstract methods"
     assert len(port.__abstractmethods__) > 0, f"{port} must declare at least one abstract method"
+
+
+# ==============================================================================
+# Concrete Adapter Subtyping Tests (Article 3)
+# ==============================================================================
 
 
 @pytest.mark.parametrize(

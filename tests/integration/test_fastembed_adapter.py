@@ -16,6 +16,11 @@ from src.domain.ports.embeddings import EmbedderPort
 pytestmark = pytest.mark.integration
 
 
+# ==============================================================================
+# Port Contract Conformance & Fixture Setup (Article 3)
+# ==============================================================================
+
+
 @pytest.fixture(scope="module")
 def embedder() -> FastEmbedAdapter:
     """Initialize FastEmbed adapter once for all tests in this module."""
@@ -25,6 +30,11 @@ def embedder() -> FastEmbedAdapter:
 def test_fastembed_inherits_from_embedder_port(embedder: FastEmbedAdapter) -> None:
     """Verify that FastEmbedAdapter strictly satisfies the EmbedderPort contract."""
     assert isinstance(embedder, EmbedderPort)
+
+
+# ==============================================================================
+# Dense & Sparse Vector Embeddings Generation (Article 10)
+# ==============================================================================
 
 
 def test_dense_embeddings_generation(embedder: FastEmbedAdapter) -> None:
@@ -53,6 +63,11 @@ def test_sparse_bm25_embeddings_generation(embedder: FastEmbedAdapter) -> None:
     assert len(indices) > 0
     assert len(indices) == len(values)
     assert all(val > 0.0 for val in values), "BM25 token weights must be positive"
+
+
+# ==============================================================================
+# GovernedChunk Vectorization & Batch Boundary Tests
+# ==============================================================================
 
 
 def test_vectorize_chunks_full_contract(embedder: FastEmbedAdapter) -> None:

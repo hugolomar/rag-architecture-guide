@@ -18,12 +18,22 @@ pytestmark = pytest.mark.integration
 VECTOR_SIZE = 1024
 
 
+# ==============================================================================
+# Port Contract Conformance Tests (Article 3)
+# ==============================================================================
+
+
 def test_qdrant_adapter_inherits_from_port() -> None:
     """Verify that QdrantStorageAdapter strictly satisfies ChunkStorageWriterPort (Article 3)."""
     # Qdrant :memory: runs the real native engine in RAM, satisfying Article 11 without Docker
     client = QdrantClient(":memory:")
     adapter = QdrantStorageAdapter(client=client, vector_size=VECTOR_SIZE)
     assert isinstance(adapter, ChunkStorageWriterPort)
+
+
+# ==============================================================================
+# Collection Setup, Dual-Vector Upsert, & Payload Retrieval Tests
+# ==============================================================================
 
 
 def test_qdrant_adapter_ensure_collection_and_upsert() -> None:

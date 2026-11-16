@@ -22,6 +22,11 @@ from src.ingestion.pipeline import run_ingestion_pipeline
 pytestmark = pytest.mark.integration
 
 
+# ==============================================================================
+# Full Batch Ingestion Pipeline E2E Integration Test (Articles 7, 10, 11)
+# ==============================================================================
+
+
 def test_end_to_end_batch_ingestion(tmp_path: Path) -> None:
     """Verify complete batch ingestion cycle with real FastEmbed and in-memory Qdrant."""
     raw_dir = tmp_path / "raw"

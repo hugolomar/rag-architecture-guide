@@ -21,6 +21,11 @@ MANIFEST_PATH = Path("data/manifest.json")
 RAW_DATA_DIR = Path("data/raw")
 
 
+# ==============================================================================
+# Manifest File Existence & Fixture
+# ==============================================================================
+
+
 def test_manifest_file_exists() -> None:
     """Verify that data/manifest.json exists on disk."""
     assert MANIFEST_PATH.exists(), f"{MANIFEST_PATH} is missing"
@@ -34,6 +39,11 @@ def raw_manifest() -> Sequence[dict[str, Any]]:
     assert isinstance(content, list), f"{MANIFEST_PATH} must be a JSON array"
     assert len(content) > 0, f"{MANIFEST_PATH} cannot be empty"
     return content
+
+
+# ==============================================================================
+# Schema Conformance & Referential Integrity Tests (Article 4)
+# ==============================================================================
 
 
 def test_manifest_records_conform_to_contract(raw_manifest: Sequence[dict[str, Any]]) -> None:

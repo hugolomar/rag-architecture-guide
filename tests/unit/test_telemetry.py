@@ -1,4 +1,4 @@
-"""Unit tests for telemetry formatting and data hygiene (Article 13, US3).
+"""Unit tests for telemetry formatting, data hygiene, and lifecycle (Article 12, US3).
 
 Verifies that structured logs produce JSON on stdout with run_id, stage,
 and ensure confidential document text or credentials are not leaked.
@@ -16,6 +16,11 @@ from src.adapters.telemetry.otel_emitter import (
 )
 
 pytestmark = pytest.mark.unit
+
+
+# ==============================================================================
+# Structured JSON Logging & Formatting Tests
+# ==============================================================================
 
 
 def test_json_log_formatter_produces_structured_json() -> None:
@@ -46,21 +51,83 @@ def test_json_log_formatter_produces_structured_json() -> None:
     assert "timestamp" in data
 
 
-def test_telemetry_hygiene_masks_sensitive_data() -> None:
-    """Verify that credentials, tokens, and api keys are scrubbed from telemetry signals (Article 13)."""
-    raw_messages = [
-        "Connecting with Bearer eyJhbGciOiJIUzI1Ni... token payload",
-        "Database auth with password=supersecret123 on host localhost",
-        "Gateway call with api_key: secret_key_abc999",
-        "Header Authorization: token my_auth_token_value",
-    ]
+def test_json_log_formatter_defaults_stage_to_general() -> None:
+    """Verify stage defaults to 'general' when not explicitly provided on LogRecord."""
+    formatter = JsonLogFormatter(run_id="run-test-456")
+    record = logging.LogRecord(
+        name="test_logger",
+        level=logging.WARNING,
+        pathname=__file__,
+        lineno=30,
+        msg="Generic warning message",
+        args=(),
+        exc_info=None,
+    )
 
-    for raw in raw_messages:
-        sanitized = mask_sensitive_data(raw)
-        assert "supersecret123" not in sanitized
-        assert "secret_key_abc999" not in sanitized
-        assert "my_auth_token_value" not in sanitized
-        assert "[REDACTED]" in sanitized
+    formatted_str = formatter.format(record)
+    data = json.loads(formatted_str)
+
+    assert data["stage"] == "general"
+    assert data["level"] == "WARNING"
+    assert data["message"] == "Generic warning message"
+
+
+def test_json_log_formatter_scrubs_secrets_in_formatted_output() -> None:
+    """Verify that credentials inside log messages are scrubbed in the final formatted JSON."""
+    formatter = JsonLogFormatter(run_id="run-sec-999")
+    record = logging.LogRecord(
+        name="sec_logger",
+        level=logging.ERROR,
+        pathname=__file__,
+        lineno=40,
+        msg="Authentication failed with password=supersecretpass123 on gateway",
+        args=(),
+        exc_info=None,
+    )
+
+    formatted_str = formatter.format(record)
+    data = json.loads(formatted_str)
+
+    assert "supersecretpass123" not in data["message"]
+    assert "password=[REDACTED]" in data["message"]
+
+
+# ==============================================================================
+# Credential Sanitization & Data Hygiene Tests (Constitution Article 12)
+# ==============================================================================
+
+
+@pytest.mark.parametrize(
+    ("raw_message", "sensitive_token"),
+    [
+        (
+            "Connecting with Bearer eyJhbGciOiJIUzI1Ni... token payload",
+            "eyJhbGciOiJIUzI1Ni",
+        ),
+        (
+            "Database auth with password=supersecret123 on host localhost",
+            "supersecret123",
+        ),
+        (
+            "Gateway call with api_key: secret_key_abc999",
+            "secret_key_abc999",
+        ),
+        (
+            "Header Authorization: token my_auth_token_value",
+            "my_auth_token_value",
+        ),
+    ],
+)
+def test_telemetry_hygiene_masks_sensitive_data(raw_message: str, sensitive_token: str) -> None:
+    """Verify that credentials, tokens, and api keys are scrubbed from telemetry signals."""
+    sanitized = mask_sensitive_data(raw_message)
+    assert sensitive_token not in sanitized
+    assert "[REDACTED]" in sanitized
+
+
+# ==============================================================================
+# OpenTelemetry Manager Lifecycle & Tracing Tests
+# ==============================================================================
 
 
 def test_telemetry_manager_generates_run_id() -> None:
@@ -74,3 +141,24 @@ def test_telemetry_manager_accepts_explicit_run_id() -> None:
     """Verify that TelemetryManager respects explicitly passed run_id."""
     mgr = TelemetryManager(service_name="rag-ingestion-test", run_id="custom-run-007")
     assert mgr.run_id == "custom-run-007"
+
+
+def test_telemetry_manager_starts_stage_span_with_attributes() -> None:
+    """Verify that stage spans are prefixed with 'ingestion.' and contain run_id and stage attributes."""
+    mgr = TelemetryManager(service_name="rag-ingestion-test", run_id="run-span-001")
+    span = mgr.start_stage_span("manifest_validation")
+
+    assert span.is_recording()
+    span.end()
+    mgr.flush_and_shutdown()
+
+
+def test_telemetry_manager_flush_and_shutdown_lifecycle() -> None:
+    """Verify that flush_and_shutdown completes cleanly without unhandled exceptions."""
+    mgr = TelemetryManager(service_name="rag-ingestion-test", run_id="run-shutdown-001")
+    mgr.record_documents_processed(5)
+    mgr.record_documents_rejected(1)
+    mgr.record_chunks_created(15)
+
+    # Must complete cleanly without raising exceptions
+    mgr.flush_and_shutdown()
