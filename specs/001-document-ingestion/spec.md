@@ -2,7 +2,7 @@
 
 **Feature Branch**: `001-document-ingestion`  
 **Created**: 2026-11-05  
-**Status**: Draft  
+**Status**: Completed  
 **Input**: User description: "Define the specification and requirements for the Governed Document Ingestion Pipeline as a complete, observable, and containerized Data Plane vertical slice."
 
 ---
@@ -112,9 +112,12 @@ As a platform engineer or developer, I want the retrieval store and the ingestio
 ### Edge Cases
 
 - **Missing or Corrupted Manifest**: What happens when `data/manifest.json` is missing, unparseable, or references files not present on disk? The pipeline must abort immediately and log an explicit error without writing partial or corrupt states to the index.
+- **Non-Array Manifest Payloads**: What happens when `manifest.json` or raw manifest data is not a JSON array (e.g. a raw dictionary, string, or scalar)? The domain validator must fail loud immediately with an explicit validation error.
 - **Uncataloged Document on Disk**: What happens when a Markdown file exists in the directory but is absent from `data/manifest.json`? The system must refuse to index the uncataloged document, as uncataloged content lacks verified access control metadata.
-- **Empty or Whitespace-Only Document**: How does the chunker handle documents with valid metadata but empty bodies? The system logs a warning, skips chunk generation for that file, and records a zero-chunk count without crashing the batch.
+- **Empty or Whitespace-Only Document**: How does the chunker handle documents with valid metadata but empty bodies? The system skips chunk generation for that file and returns an empty chunk list without crashing the batch.
 - **Overly Large Tables**: What happens when a single Markdown table exceeds the standard token limit of a single chunk? The system preserves row integrity by chunking across row boundaries while repeating table headers in subsequent chunks to maintain context.
+- **Fenced Code Blocks with Pipes**: How does the chunker handle bash pipes or command pipelines (`|`) within code fences (```` ``` ````)? Lines inside fenced code blocks are protected and never misidentified as Markdown tables.
+- **Subheading Title Fallback**: How does the parser handle documents without frontmatter where the first heading is an H2 (`##`)? Level-2 and deeper subheadings do not qualify as document titles; the parser falls back to the formatted (hyphens/underscores replaced with spaces) title-cased file stem.
 - **Storage Connectivity Interruption**: What happens if the retrieval store becomes unreachable during upsert? The pipeline logs the failure with the active `run_id`, flushes error telemetry, and exits with a non-zero code to signal batch failure.
 
 ---

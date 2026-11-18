@@ -17,7 +17,7 @@ FROM python:3.14-slim AS runtime
 
 WORKDIR /app
 
-# Exclude build tools (uv, compilers) from runtime image per Constitution Article 26
+# Exclude build tools (uv, compilers) from runtime image
 # Copy virtual environment directly from builder
 COPY --from=builder /build/.venv /app/.venv
 

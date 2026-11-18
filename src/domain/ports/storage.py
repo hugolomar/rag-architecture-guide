@@ -1,7 +1,6 @@
 """Behavioral port definition for chunk storage writers.
 
-In accordance with Constitution Article 3, all cross-boundary contracts
-must inherit from abc.ABC and declare abstract methods.
+Abstract port specifying collection initialization and point upsert operations.
 """
 
 from abc import ABC, abstractmethod

@@ -1,8 +1,7 @@
 """Closed governance catalogs for document classification and security.
 
 This module defines the non-extensible domain taxonomies governing document
-lifecycle, sensitivity classification, ownership, and caller access groups
-in accordance with Constitution Article 4 and ADR 0004.
+lifecycle, sensitivity classification, ownership, and caller access groups.
 """
 
 from enum import StrEnum
@@ -12,7 +11,7 @@ class Department(StrEnum):
     """Owning department of the document.
 
     Department ownership classifies the business origin of the knowledge
-    but does not confer access permissions on its own (Constitution Article 4).
+    but does not confer access permissions on its own.
     """
 
     HR = "HR"
@@ -26,7 +25,7 @@ class Classification(StrEnum):
     """Information sensitivity classification of the document.
 
     Sensitivity classification documents handling requirements but does
-    not grant access on its own (Constitution Article 4).
+    not grant access on its own.
     """
 
     PUBLIC = "public"
@@ -52,8 +51,7 @@ class IdPGroup(StrEnum):
     """Identity provider groups that cross the access boundary.
 
     These closed groups match the identity authority roles and determine
-    document access via the intersection with document allowed_groups
-    (Constitution Articles 5, 8, 9).
+    document access via the intersection with document allowed_groups.
     """
 
     ALL_EMPLOYEES = "all-employees"

@@ -1,6 +1,6 @@
 """OpenTelemetry instrumentation and structured JSON logging emitter.
 
-In accordance with Constitution Articles 20 and 22, emits:
+Emits:
 1. Structured JSON logs on stdout with run_id correlation.
 2. Distributed trace stage spans (ingestion.run, ingestion.manifest.validate, etc.).
 3. Progress metrics for documents processed, rejected, and chunks created.
@@ -20,7 +20,7 @@ from opentelemetry.sdk.metrics import MeterProvider
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 
-# Sanitization patterns to prevent credential leaks (Constitution Article 13)
+# Sanitization patterns to prevent credential leaks
 SENSITIVE_PATTERNS = [
     (re.compile(r"Bearer\s+[A-Za-z0-9\-._~+/]+=*", re.IGNORECASE), "Bearer [REDACTED]"),
     (
@@ -93,7 +93,7 @@ class TelemetryManager:
         self.meter_provider = MeterProvider(resource=self.resource)
         self.meter = self.meter_provider.get_meter(self.service_name)
 
-        # Progress Counters (FR-012)
+        # Progress Counters
         self.docs_processed_counter = self.meter.create_counter(
             name="ingestion.documents.processed",
             description="Number of canonical documents successfully processed",

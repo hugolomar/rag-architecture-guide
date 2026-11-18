@@ -21,7 +21,7 @@ docker compose run --rm ingestion
 
 ## 2. Environment Variables
 
-All configuration is environment-driven (per Constitution Article 27):
+All configuration is environment-driven:
 
 | Variable | Default Value | Required | Description |
 | :--- | :--- | :---: | :--- |
@@ -38,7 +38,7 @@ All configuration is environment-driven (per Constitution Article 27):
 
 ## 3. Exit Codes
 
-The ingestion process is a one-shot batch command (Article 27). Progress is audited through OpenTelemetry signals, not health check endpoints.
+The ingestion process is a one-shot batch command. Progress is audited through OpenTelemetry signals, not health check endpoints.
 
 | Exit Code | Meaning | Conditions |
 | :---: | :--- | :--- |

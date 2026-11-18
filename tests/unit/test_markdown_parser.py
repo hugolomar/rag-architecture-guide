@@ -1,7 +1,6 @@
 """Unit tests for Markdown parser and frontmatter extraction.
 
-Tests separation of metadata frontmatter from document body content
-(FR-005, User Story 1).
+Tests separation of metadata frontmatter from document body content.
 """
 
 from pathlib import Path

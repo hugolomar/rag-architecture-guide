@@ -1,8 +1,7 @@
 """Pipeline and environment configuration model.
 
-In accordance with Constitution Article 14, container definitions and batch
-processes are environment-agnostic; all runtime configuration is injected
-exclusively via environment variables.
+Container definitions and batch processes are environment-agnostic; all runtime
+configuration is injected exclusively via environment variables.
 """
 
 from pathlib import Path

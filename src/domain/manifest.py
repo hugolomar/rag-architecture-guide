@@ -1,7 +1,7 @@
 """Domain validation and lifecycle filtering for manifest records.
 
 Validates raw manifest entries against closed taxonomies and partitions records
-according to document lifecycle invariants (FR-001, FR-002, FR-003, FR-004).
+according to document lifecycle invariants (active vs archived).
 """
 
 from src.domain.enums import LifecycleStatus

@@ -41,7 +41,7 @@ curl http://localhost:6333/healthz
 Before running the batch process, verify architectural boundaries and ensure all unit, contract, and integration tests pass:
 
 ```bash
-# Verify architectural boundaries (Constitution Article 19 & ADR 0016)
+# Verify architectural boundaries via import-linter
 uv run lint-imports
 
 # Run unit & contract tests

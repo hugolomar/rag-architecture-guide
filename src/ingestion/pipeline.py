@@ -47,7 +47,7 @@ def run_ingestion_pipeline(
     with telemetry.start_stage_span("run"):
         telemetry.log("INFO", "Initiating governed document ingestion batch", stage="init")
 
-        # 1. Manifest Validation & Lifecycle Filter (FR-001, FR-002, FR-003, FR-004)
+        # 1. Manifest Validation & Lifecycle Filter (drop archived documents)
         with telemetry.start_stage_span("manifest.validate") as span:
             active_records, archived_records = load_and_validate_manifest(manifest_path, raw_dir)
             span.set_attribute("total_records", len(active_records) + len(archived_records))
@@ -63,7 +63,7 @@ def run_ingestion_pipeline(
             )
             telemetry.record_documents_rejected(len(archived_records))
 
-        # 2. Markdown Parsing (FR-005)
+        # 2. Markdown Parsing and Metadata Extraction
         canonical_docs = []
         with telemetry.start_stage_span("document.parse") as span:
             for record in active_records:
@@ -79,7 +79,7 @@ def run_ingestion_pipeline(
             )
             telemetry.record_documents_processed(len(canonical_docs))
 
-        # 3. Structure-Preserving Chunking (FR-006, FR-007)
+        # 3. Structure-Preserving Chunking
         all_chunks: list[GovernedChunk] = []
         with telemetry.start_stage_span("document.chunk") as span:
             for doc in canonical_docs:
@@ -93,7 +93,7 @@ def run_ingestion_pipeline(
             )
             telemetry.record_chunks_created(len(all_chunks))
 
-        # 4. Dual Embedding (FR-008)
+        # 4. Dual Embedding (Dense + Sparse BM25)
         with telemetry.start_stage_span("embeddings.compute") as span:
             vectorized_chunks: list[VectorizedChunk] = embedder.vectorize_chunks(all_chunks)
             span.set_attribute("vectorized_count", len(vectorized_chunks))
@@ -103,7 +103,7 @@ def run_ingestion_pipeline(
                 stage="embed",
             )
 
-        # 5. Storage Persistence (FR-009)
+        # 5. Storage Persistence (Qdrant Point Upsert)
         with telemetry.start_stage_span("storage.upsert") as span:
             storage.ensure_collection(config.qdrant_collection_name)
             total_upserted = storage.upsert_chunks(config.qdrant_collection_name, vectorized_chunks)

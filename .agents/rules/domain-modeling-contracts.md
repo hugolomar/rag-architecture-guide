@@ -1,0 +1,43 @@
+---
+description: Mandatory standards for Pydantic v2 domain models, closed governance catalogs (StrEnum), ID formatting, and metadata inheritance
+trigger: model_decision
+---
+
+# Domain Modeling and Data Contracts
+
+All domain entities, value objects, and boundary contracts must strictly comply with these modeling standards to ensure domain purity, strict boundary validation, and immutable security constraints.
+
+## 1. Pydantic v2 Discipline & Boundary Strictness
+
+All models crossing architectural layer boundaries must be declared using Pydantic v2:
+- **Zero Undocumented Fields**: All domain models must strictly set:
+  ```python
+  model_config = ConfigDict(extra="forbid")
+  ```
+  Extra fields from external payloads must raise validation errors immediately (*fail loud*), never silently accepted or stripped.
+- **No Silent Type Coercion**: Models must enforce strict types. Rely on explicit converters or validators rather than implicit string-to-int/boolean casting.
+- **Fail Loud at Boundaries**: If incoming manifests, configuration files, or external payloads deviate from contracts, execution must abort with structured validation feedback before reaching downstream processing.
+
+## 2. Closed Governance Catalogs via `StrEnum`
+
+All domain categories, lifecycles, and access classifications must be declared as closed Python enumerations inheriting from `enum.StrEnum` (or `(str, Enum)`):
+- Hardcoded string literals for business categories (e.g. `"HR"`, `"internal"`, `"archived"`) in application code are strictly prohibited.
+- Adding a category requires updating the domain catalog enum in `src/domain/enums.py`.
+- Any external record carrying an unrecognized category must fail loud during boundary validation.
+
+## 3. Canonical Identifiers & Regex Constraints
+
+Identifiers must be deterministic and verifiable:
+- **Document IDs**: Must match the canonical enterprise pattern `^DOC-[A-Z]{2,4}-[0-9]{3}$` (e.g., `DOC-SEC-001`, `DOC-HR-042`).
+- **Chunk IDs**: Must follow the deterministic compound schema `{doc_id}#c{chunk_index}` (e.g., `DOC-SEC-001#c0`, `DOC-SEC-001#c1`). Chunk indexes must be non-negative integers (`chunk_index >= 0`).
+
+## 4. Inseparable Governance Metadata Inheritance
+
+Chunks or transformed representations derived from a parent canonical document must inseparably inherit that document's governance boundary metadata:
+- Every chunk model (`GovernedChunk`) must contain:
+  - `doc_id: str`
+  - `allowed_groups: list[IdPGroup]` (minimum 1 group)
+  - `status: LifecycleStatus`
+  - `department: Department`
+  - `classification: Classification`
+- Downstream storage adapters must persist these fields directly into vector payloads to enable pre-inference security trimming and deterministic lifecycle filtering.

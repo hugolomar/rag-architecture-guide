@@ -1,7 +1,7 @@
 """Markdown parser for extracting frontmatter and body content.
 
-Separates metadata frontmatter from document content in accordance with
-FR-005 and constructs CanonicalDocument domain instances.
+Separates metadata frontmatter from document content and constructs
+CanonicalDocument domain instances.
 """
 
 from pathlib import Path

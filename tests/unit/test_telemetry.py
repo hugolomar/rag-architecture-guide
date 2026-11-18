@@ -1,4 +1,4 @@
-"""Unit tests for telemetry formatting, data hygiene, and lifecycle (Article 12, US3).
+"""Unit tests for telemetry formatting, data hygiene, and lifecycle.
 
 Verifies that structured logs produce JSON on stdout with run_id, stage,
 and ensure confidential document text or credentials are not leaked.
@@ -93,7 +93,7 @@ def test_json_log_formatter_scrubs_secrets_in_formatted_output() -> None:
 
 
 # ==============================================================================
-# Credential Sanitization & Data Hygiene Tests (Constitution Article 12)
+# Credential Sanitization & Data Hygiene Tests
 # ==============================================================================
 
 

@@ -14,24 +14,29 @@ The pipeline parses Markdown documents from `data/raw/`, validates them against 
 
 ## Technical Context
 
-**Language/Version**: Python 3.14 (pinned in `.python-version`, per Constitution Article 1).
+**Language/Version**: Python 3.14 (pinned in `.python-version`).
 
 **Primary Dependencies**:
-- `pydantic>=2.0` (boundary validation, closed enums, canonical models - ADR 0004)
-- `fastembed>=0.4` (in-process ONNX dense embeddings and sparse BM25 vectors - ADR 0005)
-- `qdrant-client>=1.12` (storage adapter, dual vector upsert, payload filtering - ADR 0006)
-- `opentelemetry-api>=1.28` and `opentelemetry-sdk>=1.28` (structured JSON logging, tracing, metrics - ADR 0011, 0012)
+- `pydantic>=2.0` (boundary validation, closed enums, canonical models)
+- `fastembed>=0.4` (in-process ONNX dense embeddings and sparse BM25 vectors)
+- `qdrant-client>=1.12` (storage adapter, dual vector upsert, payload filtering)
+- `opentelemetry-api>=1.28` and `opentelemetry-sdk>=1.28` (structured JSON logging, tracing, metrics)
 - `python-frontmatter>=1.1` (Markdown frontmatter extraction)
 
 **Storage**: Qdrant vector database (running locally or in Docker). Single collection with named dense vector (`dense`), named sparse vector (`sparse`), and governance payload (`doc_id`, `allowed_groups`, `status`, `text`).
 
 **Testing**: 
-- `pytest>=9.1` (strict idiomatic test runner; module-level `pytestmark` suite categorization (`unit`, `contract`, `integration`), module-scoped fixtures for file I/O, `@pytest.mark.parametrize` for defect isolation, and Pydantic `TypeAdapter` batch schema validation without redundant manual assertions)
-- `pytest-cov` (coverage)
-- `import-linter` (automated architecture boundary enforcement - Constitution Article 12)
-- `testcontainers-python` / local Docker (integration tests against real Qdrant - Constitution Article 11)
+- `pytest>=9.1`, `pytest-cov` (test runner and coverage — conventions in `.agents/rules/testing-standards.md`)
+- `import-linter` (architecture boundary enforcement)
+- `testcontainers-python` / local Docker (integration tests against real Qdrant)
 
-**Target Platform**: Linux container (multi-stage Dockerfile running directly with Python 3.14 runtime - ADR 0017).
+**Standards Compliance**:
+- Testing & Pytest Suite: `.agents/rules/testing-standards.md`
+- Telemetry, Logging & Flush: `.agents/rules/telemetry-and-observability.md`
+- Domain Modeling & Data Contracts: `.agents/rules/domain-modeling-contracts.md`
+- Container Packaging & Docker: `.agents/rules/container-packaging-standards.md`
+
+**Target Platform**: Linux container (multi-stage Dockerfile per `.agents/rules/container-packaging-standards.md`).
 
 **Project Type**: Batch CLI / one-shot ephemeral pipeline (Data Plane) + Shared Domain Library.
 
@@ -149,11 +154,11 @@ Standard single-project hexagonal architecture separating the pure business doma
 
 ## Complexity Tracking
 
-> **Constitution Compliance**: No violations. All patterns follow ratified ADRs and Constitution v1.0.0.
+> **Constitution Compliance**: No violations. All patterns follow ratified ADRs and Constitution v2.0.0.
 
 | Decision / Pattern | Why Needed | Simpler Alternative Rejected Because |
 | :--- | :--- | :--- |
-| **Dual vectorization (Dense + BM25)** | Required by Article 10 and ADR 0005 to support semantic similarity and exact-token recall. | Dense-only search fails on flags, error codes, and configuration parameters. |
+| **Dual vectorization (Dense + BM25)** | Supports both semantic similarity and exact-token recall (flags, error codes, configuration keys). | Dense-only search fails on exact technical tokens and configuration parameters. |
 | **Pluggable DocumentChunker Strategy** | Enables evaluation and swapping of chunking strategies without coupling orchestrator logic to concrete splitting algorithms. | Hardcoding TablePreservingChunker directly into pipeline.py prevents clean dependency injection and A/B benchmarking. |
-| **Multi-stage Dockerfile** | Required by Article 14 to exclude build tools (`uv`, compilers) from runtime image. | Single-stage image unnecessarily inflates image size and introduces build-time security attack surface. |
-| **Explicit Telemetry Flush** | Required by Article 13 and ADR 0011 because ingestion is an ephemeral batch process. | Standard default telemetry buffers drop in-flight spans and metrics when the process exits. |
+| **Multi-stage Dockerfile** | Excludes build tools (`uv`, compilers) and development dependencies from the final runtime image. | Single-stage image unnecessarily inflates image size and introduces build-time security attack surface. |
+| **Explicit Telemetry Flush** | Ephemeral batch processes terminate immediately upon completion; explicit flush prevents dropped in-flight signals. | Standard default telemetry buffers drop in-flight spans and metrics when the process exits. |

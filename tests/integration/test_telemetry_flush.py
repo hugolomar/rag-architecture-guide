@@ -1,4 +1,4 @@
-"""Integration test for OpenTelemetry flush lifecycle (Article 13, US3).
+"""Integration test for OpenTelemetry flush lifecycle.
 
 Verifies that stage spans, metrics, structured logs, and providers flush
 cleanly prior to process termination with zero telemetry loss.

@@ -1,4 +1,4 @@
-"""Architectural contract tests enforcing Constitution Articles 3 and 12.
+"""Architectural contract tests enforcing hexagonal boundaries.
 
 This module programmatically enforces clean hexagonal architecture contracts:
 1. Cross-layer behavioral contracts must be abc.ABC classes with abstract methods.
@@ -22,7 +22,7 @@ pytestmark = pytest.mark.contract
 
 
 # ==============================================================================
-# Behavioral Ports Contract Tests (Article 3)
+# Behavioral Ports Contract Tests
 # ==============================================================================
 
 
@@ -34,7 +34,7 @@ pytestmark = pytest.mark.contract
     ],
 )
 def test_behavioral_ports_are_abstract_classes(port: type) -> None:
-    """Enforce Constitution Article 3: contracts must be abc.ABC with abstract methods."""
+    """Verify that ports are abstract classes inheriting from abc.ABC with abstract methods."""
     assert inspect.isclass(port), f"{port} is not a class"
     assert issubclass(port, ABC), f"{port} must inherit from abc.ABC"
     assert hasattr(port, "__abstractmethods__"), f"{port} has no abstract methods"
@@ -42,7 +42,7 @@ def test_behavioral_ports_are_abstract_classes(port: type) -> None:
 
 
 # ==============================================================================
-# Concrete Adapter Subtyping Tests (Article 3)
+# Concrete Adapter Subtyping Tests
 # ==============================================================================
 
 
@@ -54,7 +54,7 @@ def test_behavioral_ports_are_abstract_classes(port: type) -> None:
     ],
 )
 def test_concrete_adapters_inherit_from_domain_ports(adapter_cls: type, port_cls: type) -> None:
-    """Enforce Constitution Article 3: adapters must inherit from ports, duck typing is forbidden."""
+    """Verify that concrete adapters explicitly inherit from domain ports (nominal subtyping)."""
     assert inspect.isclass(adapter_cls), f"{adapter_cls} is not a class"
     assert issubclass(adapter_cls, port_cls), (
         f"Architecture violation: {adapter_cls.__name__} must inherit from {port_cls.__name__}"

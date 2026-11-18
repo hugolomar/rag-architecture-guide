@@ -1,8 +1,7 @@
 """Contract test validating data/manifest.json against its schema.
 
-In accordance with Constitution Article 4, the corpus governance manifest
-is verified against its canonical schema. Divergences or values outside
-closed catalogs fail before ingestion begins.
+The corpus governance manifest is verified against its canonical schema.
+Divergences or values outside closed catalogs fail before ingestion begins.
 """
 
 import json
@@ -42,7 +41,7 @@ def raw_manifest() -> Sequence[dict[str, Any]]:
 
 
 # ==============================================================================
-# Schema Conformance & Referential Integrity Tests (Article 4)
+# Schema Conformance & Referential Integrity Tests
 # ==============================================================================
 
 

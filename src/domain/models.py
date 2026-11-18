@@ -1,7 +1,6 @@
 """Domain models for governed enterprise documents and chunks.
 
-In accordance with Constitution Articles 2, 3, and 4, this module defines the
-canonical domain representations with strict boundary validation via Pydantic v2.
+Defines the canonical domain representations with strict boundary validation via Pydantic v2.
 """
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -14,7 +13,7 @@ class ManifestRecord(BaseModel):
 
     Validates identifiers against the corporate pattern and checks that
     departments, classifications, lifecycle statuses, and identity groups
-    belong to strictly closed taxonomies (Constitution Article 4).
+    belong to strictly closed taxonomies.
     """
 
     doc_id: str = Field(
@@ -73,8 +72,7 @@ class CanonicalDocument(BaseModel):
 class GovernedChunk(BaseModel):
     """An indivisible segment of text that inherits its parent document governance.
 
-    In accordance with Constitution Article 4 and FR-007, every chunk carries
-    the parent document's doc_id, allowed_groups, and status inseparably.
+    Every chunk carries the parent document's doc_id, allowed_groups, and status inseparably.
     """
 
     chunk_id: str = Field(..., description="Deterministic ID: {doc_id}#c{chunk_index}")
@@ -95,8 +93,7 @@ class GovernedChunk(BaseModel):
 class VectorizedChunk(BaseModel):
     """The enriched chunk containing dual vector embeddings prepared for storage.
 
-    In accordance with Constitution Article 10, every chunk is represented
-    by both a dense semantic vector and sparse lexical token weights.
+    Every chunk is represented by both a dense semantic vector and sparse lexical token weights.
     """
 
     chunk: GovernedChunk = Field(..., description="The underlying governed chunk.")

@@ -1,4 +1,4 @@
-"""Unit tests for structure-preserving chunking (FR-006, User Story 2).
+"""Unit tests for structure-preserving chunking.
 
 Verifies that tables remain intact in single chunks, oversized tables
 split across rows with repeated headers, code blocks with pipes are preserved,
@@ -30,7 +30,7 @@ def _build_doc(content: str, doc_id: str = "DOC-ENG-001") -> CanonicalDocument:
 
 
 # ==============================================================================
-# Strategy Contract & Interface Tests (Article 3)
+# Strategy Contract & Interface Tests
 # ==============================================================================
 
 
@@ -60,7 +60,7 @@ def test_custom_chunker_strategy_can_be_implemented() -> None:
 
 
 # ==============================================================================
-# Table Integrity & Governance Inheritance Tests (FR-006 & FR-007)
+# Table Integrity & Governance Inheritance Tests
 # ==============================================================================
 
 
@@ -101,7 +101,7 @@ def test_chunker_preserves_table_intact_with_reading_order() -> None:
     assert chunks[2].is_tabular is False
     assert "Following paragraph explaining configuration." in chunks[2].text
 
-    # Verify governance inheritance on table chunk (FR-007)
+    # Verify governance inheritance on table chunk
     assert table_chunk.doc_id == "DOC-ENG-001"
     assert table_chunk.department == Department.ENGINEERING
     assert table_chunk.allowed_groups == [IdPGroup.ENGINEERING_CORE]

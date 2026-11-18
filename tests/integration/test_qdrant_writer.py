@@ -1,8 +1,8 @@
-"""Integration tests for Qdrant storage adapter (FR-009, User Story 2, Article 11).
+"""Integration tests for Qdrant storage adapter.
 
 Verifies collection creation matching contracts/qdrant-collection.json,
 dual vector persistence (named dense and sparse vectors), and payload filtering.
-Uses Qdrant's embedded in-memory engine (:memory:) per Article 11 (real engine in RAM).
+Uses Qdrant's embedded in-memory engine (:memory:) for fast, native execution.
 """
 
 import pytest
@@ -19,13 +19,12 @@ VECTOR_SIZE = 1024
 
 
 # ==============================================================================
-# Port Contract Conformance Tests (Article 3)
+# Port Contract Conformance Tests
 # ==============================================================================
 
 
 def test_qdrant_adapter_inherits_from_port() -> None:
-    """Verify that QdrantStorageAdapter strictly satisfies ChunkStorageWriterPort (Article 3)."""
-    # Qdrant :memory: runs the real native engine in RAM, satisfying Article 11 without Docker
+    """Verify that QdrantStorageAdapter strictly satisfies ChunkStorageWriterPort."""
     client = QdrantClient(":memory:")
     adapter = QdrantStorageAdapter(client=client, vector_size=VECTOR_SIZE)
     assert isinstance(adapter, ChunkStorageWriterPort)

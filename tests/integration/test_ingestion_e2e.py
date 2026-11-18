@@ -2,8 +2,8 @@
 
 Verifies complete execution from raw documents to populated Qdrant storage,
 enforcing:
-- Zero-trust exclusion of archived documents (Articles 7 & 13, SC-002)
-- Strict pipeline summary metrics (Article 11, US4)
+- Zero-trust exclusion of archived documents
+- Strict pipeline summary metrics
 - Deterministic dual vector persistence (dense BGE + sparse BM25)
 """
 

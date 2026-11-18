@@ -26,10 +26,9 @@ def main() -> int:
     exit_code = 0
     try:
         # NOTE(Architecture): As the Composition Root, this entrypoint wires baseline
-        # concrete adapters (FastEmbedAdapter per ADR 0005, QdrantStorageAdapter per ADR 0006)
-        # and chunking strategies (TablePreservingChunker per FR-006).
-        # To test or benchmark alternative adapters (e.g. Postgres or OpenAI) or alternative
-        # chunkers (e.g. SemanticChunker), wire the new instance directly here.
+        # concrete adapters (FastEmbedAdapter, QdrantStorageAdapter) and chunking
+        # strategies (TablePreservingChunker). To test or benchmark alternative adapters
+        # (e.g. Postgres or OpenAI) or alternative chunkers, wire the new instance directly here.
         # The core orchestrator (src.ingestion.pipeline) requires zero modifications.
         embedder = FastEmbedAdapter()
         storage = QdrantStorageAdapter(

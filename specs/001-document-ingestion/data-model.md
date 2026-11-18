@@ -8,12 +8,12 @@
 
 ## 1. Closed Governance Catalogs (Domain Enums)
 
-All classification and security taxonomies are strictly closed catalogs defined as standard Python `Enum` classes inheriting from `str`. Any value outside these enumerations is rejected at validation boundaries.
+All classification and security taxonomies are strictly closed catalogs defined as standard Python `StrEnum` classes. Any value outside these enumerations is rejected at validation boundaries.
 
 ```python
-from enum import Enum
+from enum import StrEnum
 
-class Department(str, Enum):
+class Department(StrEnum):
     """Owning department of the document. Does not grant access on its own."""
     HR = "HR"
     ENGINEERING = "Engineering"
@@ -21,19 +21,19 @@ class Department(str, Enum):
     FINANCE = "Finance"
     LEGAL = "Legal"
 
-class Classification(str, Enum):
+class Classification(StrEnum):
     """Sensitivity classification of the document. Does not grant access on its own."""
     PUBLIC = "public"
     INTERNAL = "internal"
     RESTRICTED = "restricted"
 
-class LifecycleStatus(str, Enum):
+class LifecycleStatus(StrEnum):
     """Document lifecycle state governing indexing and freshness."""
     CURRENT = "current"       # Indexed; primary grounding evidence
     DEPRECATED = "deprecated" # Indexed; historical context, superseded by current
     ARCHIVED = "archived"     # Excluded from indexing completely
 
-class IdPGroup(str, Enum):
+class IdPGroup(StrEnum):
     """Identity provider groups that cross the access boundary."""
     ALL_EMPLOYEES = "all-employees"
     PEOPLE_TEAM = "people-team"
@@ -64,18 +64,20 @@ Represents an individual entry in `data/manifest.json`.
 Represents the merged, validated enterprise document ready for chunking.
 
 ```python
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 class CanonicalDocument(BaseModel):
-    doc_id: str
-    relative_path: str
-    department: Department
-    allowed_groups: list[IdPGroup]
-    classification: Classification
-    status: LifecycleStatus
+    doc_id: str = Field(description="Unique corporate document ID")
+    relative_path: str = Field(description="Relative file path in corpus")
+    department: Department = Field(description="Owning department")
+    allowed_groups: list[IdPGroup] = Field(min_length=1, description="Authorized IdP groups")
+    classification: Classification = Field(description="Sensitivity classification")
+    status: LifecycleStatus = Field(description="Lifecycle status")
     title: str = Field(description="Extracted from frontmatter or first markdown heading")
     content: str = Field(description="Markdown body without frontmatter")
     keywords: list[str] = Field(default_factory=list, description="Extracted tags/keywords")
+
+    model_config = ConfigDict(extra="forbid")
 ```
 
 ---
@@ -86,14 +88,16 @@ An indivisible segment of text that inherits its parent document's governance me
 ```python
 class GovernedChunk(BaseModel):
     chunk_id: str = Field(description="Deterministic ID: {doc_id}#c{chunk_index}")
-    doc_id: str
-    allowed_groups: list[IdPGroup]
-    status: LifecycleStatus
-    department: Department
-    classification: Classification
-    chunk_index: int
+    doc_id: str = Field(description="Parent document identifier")
+    allowed_groups: list[IdPGroup] = Field(min_length=1, description="Inherited access groups")
+    status: LifecycleStatus = Field(description="Inherited lifecycle status")
+    department: Department = Field(description="Inherited owning department")
+    classification: Classification = Field(description="Inherited classification")
+    chunk_index: int = Field(ge=0, description="Sequential 0-indexed position within doc")
     text: str = Field(description="Raw chunk text preserving Markdown structure and tables")
     is_tabular: bool = Field(default=False, description="True if chunk contains a table")
+
+    model_config = ConfigDict(extra="forbid")
 ```
 
 ---
@@ -103,10 +107,12 @@ The enriched chunk containing dual vector embeddings prepared for Qdrant upsert.
 
 ```python
 class VectorizedChunk(BaseModel):
-    chunk: GovernedChunk
+    chunk: GovernedChunk = Field(description="The underlying governed chunk")
     dense_vector: list[float] = Field(description="Dense semantic embedding vector")
     sparse_indices: list[int] = Field(description="Sparse lexical token indices")
     sparse_values: list[float] = Field(description="Sparse lexical token weights")
+
+    model_config = ConfigDict(extra="forbid")
 ```
 
 ---
@@ -133,7 +139,8 @@ Each `VectorizedChunk` maps to a Qdrant point struct as follows:
     "department": "HR",
     "classification": "internal",
     "chunk_index": 0,
-    "text": "### Remote Work Policy\nEmployees are eligible for remote work..."
+    "text": "### Remote Work Policy\nEmployees are eligible for remote work...",
+    "is_tabular": false
   }
 }
 ```

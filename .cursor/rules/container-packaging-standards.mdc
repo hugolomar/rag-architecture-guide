@@ -1,0 +1,44 @@
+---
+description: Mandatory standards for multi-stage Dockerfiles, uv dependency isolation, container security, and service orchestration
+globs: ["docker/**/*", "**/Dockerfile*", "**/docker-compose*.yml"]
+alwaysApply: false
+---
+
+# Container Packaging and Deployment Standards
+
+All containerized components across the Data Plane and Runtime Plane must strictly adhere to these packaging and orchestration standards to ensure minimal attack surface, reproducible builds, and single-command local orchestration.
+
+## 1. Multi-Stage Dockerfile Pattern
+
+All deployable containers must use multi-stage builds separating build tooling from the runtime environment:
+- **Builder Stage**:
+  - Uses the official Python base image corresponding to `.python-version` (e.g., `python:3.14-slim`).
+  - Installs `uv` using the official astral-sh installer or binary copy (`COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv`).
+  - Copies `pyproject.toml` and `uv.lock`.
+  - Executes `uv sync --frozen --no-dev` to construct a clean, locked virtual environment at `/app/.venv`.
+- **Runtime Stage**:
+  - Uses clean `python:3.14-slim` (or designated minimal base).
+  - Copies ONLY `/app/.venv` from the builder stage.
+  - Copies application source code (`src/`).
+  - Sets `PATH="/app/.venv/bin:$PATH"` and executes entrypoints directly with `python -m <module>`.
+
+## 2. Invariant: Zero Build Tools in Runtime Image
+
+To minimize attack surface and image size:
+- `uv`, package managers, compilers (gcc), and VCS tools (`git`) must **never** exist in the final runtime container image.
+- Development dependencies (`pytest`, `pytest-cov`, linters) must be excluded via `--no-dev`.
+
+## 3. Pre-Caching External Model Artifacts
+
+Containers utilizing local embedded models (e.g., FastEmbed, HuggingFace ONNX models) must pre-cache model weights during image build or utilize mounted cache volumes:
+- Pre-cache weights into standard runtime directories (e.g., `/root/.cache/fastembed`) so that offline or network-isolated production deployments do not attempt runtime downloads.
+
+## 4. Ephemeral Batch Containers vs. Long-Running Services
+
+- **Ephemeral Batch Jobs (Data Plane)**:
+  - Run as one-shot tasks that terminate upon pipeline completion.
+  - Must communicate outcomes strictly via standard exit codes (`0` for success, non-zero for errors).
+  - Must **not** expose synthetic HTTP servers or healthcheck endpoints solely to satisfy orchestration.
+- **Persistent Services (Runtime Plane)**:
+  - Must expose a dedicated `/health` or readiness probe for orchestrator lifecycle coordination.
+  - Must handle graceful SIGTERM shutdown to flush in-flight connections and telemetry buffers.

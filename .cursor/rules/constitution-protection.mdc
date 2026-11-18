@@ -6,11 +6,11 @@ alwaysApply: true
 
 # Constitution Protection and Governance Rules
 
-The document `.specify/memory/constitution.md` is the supreme architectural and engineering policy for this repository (Article 28).
+The document `.specify/memory/constitution.md` is the supreme architectural and engineering policy for this repository (Article 15).
 
 ## Mandatory Guidelines for AI Agents
 
-1. **NEVER Edit Directly & Mandatory Human Gate (Article 29)**:
+1. **NEVER Edit Directly & Mandatory Human Gate (Article 16)**:
    Do NOT modify `.specify/memory/constitution.md` using generic file editing tools.
    Autonomous, assumed, or self-approved modifications are STRICTLY PROHIBITED.
    Before applying any change to the constitution under any circumstance, the agent MUST:
@@ -18,9 +18,9 @@ The document `.specify/memory/constitution.md` is the supreme architectural and 
    - STOP and explicitly ask the user for confirmation.
    - NEVER touch the file until the user has explicitly confirmed approval for that constitutional change in their reply.
 
-2. **Technical Amendment Protocol (Article 29 & Article 30)**:
+2. **Technical Amendment Protocol (Article 16)**:
    When an approved amendment is being applied, the agent MUST satisfy:
-   - **Semantic Versioning (Article 30)**:
+   - **Semantic Versioning (Article 16)**:
      - `MAJOR`: Removing or fundamentally redefining an existing principle.
      - `MINOR`: Adding a new principle or materially expanding mandatory guidance.
      - `PATCH`: Non-semantic wording clarifications or typo fixes.

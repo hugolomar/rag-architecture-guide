@@ -19,7 +19,7 @@ Define an abstract strategy contract `DocumentChunker` and implement a default M
 
 ### Alternatives Considered
 - **LangChain `MarkdownHeaderTextSplitter`**: Splits by headers only; does not guarantee table integrity or handle table rows specially.
-- **Unstructured / Pandoc parser**: Heavy external dependency requiring C/C++ system libraries; violates Article 6 (Simplicity and proportionality).
+- **Unstructured / Pandoc parser**: Heavy external dependency requiring C/C++ system libraries; violates architectural simplicity and proportionality by inflating the container footprint for basic markdown parsing.
 - **Fixed-size text chunking (e.g. 500 chars)**: Severely degrades retrieval on tabular data.
 
 ---
@@ -35,7 +35,7 @@ Vector computation is executed in Python inside `src/adapters/embeddings/fastemb
 
 ### Rationale
 - FastEmbed runs lightweight ONNX models on CPU without requiring PyTorch, CUDA, or heavy ML dependencies, aligning with local and CI container constraints.
-- FastEmbed includes built-in BM25 sparse vector generation, satisfying Article 14 (dual representation) within a single Python library dependency (ADR 0005).
+- FastEmbed includes built-in BM25 sparse vector generation, satisfying dual semantic and exact-token retrieval within a single lightweight library dependency.
 - Both dense and sparse vectors can be generated in parallel or pipeline sequence before storage upsert.
 
 ### Alternatives Considered
@@ -63,7 +63,7 @@ Points are upserted via `qdrant_client.QdrantClient.upsert(collection_name=..., 
 
 ### Rationale
 - Named vectors enable storing both dense and sparse representations within a single point struct in Qdrant (ADR 0006).
-- Creating payload indexes on `allowed_groups` and `status` enables fast pre-filtering during runtime retrieval, satisfying zero-trust trimming before model generation (Articles 8, 9, 10).
+- Creating payload indexes on `allowed_groups` and `status` enables fast pre-filtering during runtime retrieval, ensuring deterministic zero-trust access control before generative context assembly.
 - Qdrant natively manages Reciprocal Rank Fusion (RRF) when querying both vector types simultaneously.
 
 ### Alternatives Considered
@@ -94,7 +94,7 @@ Instrument the ingestion process using the official `opentelemetry-sdk`:
    ```
 
 ### Rationale
-- Ephemeral batch jobs exit as soon as their work completes. Without an explicit flush and shutdown, default background exporter threads are terminated abruptly by the operating system, resulting in dropped spans and lost audit metrics (ADR 0011, Article 20).
+- Ephemeral batch jobs exit as soon as their work completes. Without an explicit flush and shutdown, default background exporter threads are terminated abruptly by the operating system, resulting in dropped spans and lost audit metrics.
 - Correlating with `run_id` allows operators to trace an entire batch execution end-to-end in Grafana / Tempo.
 
 ### Alternatives Considered
@@ -109,14 +109,13 @@ Instrument the ingestion process using the official `opentelemetry-sdk`:
 Construct a multi-stage Dockerfile (`docker/Dockerfile.ingestion`):
 - **Stage 1 (Builder)**: Base `python:3.14-slim`. Installs `uv`, copies `pyproject.toml` and `uv.lock`, and runs `uv sync --frozen --no-dev`.
 - **Stage 2 (Runtime)**: Base `python:3.14-slim`. Copies the compiled virtual environment from the builder to `/app/.venv`. Pre-downloads or bundles the FastEmbed ONNX model cache into `/root/.cache/fastembed`. Sets `PATH="/app/.venv/bin:$PATH"` and executes `python -m src.ingestion.cli`.
-- **Exclusion**: Build tools, compilers, and `uv` are excluded from the runtime stage (Article 26).
+- **Exclusion**: Build tools, compilers, and `uv` are excluded from the runtime stage to minimize image footprint and attack surface.
 
 ### Rationale
-- Satisfies Article 26 (Multi-stage image hygiene) and ADR 0017.
 - Produces a secure, minimal runtime image without compilers or package installers.
 - Embedding models pre-cached in the image prevent network downloads at container startup.
 
 ### Alternatives Considered
-- **Single-stage Dockerfile with `uv run`**: Rejected by Article 26 ("executing directly with the environment's python, never uv run in production").
+- **Single-stage Dockerfile with `uv run`**: Rejected because executing `uv run` in production containers introduces unnecessary toolchain overhead and startup latency instead of running directly against the compiled environment.
 - **Mounting source code dynamically in production**: Good for local dev, but production release requires an immutable, self-contained container image.
 

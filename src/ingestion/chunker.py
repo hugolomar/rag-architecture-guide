@@ -1,8 +1,7 @@
 """Pluggable Markdown chunking strategy and structure-preserving implementation.
 
-In accordance with FR-006 and ADR 0005, this module defines the abstract
-DocumentChunker strategy contract and the TablePreservingChunker baseline,
-which identifies Markdown tables and keeps them intact within single chunks,
+Defines the abstract DocumentChunker strategy contract and the TablePreservingChunker
+baseline, which identifies Markdown tables and keeps them intact within single chunks,
 repeating table headers across continuation chunks if a table exceeds the target chunk size.
 """
 
@@ -30,7 +29,7 @@ class DocumentChunker(ABC):
 class TablePreservingChunker(DocumentChunker):
     """Chunks Markdown documents while strictly preserving table integrity.
 
-    Assigns inherited governance metadata to each generated GovernedChunk (FR-007).
+    Assigns inherited governance metadata to each generated GovernedChunk.
     """
 
     def __init__(self, target_chunk_tokens: int = 600) -> None:
@@ -88,7 +87,7 @@ class TablePreservingChunker(DocumentChunker):
             if flushed_text:
                 raw_chunks.append((flushed_text, False))
 
-        # Build GovernedChunk models with governance inheritance (FR-007)
+        # Build GovernedChunk models with governance inheritance
         governed_chunks: list[GovernedChunk] = []
         for idx, (text, is_tabular) in enumerate(raw_chunks):
             governed_chunks.append(

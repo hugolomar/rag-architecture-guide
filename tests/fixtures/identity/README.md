@@ -9,7 +9,7 @@ This directory contains deterministic identity seed data used across local integ
    - Seeds local authentication containers and offline JWT token generators without requiring live cloud IdP connections.
 
 2. **Zero-Trust Security Trimming:**
-   - Powers deterministic security trimming tests (Constitution Article 7).
+   - Powers deterministic security trimming tests.
    - Verifies that queries execute strictly against the intersection of the caller's `groups` and document `allowed_groups`.
 
 3. **Why here and not in `evals/`?**

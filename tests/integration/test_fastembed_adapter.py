@@ -1,4 +1,4 @@
-"""Integration test for FastEmbed vectorization adapter (Article 10, FR-008).
+"""Integration tests for FastEmbed vectorization adapter.
 
 Verifies dense semantic embeddings, sparse BM25 token indices and weights,
 and full GovernedChunk vectorization using FastEmbed.
@@ -17,7 +17,7 @@ pytestmark = pytest.mark.integration
 
 
 # ==============================================================================
-# Port Contract Conformance & Fixture Setup (Article 3)
+# Port Contract Conformance & Fixture Setup
 # ==============================================================================
 
 
@@ -33,7 +33,7 @@ def test_fastembed_inherits_from_embedder_port(embedder: FastEmbedAdapter) -> No
 
 
 # ==============================================================================
-# Dense & Sparse Vector Embeddings Generation (Article 10)
+# Dense & Sparse Vector Embeddings Generation
 # ==============================================================================
 
 

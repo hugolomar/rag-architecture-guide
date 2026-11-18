@@ -57,3 +57,11 @@ plugins = ["pydantic.mypy"]
 [[tool.mypy.overrides]]
 module = ["fastembed.*", "frontmatter.*"]
 ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+markers = [
+    "unit: Unit tests tier (in-memory, pure domain models, isolated parsers)",
+    "contract: Contract verification tests tier (schema and structural invariants)",
+    "integration: Integration tests tier (adapters, in-memory databases, and I/O)",
+]
+

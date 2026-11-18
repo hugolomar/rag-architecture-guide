@@ -1,7 +1,6 @@
 """Qdrant storage writer adapter implementing ChunkStorageWriterPort.
 
-In accordance with FR-009, ADR 0006, and contracts/qdrant-collection.json,
-initializes hybrid collections with named dense and sparse vectors, creates
+Initializes hybrid collections with named dense and sparse vectors, creates
 governance payload indexes, and persists vectorized chunks with full metadata.
 """
 

@@ -1,7 +1,7 @@
 """Unit tests for domain enums, models, and boundary validation rules.
 
-Enforces Constitution Article 4 (Closed governance catalogs, strict Pydantic v2
-boundary validation, and prohibition of extra undocumented fields) and data-model.md.
+Validates closed governance catalogs, strict Pydantic v2 boundary validation,
+and prohibition of extra undocumented fields per data-model.md.
 """
 
 from typing import Any
@@ -21,7 +21,7 @@ pytestmark = pytest.mark.unit
 
 
 # ==============================================================================
-# Closed Catalogs Tests (Article 4)
+# Closed Catalogs Tests
 # ==============================================================================
 
 
@@ -142,7 +142,7 @@ def test_manifest_record_empty_allowed_groups() -> None:
 
 
 def test_manifest_record_forbids_extra_fields() -> None:
-    """Verify that undocumented extra fields are prohibited at boundaries (Article 4)."""
+    """Verify that undocumented extra fields are prohibited at boundaries."""
     with pytest.raises(ValidationError, match="Extra inputs are not permitted"):
         ManifestRecord(
             doc_id="DOC-ENG-001",
@@ -214,7 +214,7 @@ def test_canonical_document_empty_allowed_groups() -> None:
 
 
 def test_canonical_document_forbids_extra_fields() -> None:
-    """Verify that extra fields are forbidden on CanonicalDocument (Article 4)."""
+    """Verify that extra fields are forbidden on CanonicalDocument."""
     with pytest.raises(ValidationError, match="Extra inputs are not permitted"):
         CanonicalDocument(
             doc_id="DOC-ENG-002",
@@ -286,7 +286,7 @@ def test_governed_chunk_negative_index_raises_validation_error() -> None:
 
 
 def test_governed_chunk_forbids_extra_fields() -> None:
-    """Verify that extra fields are forbidden on GovernedChunk (Article 4)."""
+    """Verify that extra fields are forbidden on GovernedChunk."""
     with pytest.raises(ValidationError, match="Extra inputs are not permitted"):
         GovernedChunk(
             chunk_id="DOC-HR-001#c0",
@@ -331,7 +331,7 @@ def test_vectorized_chunk_instantiation() -> None:
 
 
 def test_vectorized_chunk_forbids_extra_fields() -> None:
-    """Verify that extra fields are forbidden on VectorizedChunk (Article 4)."""
+    """Verify that extra fields are forbidden on VectorizedChunk."""
     chunk = GovernedChunk(
         chunk_id="DOC-SEC-001#c0",
         doc_id="DOC-SEC-001",

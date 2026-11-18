@@ -8,7 +8,7 @@ ADRs 0003, 0005, and 0006 establish hexagonal boundaries for outbound infrastruc
 
 ## 1. Current boundary: pure domain, local ingestion
 
-In the initial data plane slice, the corpus lives exclusively on the local filesystem (`data/manifest.json` and Markdown files under `data/raw/`). In accordance with Article 6 (Simplicity and proportionality), responsibilities are split without speculative interfaces:
+In the initial data plane slice, the corpus lives exclusively on the local filesystem (`data/manifest.json` and Markdown files under `data/raw/`). In accordance with Article 5 (Simplicity and proportionality), responsibilities are split without speculative interfaces:
 
 * **Pure domain (`src/domain/manifest.py`):** `validate_and_partition_manifest` validates parsed manifest entries against `ManifestRecord` and enforces lifecycle partitioning (`current` / `deprecated` retained; `archived` excluded) strictly in memory, with zero filesystem or JSON I/O imports.
 * **Local ingestion (`src/ingestion/`):** `manifest_loader.py` reads `data/manifest.json` from disk and verifies file existence against `raw_dir`, while `parser.py` reads Markdown files from disk and builds `CanonicalDocument` instances.
