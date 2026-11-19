@@ -1,8 +1,7 @@
 """Contract test verifying repository constitution governance and amendment integrity.
 
-In accordance with Constitution Article 12 (Executable architecture) and Section VII
-(Articles 15-16 Governance), constitution integrity, synchronization impact reports,
-and semantic versioning metadata are automatically verified before merges.
+Verifies constitution document integrity, synchronization impact reports,
+and semantic versioning metadata prior to merges.
 """
 
 import re

@@ -23,7 +23,7 @@ pytestmark = pytest.mark.integration
 
 
 # ==============================================================================
-# Full Batch Ingestion Pipeline E2E Integration Test (Articles 7, 10, 11)
+# Full Batch Ingestion Pipeline E2E Integration Test
 # ==============================================================================
 
 

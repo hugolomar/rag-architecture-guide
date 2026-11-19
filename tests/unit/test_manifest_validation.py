@@ -1,7 +1,7 @@
 """Unit tests for domain manifest validation and ingestion filesystem loader.
 
-Tests acceptance scenarios for User Story 1 (Enforce Governance and Manifest
-Access Rules, Articles 4 & 7).
+Tests domain manifest validation, lifecycle filtering (active vs. archived),
+and schema boundary enforcement.
 """
 
 import json
