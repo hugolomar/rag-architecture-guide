@@ -106,7 +106,7 @@ def test_end_to_end_batch_ingestion(tmp_path: Path) -> None:
     assert results["points_indexed"] >= 2
     assert results["chunks_generated"] == results["points_indexed"]
 
-    # Verify SC-002: Exactly 0% archived documents indexed
+    # Verify that exactly 0% archived documents are indexed
     points, _ = client.scroll(
         collection_name="e2e_governed_docs",
         limit=50,

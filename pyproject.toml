@@ -61,19 +61,30 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
-addopts = "--strict-markers"
+addopts = "--strict-markers -ra"
 testpaths = ["tests"]
+filterwarnings = [
+    # Qdrant client emite un aviso inocuo al declarar índices de payload en memoria (:memory:)
+    "ignore:Payload indexes have no effect in the local Qdrant:UserWarning",
+]
 markers = [
+    # --- 1. Software Testing Pyramid (Uso obligatorio en tests/) ---
     "unit: Unit tests tier (in-memory, pure domain models, isolated parsers)",
     "contract: Contract verification tests tier (schema and structural invariants)",
     "integration: Integration tests tier (adapters, in-memory databases, and I/O)",
+
+    # --- 2. RAG Quality Gates & Evaluation Suites (evals/) ---
     "dev: Development suite tests (14 cases)",
     "validation: Pull-request CI regression suite tests (6 cases)",
     "release_gate: Protected hold-out suite for release gating (7 cases)",
+
+    # --- 3. Pipeline Lifecycle & Target Phase ---
     "retrieval: Phase 1 retrieval-focused case",
     "security: Security trimming and RBAC boundary case",
     "generation: Phase 2 generation-focused case",
     "end_to_end: Full retrieval and generation case",
+
+    # --- 4. RAG Behavioral Categories (Inyectados dinamicamente por evals/harness) ---
     "hybrid_search: Lexical + dense hybrid retrieval category",
     "tabular_chunking: Table preservation category",
     "security_rbac: Role-based access control category",

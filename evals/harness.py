@@ -249,11 +249,11 @@ def run_evaluation_case(case: dict, retrieve_fn, generate_fn) -> None:
 
 
 def parametrize_suite(cases: list[dict], suite_mark):
-    """Build pytest parameters, one per case, with the marks declared in ``pytest.ini``.
+    """Build pytest parameters, one per case, with the marks declared in ``pyproject.toml``.
 
     Each parameter carries the suite mark (``dev``, ``validation``, or
     ``release_gate``), the case's ``target_stage``, and its ``category``.
-    ``--strict-markers`` rejects a stage or category that the ini does not name.
+    ``--strict-markers`` rejects a stage or category that configuration does not name.
     """
     return [
         pytest.param(

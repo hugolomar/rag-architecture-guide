@@ -16,7 +16,7 @@ echo "[3/4] Running Import Linter (Hexagonal Boundary Verification)..."
 uv run lint-imports
 
 echo "[4/4] Running Unit & Contract Tests..."
-uv run pytest tests/unit tests/contract -v
+uv run pytest tests/unit tests/contract
 
 echo "=========================================="
 echo "  All Quality Gates Passed Successfully!"

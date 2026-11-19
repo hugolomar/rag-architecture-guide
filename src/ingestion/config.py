@@ -42,6 +42,22 @@ class IngestionConfig(BaseSettings):
         description="Target Qdrant collection name.",
         alias="QDRANT_COLLECTION_NAME",
     )
+    dense_model_name: str = Field(
+        default="BAAI/bge-large-en-v1.5",
+        description="FastEmbed dense embedding model name (e.g. BAAI/bge-small-en-v1.5 for CPU).",
+        alias="DENSE_MODEL_NAME",
+    )
+    # NOTE(Performance): Default batch size of 32 is chosen specifically for CPU inference.
+    # FastEmbed's default of 256 causes massive intermediate attention activation allocations
+    # (>13 GB RAM) and CPU cache thrashing on 1024-dim transformer models (bge-large). A batch
+    # size of 32 keeps peak process memory under 1.2 GB and achieves optimal CPU throughput.
+    embedding_batch_size: int = Field(
+        default=32,
+        ge=1,
+        le=256,
+        description="Batch size for generating embeddings (32 is optimal for CPU inference).",
+        alias="EMBEDDING_BATCH_SIZE",
+    )
     otel_exporter_otlp_endpoint: str = Field(
         default="http://localhost:4318",
         description="OpenTelemetry OTLP HTTP receiver endpoint.",

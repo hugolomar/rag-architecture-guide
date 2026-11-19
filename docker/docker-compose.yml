@@ -1,3 +1,5 @@
+name: rag-pipeline
+
 services:
   qdrant:
     image: qdrant/qdrant:latest
@@ -8,8 +10,11 @@ services:
       - "6334:6334"
     volumes:
       - qdrant_storage:/qdrant/storage
+    # NOTE: The official qdrant/qdrant minimal image excludes curl and wget to reduce
+    # container attack surface (CVEs). Since Docker Compose executes healthchecks inside
+    # the container, we probe the TCP port via Bash socket redirection instead of HTTP.
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:6333/healthz || exit 1"]
+      test: ["CMD-SHELL", "bash -c ':> /dev/tcp/127.0.0.1/6333' || exit 1"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -19,6 +24,7 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile.ingestion
+    image: rag-ingestion:local
     container_name: rag-ingestion-batch
     depends_on:
       qdrant:
@@ -29,6 +35,11 @@ services:
       - QDRANT_HOST=qdrant
       - QDRANT_PORT=6333
       - QDRANT_COLLECTION_NAME=governed_docs
+      # Lightweight BAAI/bge-small-en-v1.5 (384-dim) for fast local CPU runs (~25s)
+      # Override with DENSE_MODEL_NAME=BAAI/bge-large-en-v1.5 for production
+      - DENSE_MODEL_NAME=${DENSE_MODEL_NAME:-BAAI/bge-small-en-v1.5}
+      # Batch size 32 bounds CPU RAM < 1.2 GB and prevents cache thrashing
+      - EMBEDDING_BATCH_SIZE=32
       - LOG_LEVEL=INFO
     volumes:
       - ../data:/app/data:ro

@@ -30,7 +30,10 @@ def main() -> int:
         # strategies (TablePreservingChunker). To test or benchmark alternative adapters
         # (e.g. Postgres or OpenAI) or alternative chunkers, wire the new instance directly here.
         # The core orchestrator (src.ingestion.pipeline) requires zero modifications.
-        embedder = FastEmbedAdapter()
+        embedder = FastEmbedAdapter(
+            dense_model_name=config.dense_model_name,
+            batch_size=config.embedding_batch_size,
+        )
         storage = QdrantStorageAdapter(
             host=config.qdrant_host,
             port=config.qdrant_port,

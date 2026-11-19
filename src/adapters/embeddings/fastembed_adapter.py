@@ -20,20 +20,38 @@ class FastEmbedAdapter(EmbedderPort):
         self,
         dense_model_name: str = "BAAI/bge-large-en-v1.5",
         sparse_model_name: str = "Qdrant/bm25",
-        dimension: int = 1024,
+        dimension: int | None = None,
+        batch_size: int = 32,
     ) -> None:
         """Initialize the FastEmbed models with lazy loading.
 
         Args:
             dense_model_name: HuggingFace identifier for dense ONNX embedding model.
             sparse_model_name: Identifier for sparse BM25 model.
-            dimension: Dimensionality of dense vectors produced by the configured model.
+            dimension: Optional vector dimension. If None, auto-resolved from FastEmbed registry.
+            batch_size: Number of text chunks per inference batch. Default is 32 to bound
+                peak process memory below 1.2 GB and prevent CPU cache thrashing on 1024-dim
+                transformer models (FastEmbed's default of 256 spikes RAM beyond 13 GB on CPU).
         """
         self.dense_model_name = dense_model_name
         self.sparse_model_name = sparse_model_name
-        self._dimension = dimension
+        self._dimension = (
+            dimension if dimension is not None else self._resolve_dimension(dense_model_name)
+        )
+        self.batch_size = batch_size
         self._dense_model: TextEmbedding | None = None
         self._sparse_model: SparseTextEmbedding | None = None
+
+    @staticmethod
+    def _resolve_dimension(model_name: str, fallback: int = 1024) -> int:
+        """Resolve vector dimensionality for a supported FastEmbed dense model."""
+        try:
+            for model_desc in TextEmbedding.list_supported_models():
+                if model_desc.get("model", "").lower() == model_name.lower():
+                    return int(model_desc.get("dim", fallback))
+        except Exception:
+            pass
+        return fallback
 
     @property
     def dimension(self) -> int:
@@ -79,7 +97,7 @@ class FastEmbedAdapter(EmbedderPort):
         """
         if not texts:
             return []
-        embeddings = list(self.dense_model.embed(texts))
+        embeddings = list(self.dense_model.embed(texts, batch_size=self.batch_size))
         return [emb.tolist() for emb in embeddings]
 
     def embed_sparse(self, texts: list[str]) -> list[tuple[list[int], list[float]]]:
@@ -93,7 +111,7 @@ class FastEmbedAdapter(EmbedderPort):
         """
         if not texts:
             return []
-        sparse_embeddings = list(self.sparse_model.embed(texts))
+        sparse_embeddings = list(self.sparse_model.embed(texts, batch_size=self.batch_size))
         results: list[tuple[list[int], list[float]]] = []
         for emb in sparse_embeddings:
             results.append((emb.indices.tolist(), emb.values.tolist()))

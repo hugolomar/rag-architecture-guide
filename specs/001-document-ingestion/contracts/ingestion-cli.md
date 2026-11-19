@@ -30,6 +30,8 @@ All configuration is environment-driven:
 | `QDRANT_HOST` | `localhost` | No | Hostname of the Qdrant service |
 | `QDRANT_PORT` | `6333` | No | REST/gRPC port for Qdrant |
 | `QDRANT_COLLECTION_NAME`| `governed_docs` | No | Target Qdrant collection name |
+| `DENSE_MODEL_NAME` | `BAAI/bge-large-en-v1.5` | No | Dense embedding model (e.g. `BAAI/bge-small-en-v1.5` for lightweight CPU development) |
+| `EMBEDDING_BATCH_SIZE` | `32` | No | Batch size for neural inference and embedding generation (optimal: 32 for CPU) |
 | `OTEL_EXPORTER_OTLP_ENDPOINT`| `http://localhost:4318` | No | OTLP HTTP receiver endpoint |
 | `OTEL_SERVICE_NAME` | `rag-ingestion` | No | Service name reported in traces |
 | `LOG_LEVEL` | `INFO` | No | Logging verbosity (`DEBUG`, `INFO`, `WARNING`, `ERROR`) |

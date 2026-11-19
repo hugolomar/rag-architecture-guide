@@ -8,11 +8,12 @@ trigger: model_decision
 All test code in this repository must strictly adhere to these standards to ensure determinism, maintainability, and clean segregation.
 
 ## 1. Suite Categorization & Pytest Markers
-- Every test file must declare its test tier at module level using `pytestmark`:
+- Every test file in `tests/` must declare its test tier at module level using `pytestmark`:
   ```python
   pytestmark = pytest.mark.unit  # or pytest.mark.contract, pytest.mark.integration
   ```
 - Tests must strictly live in their corresponding directory (`tests/unit/`, `tests/contract/`, `tests/integration/`).
+- The three test pyramid tiers (`unit`, `contract`, `integration`) are strictly reserved for test code under `tests/`. Evaluation suite markers (`dev`, `validation`, `release_gate`, and behavioral category markers like `hybrid_search`, `security_rbac`) belong strictly to the dynamic RAG evaluation harness in `evals/` and must never be applied as module test tiers in `tests/`.
 - Any custom pytest marker must be declared in `pyproject.toml` under `[tool.pytest.ini_options] markers`.
 
 ## 2. Visual Section Headers
@@ -58,4 +59,9 @@ All test code in this repository must strictly adhere to these standards to ensu
 - When executing in offline or sandboxed environments where weights are absent from local cache:
   - Tests must eagerly probe artifact availability and gracefully invoke `pytest.skip()` with an explicit, actionable message instructing how to warm up the cache (`Run 'bash scripts/warmup_models.sh' to download`).
   - Tests must never block CI runners or local development workflows on unhandled network errors.
+
+## 9. In-Memory Test Doubles for Workflow Orchestrators
+- Application workflow orchestrators and CLI entrypoints must be verified at the unit tier using pure in-memory test doubles that nominally inherit from domain port contracts (e.g., `EmbedderPort`, `ChunkStorageWriterPort`).
+- This ensures 100% deterministic coverage of orchestration logic, lifecycle state transitions, and OpenTelemetry instrumentation in microsecond unit runs, completely decoupled from external network access, storage services, or heavy machine learning weights.
+
 

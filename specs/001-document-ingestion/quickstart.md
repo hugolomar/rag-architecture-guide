@@ -18,10 +18,11 @@ docker --version
 ```
 
 ### Pre-Cache Embedding Models (Required for host integration tests)
-Production Docker containers bake model weights directly into the image. If you plan to execute vectorization integration tests directly on the host machine, pre-cache FastEmbed weights in `~/.cache/fastembed/` once:
+Production Docker containers bake model weights directly into the image (`Dockerfile.ingestion`). If you plan to execute vectorization integration tests directly on the host machine, pre-cache FastEmbed weights in `~/.cache/fastembed/` once:
 ```bash
 bash scripts/warmup_models.sh
 ```
+*(Note: In air-gapped or network-isolated environments where model weights are not pre-cached, vectorization integration tests detect their absence and automatically mark themselves as `SKIPPED` with an actionable message. This graceful degradation can be verified by running: `FASTEMBED_CACHE_PATH=/tmp/empty HF_HUB_OFFLINE=1 uv run pytest tests/integration/test_fastembed_adapter.py`).*
 
 ---
 
@@ -52,6 +53,15 @@ bash scripts/check.sh
 
 # Run offline integration tests (Qdrant in-memory, Telemetry flush lifecycle)
 uv run pytest tests/integration/test_qdrant_writer.py tests/integration/test_telemetry_flush.py -v
+
+# Run full integration tests with model embeddings (requires pre-cached models or warmup)
+uv run pytest tests/integration/test_fastembed_adapter.py tests/integration/test_ingestion_e2e.py -v
+```
+
+### Simular entorno offline / validación de skip sin modelos
+Para comprobar de forma no destructiva que los tests de integración se saltan limpiamente (`SKIPPED`) con su mensaje explicativo cuando no hay pesos locales (sin necesidad de borrar `~/.cache/fastembed/`):
+```bash
+FASTEMBED_CACHE_PATH=/tmp/empty HF_HUB_OFFLINE=1 uv run pytest tests/integration/test_fastembed_adapter.py tests/integration/test_ingestion_e2e.py
 ```
 
 ---

@@ -23,7 +23,7 @@ COPY --from=builder /build/.venv /app/.venv
 
 # Pre-cache FastEmbed ONNX models in runtime image to prevent startup downloads
 ENV PATH="/app/.venv/bin:$PATH"
-RUN python -c "from fastembed import TextEmbedding, SparseTextEmbedding; TextEmbedding('BAAI/bge-large-en-v1.5'); SparseTextEmbedding('Qdrant/bm25')"
+RUN python -c "from fastembed import TextEmbedding, SparseTextEmbedding; TextEmbedding('BAAI/bge-large-en-v1.5'); TextEmbedding('BAAI/bge-small-en-v1.5'); SparseTextEmbedding('Qdrant/bm25')"
 
 # Copy application source code
 COPY src /app/src
@@ -34,6 +34,8 @@ ENV RAG_DATA_DIR=/app/data/raw \
     QDRANT_HOST=qdrant \
     QDRANT_PORT=6333 \
     QDRANT_COLLECTION_NAME=governed_docs \
+    DENSE_MODEL_NAME=BAAI/bge-small-en-v1.5 \
+    EMBEDDING_BATCH_SIZE=32 \
     OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318 \
     OTEL_SERVICE_NAME=rag-ingestion \
     LOG_LEVEL=INFO \
