@@ -17,6 +17,12 @@ python --version   # Must be >= 3.14
 docker --version
 ```
 
+### Pre-Cache Embedding Models (Required for host integration tests)
+Production Docker containers bake model weights directly into the image. If you plan to execute vectorization integration tests directly on the host machine, pre-cache FastEmbed weights in `~/.cache/fastembed/` once:
+```bash
+bash scripts/warmup_models.sh
+```
+
 ---
 
 ## 2. Start Storage Dependencies
@@ -41,14 +47,11 @@ curl http://localhost:6333/healthz
 Before running the batch process, verify architectural boundaries and ensure all unit, contract, and integration tests pass:
 
 ```bash
-# Verify architectural boundaries via import-linter
-uv run lint-imports
+# Run all automated quality gates (Ruff lint/format, Mypy, Import-Linter, Unit & Contract tests)
+bash scripts/check.sh
 
-# Run unit & contract tests
-uv run pytest tests/unit tests/contract -v
-
-# Run integration tests against running Qdrant
-uv run pytest tests/integration -v
+# Run offline integration tests (Qdrant in-memory, Telemetry flush lifecycle)
+uv run pytest tests/integration/test_qdrant_writer.py tests/integration/test_telemetry_flush.py -v
 ```
 
 ---

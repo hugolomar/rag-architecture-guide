@@ -24,12 +24,22 @@ pytestmark = pytest.mark.integration
 @pytest.fixture(scope="module")
 def embedder() -> FastEmbedAdapter:
     """Initialize FastEmbed adapter once for all tests in this module."""
-    return FastEmbedAdapter()
+    adapter = FastEmbedAdapter()
+    try:
+        # Eagerly probe models to detect missing local weights in offline/sandboxed environments
+        _ = adapter.dense_model
+        _ = adapter.sparse_model
+    except Exception as exc:
+        pytest.skip(
+            f"FastEmbed models not pre-cached in local cache: {exc}. "
+            "Run 'bash scripts/warmup_models.sh' to download models, or execute via Docker."
+        )
+    return adapter
 
 
-def test_fastembed_inherits_from_embedder_port(embedder: FastEmbedAdapter) -> None:
+def test_fastembed_inherits_from_embedder_port() -> None:
     """Verify that FastEmbedAdapter strictly satisfies the EmbedderPort contract."""
-    assert isinstance(embedder, EmbedderPort)
+    assert isinstance(FastEmbedAdapter(), EmbedderPort)
 
 
 # ==============================================================================
@@ -92,8 +102,9 @@ def test_vectorize_chunks_full_contract(embedder: FastEmbedAdapter) -> None:
     assert len(v_chunk.sparse_indices) == len(v_chunk.sparse_values)
 
 
-def test_empty_batch_handling(embedder: FastEmbedAdapter) -> None:
+def test_empty_batch_handling() -> None:
     """Verify graceful empty batch handling across all adapter methods."""
-    assert embedder.embed_dense([]) == []
-    assert embedder.embed_sparse([]) == []
-    assert embedder.vectorize_chunks([]) == []
+    adapter = FastEmbedAdapter()
+    assert adapter.embed_dense([]) == []
+    assert adapter.embed_sparse([]) == []
+    assert adapter.vectorize_chunks([]) == []

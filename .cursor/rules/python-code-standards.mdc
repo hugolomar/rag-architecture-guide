@@ -37,3 +37,7 @@ All code must pass strict static type analysis without untyped definitions or un
 
 - **Pure Domain (`src/domain/`)**: Zero imports from `src/adapters/`, `src/ingestion/`, or external infrastructure/storage SDKs. Enforced by `import-linter`.
 - **Nominal Behavioral Ports**: All contracts crossing layer boundaries must inherit from `abc.ABC` and declare `@abstractmethod`. Structural subtyping (`typing.Protocol`) and duck typing are strictly prohibited across boundary seams.
+
+## 5. Defensive Adapter Initialization & Operational Errors
+- Infrastructure adapters (`src/adapters/`) initializing third-party models, drivers, or network transports must never leak raw socket timeouts or cryptic transport traces (e.g. `urllib3.ConnectTimeoutError`).
+- Adapters must wrap external model/driver instantiation in explicit error handling, raising actionable runtime exceptions that clearly communicate missing prerequisites (e.g., pre-cached weights in `~/.cache/`) to operators and developers.

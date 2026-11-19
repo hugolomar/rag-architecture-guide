@@ -110,7 +110,8 @@ class TablePreservingChunker(DocumentChunker):
         """Separate Markdown into tabular blocks and standard prose blocks.
 
         Guarantees that lines inside fenced code blocks (```) are never misidentified
-        as Markdown tables, and table rows are recognized even if trailing pipes are omitted.
+        as Markdown tables, table rows are recognized even if trailing pipes are omitted,
+        and standard prose is split across empty-line paragraph boundaries.
         """
         lines = content.splitlines()
         blocks: list[tuple[str, bool]] = []
@@ -148,7 +149,14 @@ class TablePreservingChunker(DocumentChunker):
                         blocks.append((text, True))
                     current_lines = []
                     in_table = False
-                current_lines.append(line)
+                if not in_code_block and not stripped:
+                    if current_lines:
+                        text = "\n".join(current_lines).strip()
+                        if text:
+                            blocks.append((text, False))
+                        current_lines = []
+                else:
+                    current_lines.append(line)
 
         if current_lines:
             text = "\n".join(current_lines).strip()

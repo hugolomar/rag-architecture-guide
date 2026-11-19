@@ -13,28 +13,36 @@ All classification and security taxonomies are strictly closed catalogs defined 
 ```python
 from enum import StrEnum
 
+
 class Department(StrEnum):
     """Owning department of the document. Does not grant access on its own."""
+
     HR = "HR"
     ENGINEERING = "Engineering"
     SECURITY = "Security"
     FINANCE = "Finance"
     LEGAL = "Legal"
 
+
 class Classification(StrEnum):
     """Sensitivity classification of the document. Does not grant access on its own."""
+
     PUBLIC = "public"
     INTERNAL = "internal"
     RESTRICTED = "restricted"
 
+
 class LifecycleStatus(StrEnum):
     """Document lifecycle state governing indexing and freshness."""
-    CURRENT = "current"       # Indexed; primary grounding evidence
-    DEPRECATED = "deprecated" # Indexed; historical context, superseded by current
-    ARCHIVED = "archived"     # Excluded from indexing completely
+
+    CURRENT = "current"  # Indexed; primary grounding evidence
+    DEPRECATED = "deprecated"  # Indexed; historical context, superseded by current
+    ARCHIVED = "archived"  # Excluded from indexing completely
+
 
 class IdPGroup(StrEnum):
     """Identity provider groups that cross the access boundary."""
+
     ALL_EMPLOYEES = "all-employees"
     PEOPLE_TEAM = "people-team"
     ENGINEERING_CORE = "engineering-core"
@@ -65,6 +73,7 @@ Represents the merged, validated enterprise document ready for chunking.
 
 ```python
 from pydantic import BaseModel, ConfigDict, Field
+
 
 class CanonicalDocument(BaseModel):
     doc_id: str = Field(description="Unique corporate document ID")

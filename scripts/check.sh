@@ -7,6 +7,7 @@ echo "=========================================="
 
 echo "[1/4] Running Ruff (Lint & Formatting)..."
 uv run ruff check .
+uv run ruff format --check .
 
 echo "[2/4] Running Mypy (Strict Static Typing)..."
 uv run mypy src tests

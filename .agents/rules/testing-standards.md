@@ -53,3 +53,9 @@ All test code in this repository must strictly adhere to these standards to ensu
 - **Test Names & Docstrings**: Name tests and describe their intent strictly based on the technical behavior, edge case, or invariant being verified (e.g., `test_rejects_missing_manifest_entry`, `test_excludes_archived_documents`).
 - **No Governance Citations**: Never cite `Constitution Article X`, requirement tickets (`FR-XXX`), or story identifiers (`USX`) in test function names, docstrings, or module comments. Tests test runtime behavior, not ticket tracking.
 
+## 8. Heavy Artifacts & Offline Determinism in Integration Tests
+- Integration tests requiring heavy binary artifacts (e.g. local ONNX models, embedding weights >100MB) must run deterministically and must never hang indefinitely on socket timeouts.
+- When executing in offline or sandboxed environments where weights are absent from local cache:
+  - Tests must eagerly probe artifact availability and gracefully invoke `pytest.skip()` with an explicit, actionable message instructing how to warm up the cache (`Run 'bash scripts/warmup_models.sh' to download`).
+  - Tests must never block CI runners or local development workflows on unhandled network errors.
+

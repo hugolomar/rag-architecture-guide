@@ -85,6 +85,23 @@ graph TD
 
 ---
 
+## 🚀 Quickstart & Quality Gates
+
+### 1. Run Automated Quality Gates
+Validate static formatting, typing, architectural boundaries, and test suites in a single command:
+```bash
+bash scripts/check.sh
+```
+
+### 2. Execute Containerized Ingestion
+Run the complete Data Plane ingestion vertical slice via Docker Compose:
+```bash
+docker compose -f docker/docker-compose.yml run --rm ingestion
+```
+For complete step-by-step local validation, see the [Quickstart Guide](specs/001-document-ingestion/quickstart.md).
+
+---
+
 ## 📂 Repository Structure
 
 ```text

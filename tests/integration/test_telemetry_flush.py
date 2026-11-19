@@ -59,7 +59,8 @@ def test_telemetry_stage_spans_metrics_and_flush(capsys: pytest.CaptureFixture[s
 
     # 4. Clean shutdown and flush must succeed and terminate providers
     mgr.flush_and_shutdown()
-    assert getattr(mgr.tracer_provider, "_is_shutdown", False) is True
+    assert mgr.is_shutdown is True
+    assert mgr.tracer_provider._atexit_handler is None
     assert getattr(mgr.meter_provider, "_shutdown", False) is True
 
     # Calling shutdown again must be idempotent (no exception)

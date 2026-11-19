@@ -64,7 +64,13 @@ class JsonLogFormatter(logging.Formatter):
 
 
 class TelemetryManager:
-    """Manages OpenTelemetry tracing, metrics, and structured logging lifecycle."""
+    """Manages OpenTelemetry tracing, metrics, and structured logging lifecycle.
+
+    Attributes:
+        run_id: Unique correlation identifier for the batch run.
+        service_name: Name of the service emitted in trace and metric resources.
+        is_shutdown: Flag indicating whether providers and exporters were flushed and shut down.
+    """
 
     def __init__(
         self,
@@ -118,6 +124,7 @@ class TelemetryManager:
         self._handler = logging.StreamHandler(sys.stdout)
         self._handler.setFormatter(JsonLogFormatter(run_id=self.run_id))
         self.logger.addHandler(self._handler)
+        self.is_shutdown: bool = False
 
     def log(self, level: str, message: str, stage: str = "general", **kwargs: Any) -> None:
         """Emit a structured log message."""
@@ -165,3 +172,5 @@ class TelemetryManager:
             self._handler.flush()
         except Exception:
             pass
+
+        self.is_shutdown = True

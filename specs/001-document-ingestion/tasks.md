@@ -57,7 +57,7 @@ description: "Task list for Governed Document Ingestion Pipeline implementation"
 - [X] T013 [US1] Implement in-memory manifest validator in `src/domain/manifest.py` and loader in `src/ingestion/manifest_loader.py` enforcing active/archived partitioning (depends on T012)
 - [X] T014 [US1] Implement Markdown parser in `src/ingestion/parser.py` extracting frontmatter and constructing `CanonicalDocument` instances (depends on T012, T013)
 
-**Checkpoint**: User Story 1 complete and independently testable. Run `pytest tests/unit/test_domain_models.py tests/unit/test_manifest_validation.py tests/unit/test_markdown_parser.py tests/contract/test_manifest_contract.py`.
+**Checkpoint**: User Story 1 complete and independently testable. Run `uv run pytest tests/unit/test_domain_models.py tests/unit/test_manifest_validation.py tests/unit/test_markdown_parser.py tests/contract/test_manifest_contract.py`.
 
 ---
 
@@ -76,12 +76,12 @@ description: "Task list for Governed Document Ingestion Pipeline implementation"
 ### Implementation for User Story 2
 
 - [X] T018 [P] [US2] Implement `GovernedChunk` and `VectorizedChunk` models in `src/domain/models.py` per `data-model.md`
-- [X] T019 [US2] Implement strategy contract `DocumentChunker` and default `TablePreservingChunker` in `src/ingestion/chunker.py` identifying Markdown table blocks (`| ... |`), keeping tables within 500-800 token windows intact, splitting oversized tables across rows while repeating column headers, and assigning inherited governance metadata to each `GovernedChunk` (depends on T018)
+- [X] T019 [US2] Implement strategy contract `DocumentChunker` and default `TablePreservingChunker` in `src/ingestion/chunker.py` identifying Markdown table blocks (`| ... |`), preserving tables intact within token budgets, splitting oversized tables across rows with repeated headers, segmenting standard prose across paragraph boundaries, and assigning inherited governance metadata to each `GovernedChunk` (depends on T018)
 - [X] T020 [US2] Implement `FastEmbedAdapter` inheriting from `EmbedderPort` in `src/adapters/embeddings/fastembed_adapter.py` using `fastembed` TextEmbedding (`BAAI/bge-large-en-v1.5`, 1024 dims) and SparseTextEmbedding (`Qdrant/bm25`) to produce `VectorizedChunk` instances (depends on T005, T018)
 - [X] T021 [US2] Implement `QdrantStorageAdapter` inheriting from `ChunkStorageWriterPort` in `src/adapters/storage/qdrant_adapter.py` creating the collection per `contracts/qdrant-collection.json` with named vectors (`dense` 1024 Cosine, `sparse` idf) and payload keyword indexes (`doc_id`, `allowed_groups`, `status`, `department`, `classification`), and batch upserting points with governance payloads (depends on T005, T018)
 - [X] T022 [US2] Integrate parsing, pluggable chunking (`DocumentChunker`), embedding, and storage indexing via dependency injection in `src/ingestion/pipeline.py` to process active canonical documents into Qdrant (depends on T014, T019, T020, T021)
 
-**Checkpoint**: User Stories 1 and 2 complete and independently testable. Run `pytest tests/unit/test_table_chunker.py tests/integration/test_fastembed_adapter.py tests/integration/test_qdrant_writer.py`.
+**Checkpoint**: User Stories 1 and 2 complete and independently testable. Run `uv run pytest tests/unit/test_table_chunker.py tests/integration/test_fastembed_adapter.py tests/integration/test_qdrant_writer.py`.
 
 ---
 
@@ -131,7 +131,7 @@ description: "Task list for Governed Document Ingestion Pipeline implementation"
 **Purpose**: Documentation compliance, complete test suite execution, and corpus validation
 
 - [X] T032 [P] Validate documentation and PEP 257 Google-style docstrings across `src/domain/`, `src/adapters/`, and `src/ingestion/`
-- [X] T033 [P] Execute full test suite (`pytest tests/unit tests/contract tests/integration -v --cov=src`) and verify 100% pass rate
+- [X] T033 [P] Execute full test suite (`uv run pytest tests/unit tests/contract tests/integration -v --cov=src` or `bash scripts/check.sh`) and verify 100% pass rate
 - [X] T034 Run full end-to-end validation against the 36-document corpus following `specs/001-document-ingestion/quickstart.md` verifying > 300 points indexed, dual vectors present, and exactly 0 `archived` points in Qdrant
 - [X] T035 [P] Audit and refactor test suites across `tests/` to enforce test tier segregation and fixtures
 

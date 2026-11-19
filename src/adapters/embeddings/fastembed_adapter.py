@@ -44,14 +44,28 @@ class FastEmbedAdapter(EmbedderPort):
     def dense_model(self) -> TextEmbedding:
         """Lazily initialize the dense ONNX model."""
         if self._dense_model is None:
-            self._dense_model = TextEmbedding(model_name=self.dense_model_name)
+            try:
+                self._dense_model = TextEmbedding(model_name=self.dense_model_name)
+            except Exception as exc:
+                raise RuntimeError(
+                    f"Failed to initialize dense model '{self.dense_model_name}'. "
+                    "In offline, sandboxed, or air-gapped environments, ensure model weights "
+                    "are pre-cached in ~/.cache/fastembed/ before execution."
+                ) from exc
         return self._dense_model
 
     @property
     def sparse_model(self) -> SparseTextEmbedding:
         """Lazily initialize the sparse BM25 model."""
         if self._sparse_model is None:
-            self._sparse_model = SparseTextEmbedding(model_name=self.sparse_model_name)
+            try:
+                self._sparse_model = SparseTextEmbedding(model_name=self.sparse_model_name)
+            except Exception as exc:
+                raise RuntimeError(
+                    f"Failed to initialize sparse model '{self.sparse_model_name}'. "
+                    "In offline, sandboxed, or air-gapped environments, ensure model weights "
+                    "are pre-cached in ~/.cache/fastembed/ before execution."
+                ) from exc
         return self._sparse_model
 
     def embed_dense(self, texts: list[str]) -> list[list[float]]:
