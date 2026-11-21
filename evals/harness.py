@@ -142,11 +142,15 @@ def assert_phase1_retrieval(case: dict, retrieval_result: dict, top_k: int = 3) 
 
     for doc_id in case.get("stays_indexed_doc_ids", []):
         if doc_id not in indexed:
-            raise AssertionError(f"{test_id}: deprecated document {doc_id} is missing from the index")
+            raise AssertionError(
+                f"{test_id}: deprecated document {doc_id} is missing from the index"
+            )
 
     for doc_id in case.get("absent_from_index_doc_ids", []):
         if doc_id in indexed or doc_id in retrieved:
-            raise AssertionError(f"{test_id}: archived document {doc_id} is still in the index or the results")
+            raise AssertionError(
+                f"{test_id}: archived document {doc_id} is still in the index or the results"
+            )
 
     for current_id in case.get("expected_doc_ids", []):
         if current_id not in retrieved:
@@ -245,11 +249,11 @@ def run_evaluation_case(case: dict, retrieve_fn, generate_fn) -> None:
 
 
 def parametrize_suite(cases: list[dict], suite_mark):
-    """Build pytest parameters, one per case, with the marks declared in ``pytest.ini``.
+    """Build pytest parameters, one per case, with the marks declared in ``pyproject.toml``.
 
     Each parameter carries the suite mark (``dev``, ``validation``, or
     ``release_gate``), the case's ``target_stage``, and its ``category``.
-    ``--strict-markers`` rejects a stage or category that the ini does not name.
+    ``--strict-markers`` rejects a stage or category that configuration does not name.
     """
     return [
         pytest.param(

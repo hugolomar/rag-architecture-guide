@@ -32,8 +32,9 @@ The shared objects are these:
   An answer carries one behavior: `ground_answer`, `deny_access`, `abstain`, or `clarify`. Those
   four stay distinct.
 
-Closed catalogs, which document is readable by which groups, and the Python class names stay in the
-project notes. ADR 0004 decides how these contracts are modeled.
+Closed catalogs and governance metadata field semantics are defined in Note 02.
+ADR 0004 decides how these contracts are modeled, and feature specifications
+(such as `data-model.md`) define concrete classes.
 
 - Infrastructure adapters (vector store, lexical index, model gateway, external APIs) must
   translate provider payloads into domain contracts at the boundary.
@@ -41,6 +42,20 @@ project notes. ADR 0004 decides how these contracts are modeled.
 - Security and lifecycle semantics are first-class fields in those contracts, not side channels.
 - Runtime orchestration is allowed to depend on domain contracts and port interfaces only; it does
   not depend directly on provider SDK models.
+- Storage boundaries follow the Repository Pattern segregated by responsibility (CQRS):
+  ingestion and mutation workflows depend strictly on write-side persistence ports,
+  while query and generation workflows depend strictly on read-side retrieval ports.
+- **Dependency injection and composition roots:**
+  - Application workflows and orchestrators (such as batch pipelines and query use cases)
+    use explicit, manual dependency injection via function arguments or `__init__` constructors.
+    Orchestration receives abstract ports from the outside and never instantiates concrete
+    infrastructure adapters or declares concrete defaults.
+  - Framework dependency injection (`Depends()`) is strictly confined to the HTTP presentation
+    boundary (FastAPI endpoint controllers) to resolve request-scoped dependencies. Core domain
+    and pipeline logic must remain uncoupled from the web framework so batch CLI jobs, CI/CD runs,
+    and pytest evaluation harnesses execute directly in-process without an HTTP server.
+  - Concrete infrastructure adapter instantiation is strictly restricted to system entrypoints
+    (**Composition Roots**), such as batch CLI entrypoints and the HTTP application factory.
 
 ## Rationale
 
@@ -67,6 +82,11 @@ project notes. ADR 0004 decides how these contracts are modeled.
 3. **Single monolithic runtime model**
    - Pros: fewer object types at first.
    - Cons: weak boundaries between ingestion, retrieval, and generation responsibilities.
+   - Rejected.
+
+4. **Heavy IoC container frameworks (`dependency-injector`, `injector`)**
+   - Pros: automatic graph resolution and annotation-based injection similar to Spring or .NET IoC containers.
+   - Cons: unpythonic ceremony, runtime reflection overhead, friction with static type checkers (`mypy --strict`), and violation of Article 6 simplicity rules.
    - Rejected.
 
 ## Consequences

@@ -2,9 +2,99 @@
 name = "rag-architecture-guide"
 version = "0.1.0"
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    "fastembed>=0.4",
+    "opentelemetry-api>=1.28",
+    "opentelemetry-sdk>=1.28",
+    "pydantic>=2.0",
+    "pydantic-settings>=2.0",
+    "python-frontmatter>=1.1",
+    "qdrant-client>=1.12",
+]
 
 [dependency-groups]
 dev = [
+    "import-linter>=2.15",
+    "mypy>=1.13.0",
     "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.9.0",
+    "testcontainers>=4.15.0",
 ]
+
+[tool.ruff]
+target-version = "py314"
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "E",     # pycodestyle errors
+    "F",     # Pyflakes
+    "I",     # isort
+    "UP",    # pyupgrade (modern Python 3.14 idioms)
+    "B",     # flake8-bugbear (common bug patterns)
+    "S101",  # flake8-bandit (prohibits assert in runtime)
+    "T20",   # flake8-print (prohibits print in production code)
+    "PT009", # flake8-pytest-style (prohibits unittest assertions in tests)
+    "PT011", # flake8-pytest-style (prohibits broad pytest.raises without match)
+]
+ignore = [
+    "E501",  # line length handled by formatter
+    "B905",  # zip() strict parameter
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101", "T201"]
+"evals/*" = ["S101", "T201"]
+
+[tool.mypy]
+python_version = "3.14"
+files = ["src", "tests"]
+disallow_any_generics = true
+disallow_untyped_defs = true
+warn_return_any = true
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = ["fastembed.*", "frontmatter.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+addopts = "--strict-markers -ra"
+testpaths = ["tests"]
+filterwarnings = [
+    # Qdrant client emite un aviso inocuo al declarar índices de payload en memoria (:memory:)
+    "ignore:Payload indexes have no effect in the local Qdrant:UserWarning",
+]
+markers = [
+    # --- 1. Software Testing Pyramid (Uso obligatorio en tests/) ---
+    "unit: Unit tests tier (in-memory, pure domain models, isolated parsers)",
+    "contract: Contract verification tests tier (schema and structural invariants)",
+    "integration: Integration tests tier (adapters, in-memory databases, and I/O)",
+
+    # --- 2. RAG Quality Gates & Evaluation Suites (evals/) ---
+    "dev: Development suite tests (14 cases)",
+    "validation: Pull-request CI regression suite tests (6 cases)",
+    "release_gate: Protected hold-out suite for release gating (7 cases)",
+
+    # --- 3. Pipeline Lifecycle & Target Phase ---
+    "retrieval: Phase 1 retrieval-focused case",
+    "security: Security trimming and RBAC boundary case",
+    "generation: Phase 2 generation-focused case",
+    "end_to_end: Full retrieval and generation case",
+
+    # --- 4. RAG Behavioral Categories (Inyectados dinamicamente por evals/harness) ---
+    "hybrid_search: Lexical + dense hybrid retrieval category",
+    "tabular_chunking: Table preservation category",
+    "security_rbac: Role-based access control category",
+    "lifecycle_freshness: Document lifecycle and version freshness category",
+    "semantic_neighbor: Allowed vs restricted neighbor isolation category",
+    "multi_document: Cross-document reasoning category",
+    "adversarial: Prompt injection and spoofing category",
+    "abstention: Out-of-corpus or unsupported benefit abstention category",
+    "edge_conditions: Multi-condition edge query category",
+    "edge_ambiguity: Ambiguous policy requiring clarification category",
+    "edge_query: Noisy/typo query category",
+]
+

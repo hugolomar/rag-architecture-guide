@@ -29,7 +29,9 @@ def _users() -> dict[str, dict]:
 
     The catalog field is ``groups``. Cases copy that list into ``user_groups``.
     """
-    records = json.loads((ROOT / "tests" / "fixtures" / "identity" / "users.json").read_text(encoding="utf-8"))
+    records = json.loads(
+        (ROOT / "tests" / "fixtures" / "identity" / "users.json").read_text(encoding="utf-8")
+    )
     return {record["user_id"]: record for record in records}
 
 

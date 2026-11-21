@@ -4,7 +4,7 @@
 
 Notes 01–03 establish the corpus, the governance manifest, and the evaluation-first baseline. ADRs 0001–0017 establish the technology choices, clean hexagonal boundaries, and CI delivery platform. 
 
-This note outlines the evolutionary roadmap for the RAG pipeline beyond the initial baseline. In accordance with Article 6 (Simplicity and proportionality) and Article 13 (The suites are the specification), complexity is introduced in measured, data-driven phases: each technique is evaluated against baseline metrics before becoming permanent.
+This note outlines the evolutionary roadmap for the RAG pipeline beyond the initial baseline. In accordance with Article 5 (Simplicity and proportionality) and Article 9 (The suites are the specification), complexity is introduced in measured, data-driven phases: each technique is evaluated against baseline metrics before becoming permanent.
 
 ---
 
@@ -57,7 +57,7 @@ Query rewriting operates as an optional pre-retrieval stage in the application o
 2. **Rewriting / Expansion:** A small, fast LLM (or prompt template via LiteLLM) produces a **rewrite artifact**:
    - The rewritten canonical question (resolving pronouns and expanding acronyms).
    - Generated sub-queries or keyword lists for hybrid search.
-3. **Telemetry capture:** As mandated by Article 21, the AI trace in Langfuse records both the original user query and the rewrite artifact. If retrieval fails, audit forensics distinguish whether the search failed or the rewriter misinterpreted the question.
+3. **Telemetry capture:** As mandated by Article 13, the AI trace in Langfuse records both the original user query and the rewrite artifact. If retrieval fails, audit forensics distinguish whether the search failed or the rewriter misinterpreted the question.
 
 ### Verification
 Query rewriting is evaluated specifically against complex and colloquial test cases in `evals/`, measuring whether retrieval recall improves without drifting intent or altering the security boundary.
@@ -78,7 +78,7 @@ Instead of unconditionally passing retrieved chunks to the generation model, CRA
    - **Ambiguous (Moderate confidence):** Chunks contain partial or contradictory evidence. The pipeline combines cautious synthesis with explicit caveats, or triggers targeted query reformulation.
    - **Incorrect / Irrelevant (Low confidence):** The retrieved chunks do not answer the question. The system does not attempt to hallucinate or generate an ungrounded response.
 3. **Integration with domain behaviors:**
-   CRAG maps directly to the four domain response behaviors required by Article 13:
+   CRAG maps directly to the four domain response behaviors required by Article 9:
    - When evidence is verified and adequate: `ground_answer`.
    - When evidence is insufficient or completely absent: formal `abstain`.
    - When the question conflicts between multiple domains or requires missing parameters: structured `clarify`.

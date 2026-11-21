@@ -1,0 +1,40 @@
+{
+  "collection_name": "governed_docs",
+  "vectors": {
+    "dense": {
+      "size": 1024,
+      "distance": "Cosine"
+    }
+  },
+  "sparse_vectors": {
+    "sparse": {
+      "index": {
+        "on_disk": false
+      },
+      "modifier": "idf"
+    }
+  },
+  "payload_indexes": [
+    {
+      "field_name": "doc_id",
+      "field_schema": "keyword"
+    },
+    {
+      "field_name": "allowed_groups",
+      "field_schema": "keyword"
+    },
+    {
+      "field_name": "status",
+      "field_schema": "keyword"
+    },
+    {
+      "field_name": "department",
+      "field_schema": "keyword"
+    },
+    {
+      "field_name": "classification",
+      "field_schema": "keyword"
+    }
+  ]
+}
+

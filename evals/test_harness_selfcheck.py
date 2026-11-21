@@ -42,7 +42,9 @@ def oracle_retrieve_fn(case: dict):
 
     def _retrieve(query: str, user_id: str, top_k: int = 3) -> dict:
         retrieved = list(case.get("expected_doc_ids", []))
-        indexed = list(case.get("expected_doc_ids", [])) + list(case.get("stays_indexed_doc_ids", []))
+        indexed = list(case.get("expected_doc_ids", [])) + list(
+            case.get("stays_indexed_doc_ids", [])
+        )
         return {
             "retrieved_doc_ids": retrieved[:top_k],
             "indexed_doc_ids": indexed,
@@ -102,14 +104,17 @@ def test_leaky_retrieval_fails():
     cases = [
         case
         for case in _all_cases()
-        if case.get("prohibited_doc_ids") and case["target_stage"] in {"retrieval", "security", "end_to_end"}
+        if case.get("prohibited_doc_ids")
+        and case["target_stage"] in {"retrieval", "security", "end_to_end"}
     ]
     assert cases
 
     def leaky_retrieve(case):
         def _retrieve(query: str, user_id: str, top_k: int = 3) -> dict:
             retrieved = [case["prohibited_doc_ids"][0], *case.get("expected_doc_ids", [])]
-            indexed = list(case.get("expected_doc_ids", [])) + list(case.get("stays_indexed_doc_ids", []))
+            indexed = list(case.get("expected_doc_ids", [])) + list(
+                case.get("stays_indexed_doc_ids", [])
+            )
             return {"retrieved_doc_ids": retrieved[:top_k], "indexed_doc_ids": indexed}
 
         return _retrieve
@@ -178,7 +183,9 @@ def test_clarify_rejects_a_single_deadline():
     """TC-23 fails on 72 hours alone and passes when both visible deadlines are stated."""
     case = next(item for item in _all_cases() if item["test_id"] == "TC-23-EDGE-AMBIGUOUS-BREACH")
     with pytest.raises(AssertionError):
-        assert_phase2_generation(case, {"answer": "You must notify within 72 hours.", "behavior": "clarify"})
+        assert_phase2_generation(
+            case, {"answer": "You must notify within 72 hours.", "behavior": "clarify"}
+        )
     assert_phase2_generation(
         case,
         {

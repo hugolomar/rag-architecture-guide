@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CorpusGovernanceManifest",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": [
+      "doc_id",
+      "relative_path",
+      "department",
+      "allowed_groups",
+      "classification",
+      "status"
+    ],
+    "properties": {
+      "doc_id": {
+        "type": "string",
+        "pattern": "^DOC-[A-Z]{2,4}-[0-9]{3}$"
+      },
+      "relative_path": {
+        "type": "string"
+      },
+      "department": {
+        "type": "string",
+        "enum": ["HR", "Engineering", "Security", "Finance", "Legal"]
+      },
+      "allowed_groups": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "string",
+          "enum": [
+            "all-employees",
+            "people-team",
+            "engineering-core",
+            "security-oncall",
+            "leadership"
+          ]
+        }
+      },
+      "classification": {
+        "type": "string",
+        "enum": ["public", "internal", "restricted"]
+      },
+      "status": {
+        "type": "string",
+        "enum": ["current", "deprecated", "archived"]
+      }
+    },
+    "additionalProperties": false
+  }
+}
+
