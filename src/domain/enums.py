@@ -59,3 +59,18 @@ class IdPGroup(StrEnum):
     ENGINEERING_CORE = "engineering-core"
     SECURITY_ONCALL = "security-oncall"
     LEADERSHIP = "leadership"
+
+
+class BehaviorEnum(StrEnum):
+    """Closed catalog of governed pipeline outcomes.
+
+    - ground_answer: Evidence conclusively answers the inquiry with citations.
+    - deny_access: Inquiry targets documents restricted by access boundaries.
+    - abstain: Corpus lacks sufficient evidence to answer conclusively.
+    - clarify: Query is ambiguous and requires additional caller context.
+    """
+
+    GROUND_ANSWER = "ground_answer"
+    DENY_ACCESS = "deny_access"
+    ABSTAIN = "abstain"
+    CLARIFY = "clarify"

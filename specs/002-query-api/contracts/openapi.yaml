@@ -1,0 +1,176 @@
+openapi: 3.1.0
+info:
+  title: Governed Query API and RAG Runtime
+  description: Contract-First HTTP specification for enterprise governed knowledge retrieval and grounded generation.
+  version: 0.1.0
+paths:
+  /query:
+    post:
+      summary: Execute governed knowledge query
+      description: Authenticates caller via Bearer token, executes pre-inference security-trimmed hybrid retrieval, and synthesizes evidence-grounded answers.
+      operationId: execute_query
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryRequest'
+      responses:
+        '200':
+          description: Successful query execution across all governed business outcomes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryResponse'
+        '401':
+          description: Missing, forged, or expired authentication token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Request validation error (e.g., query length or top_k out of bounds).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+        '502':
+          description: Upstream dependency failure (vector database or generation gateway unreachable).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '504':
+          description: Endpoint timeout budget exceeded (10 seconds).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: OIDC signed JWT bearer token containing user_id (sub) and authorized groups claim.
+
+  schemas:
+    QueryRequest:
+      type: object
+      required:
+        - query
+      properties:
+        query:
+          type: string
+          minLength: 3
+          maxLength: 500
+          description: Natural language inquiry.
+          example: Which awslogs options configure CloudWatch region and log group?
+        top_k:
+          type: integer
+          minimum: 1
+          maximum: 10
+          default: 3
+          description: Maximum number of evidence chunks to retrieve.
+          example: 3
+      additionalProperties: false
+
+    Citation:
+      type: object
+      required:
+        - doc_id
+        - chunk_id
+      properties:
+        doc_id:
+          type: string
+          description: Parent document identifier.
+          example: DOC-ENG-001
+        chunk_id:
+          type: string
+          description: Specific chunk excerpt identifier.
+          example: DOC-ENG-001_0001
+      additionalProperties: false
+
+    BehaviorEnum:
+      type: string
+      enum:
+        - ground_answer
+        - deny_access
+        - abstain
+        - clarify
+      description: Governed classification of the pipeline response.
+
+    QueryResponse:
+      type: object
+      required:
+        - answer
+        - behavior
+        - citations
+        - trace_id
+        - latency_ms
+      properties:
+        answer:
+          type: string
+          description: Synthesized answer text or governed explanation.
+          example: The awslogs-region and awslogs-group options configure the CloudWatch region and log group.
+        behavior:
+          $ref: '#/components/schemas/BehaviorEnum'
+        citations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Citation'
+          description: Verifiable source citations (empty for refusals and abstentions).
+        trace_id:
+          type: string
+          description: Distributed OpenTelemetry trace identifier.
+          example: 4bf92f3577b34da6a3ce929d0e0e4736
+        latency_ms:
+          type: number
+          format: float
+          minimum: 0
+          description: Total request execution latency in milliseconds.
+          example: 420.5
+      additionalProperties: false
+
+    ErrorResponse:
+      type: object
+      required:
+        - detail
+        - error_code
+      properties:
+        detail:
+          type: string
+          description: Actionable description of the error.
+        error_code:
+          type: string
+          description: Standard error category code.
+      additionalProperties: false
+
+    ValidationError:
+      type: object
+      required:
+        - loc
+        - msg
+        - type
+      properties:
+        loc:
+          type: array
+          items:
+            anyOf:
+              - type: string
+              - type: integer
+        msg:
+          type: string
+        type:
+          type: string
+
+    HTTPValidationError:
+      type: object
+      properties:
+        detail:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationError'
