@@ -4,7 +4,7 @@ globs: ["src/**/*", "tests/**/*"]
 alwaysApply: false
 ---
 
-# Python Code Standards and Clean Architecture
+# Python Code Standards
 
 All Python source code across `src/` and `tests/` must strictly comply with these engineering standards to maintain high readability, maintainable documentation, and strict type safety.
 
@@ -31,13 +31,5 @@ Code and docstrings describe **technical behavior, contracts, and architecture**
 All code must pass strict static type analysis without untyped definitions or unchecked generics:
 - Explicit type annotations on all function signatures (arguments and return types).
 - Use modern Python type hints (`list[str]`, `dict[str, Any]`, `tuple[int, ...]`) instead of legacy `typing` constructs.
+- Generators decorated with context managers (`@asynccontextmanager`, `@contextmanager`) must be annotated as `AsyncGenerator[YieldType]` or `Generator[YieldType]` (or explicit `AsyncGenerator[YieldType, SendType]` where send semantics exist) from `collections.abc` rather than generic iterators, adhering to full generator protocols and preventing deprecated overload diagnostics.
 - Never use `# type: ignore` without an explicit error code and brief technical comment explaining why static analysis cannot infer the type.
-
-## 4. Hexagonal Core Purity & Port Discipline
-
-- **Pure Domain (`src/domain/`)**: Zero imports from `src/adapters/`, `src/ingestion/`, or external infrastructure/storage SDKs. Enforced by `import-linter`.
-- **Nominal Behavioral Ports**: All contracts crossing layer boundaries must inherit from `abc.ABC` and declare `@abstractmethod`. Structural subtyping (`typing.Protocol`) and duck typing are strictly prohibited across boundary seams.
-
-## 5. Defensive Adapter Initialization & Operational Errors
-- Infrastructure adapters (`src/adapters/`) initializing third-party models, drivers, or network transports must never leak raw socket timeouts or cryptic transport traces (e.g. `urllib3.ConnectTimeoutError`).
-- Adapters must wrap external model/driver instantiation in explicit error handling, raising actionable runtime exceptions that clearly communicate missing prerequisites (e.g., pre-cached weights in `~/.cache/`) to operators and developers.

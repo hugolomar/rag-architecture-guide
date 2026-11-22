@@ -1,5 +1,5 @@
 ---
-description: Mandatory standards for Pydantic v2 domain models, closed governance catalogs (StrEnum), ID formatting, and metadata inheritance
+description: Mandatory standards for Pydantic v2 domain models, closed governance catalogs (StrEnum), ID formatting, metadata inheritance, and behavioral ports
 globs: ["src/domain/**/*", "src/**/*model*.py", "specs/**/*data-model*.md"]
 alwaysApply: false
 ---
@@ -42,3 +42,10 @@ Chunks or transformed representations derived from a parent canonical document m
   - `department: Department`
   - `classification: Classification`
 - Downstream storage adapters must persist these fields directly into vector payloads to enable pre-inference security trimming and deterministic lifecycle filtering.
+
+## 5. Behavioral Ports & Domain Purity
+
+Contracts crossing architectural layer boundaries must maintain strict domain separation:
+- **Pure Domain (`src/domain/`)**: Zero imports from `src/adapters/`, `src/ingestion/`, or external infrastructure/storage SDKs. Enforced by `import-linter`.
+- **Nominal Behavioral Ports**: All contracts crossing layer boundaries (`src/domain/ports/`) must inherit from `abc.ABC` and declare `@abstractmethod`. Structural subtyping (`typing.Protocol`) and duck typing are strictly prohibited across boundary seams.
+- **Fail Loud on Unimplemented Methods**: Unimplemented port methods in concrete adapters must raise explicit errors; silent stubs or implicit fallbacks are forbidden.

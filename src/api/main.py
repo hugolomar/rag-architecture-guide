@@ -1,6 +1,6 @@
 """FastAPI application factory, lifespan management, and global middlewares."""
 
-from collections.abc import AsyncIterator
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request, status
@@ -13,15 +13,17 @@ from src.api.routes import health, query
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
     """Manage application startup and graceful shutdown with telemetry flush."""
     settings = APISettings()
     telemetry_manager = TelemetryManager(
         service_name=settings.service_name,
     )
-    yield
-    # Guaranteed flush during server shutdown
-    telemetry_manager.flush_and_shutdown()
+    try:
+        yield
+    finally:
+        # Guaranteed flush during server shutdown or unhandled runtime faults
+        telemetry_manager.flush_and_shutdown()
 
 
 def create_app() -> FastAPI:

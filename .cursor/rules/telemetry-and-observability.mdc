@@ -30,7 +30,7 @@ Telemetry payloads must never expose confidential data:
 
 Telemetry buffers must never be abandoned when processes exit:
 - **Batch Pipelines (CLI)**: Every CLI composition root entrypoint must enclose execution within a `try ... finally` block that explicitly calls `flush_and_shutdown()` on the `TelemetryManager` before process exit.
-- **Persistent Services (FastAPI)**: Web service composition roots must bind telemetry lifecycle to the ASGI application `lifespan` handler, ensuring `flush_and_shutdown()` executes during graceful server shutdown.
+- **Persistent Services (FastAPI/ASGI)**: Web service composition roots must bind telemetry lifecycle to the application `lifespan` handler, enclosing execution in defensive teardown (`try ... finally`) to guarantee `flush_and_shutdown()` executes during both graceful shutdown and unhandled runtime faults.
 - Telemetry failure during shutdown must not mask business domain errors, but must fail loudly if all business operations were successful yet telemetry failed to persist.
 
 ## 4. Deterministic Process Exit Codes
