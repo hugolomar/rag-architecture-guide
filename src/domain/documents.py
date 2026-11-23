@@ -4,9 +4,25 @@ Defines canonical representations for documents, chunks, and manifest entries
 with strict boundary validation via Pydantic v2.
 """
 
-from pydantic import BaseModel, ConfigDict, Field
+from typing import Annotated
+
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 
 from src.domain.enums import Classification, Department, IdPGroup, LifecycleStatus
+
+DocId = Annotated[
+    str,
+    StringConstraints(
+        pattern=r"^DOC-[A-Z]{2,4}-[0-9]{3}$",
+    ),
+]
+
+ChunkId = Annotated[
+    str,
+    StringConstraints(
+        pattern=r"^DOC-[A-Z]{2,4}-[0-9]{3}#c[0-9]+$",
+    ),
+]
 
 
 class ManifestRecord(BaseModel):
@@ -17,9 +33,8 @@ class ManifestRecord(BaseModel):
     belong to strictly closed taxonomies.
     """
 
-    doc_id: str = Field(
+    doc_id: DocId = Field(
         ...,
-        pattern=r"^DOC-[A-Z]{2,4}-[0-9]{3}$",
         description="Unique corporate identifier (e.g., DOC-HR-001, DOC-ENG-001).",
     )
     relative_path: str = Field(
@@ -54,7 +69,7 @@ class CanonicalDocument(BaseModel):
     the Markdown body content.
     """
 
-    doc_id: str = Field(..., description="Unique corporate document ID.")
+    doc_id: DocId = Field(..., description="Unique corporate document ID.")
     relative_path: str = Field(..., description="Relative file path in corpus.")
     department: Department = Field(..., description="Owning department.")
     allowed_groups: list[IdPGroup] = Field(..., min_length=1, description="Authorized IdP groups.")
@@ -76,8 +91,8 @@ class GovernedChunk(BaseModel):
     Every chunk carries the parent document's doc_id, allowed_groups, and status inseparably.
     """
 
-    chunk_id: str = Field(..., description="Deterministic ID: {doc_id}#c{chunk_index}")
-    doc_id: str = Field(..., description="Parent document identifier.")
+    chunk_id: ChunkId = Field(..., description="Deterministic ID: {doc_id}#c{chunk_index}")
+    doc_id: DocId = Field(..., description="Parent document identifier.")
     allowed_groups: list[IdPGroup] = Field(
         ..., min_length=1, description="Inherited access groups."
     )

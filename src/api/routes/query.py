@@ -1,8 +1,8 @@
 """Query route handler orchestrating authenticated knowledge inquiries."""
 
 import time
-from typing import Annotated
 import uuid
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, Header, HTTPException, status
 from opentelemetry import trace
@@ -10,6 +10,7 @@ from opentelemetry import trace
 from src.adapters.auth.oidc_validator import AuthenticationError
 from src.api.dependencies import get_orchestrator
 from src.api.schemas import ErrorResponse, QueryRequest, QueryResponse
+from src.domain.exceptions import GenerationProviderError, RetrievalProviderError
 from src.orchestration.query_orchestrator import QueryOrchestrator
 
 router = APIRouter(tags=["Query"])
@@ -62,7 +63,7 @@ def execute_query(
             status_code=status.HTTP_504_GATEWAY_TIMEOUT,
             detail=f"Execution timeout budget exceeded: {exc}",
         ) from exc
-    except Exception as exc:
+    except (RetrievalProviderError, GenerationProviderError) as exc:
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail=f"Upstream provider failure: {exc}",

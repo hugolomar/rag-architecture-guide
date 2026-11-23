@@ -98,6 +98,7 @@ src/
 ├── domain/                          # Hexagonal Domain Core (Pure Python)
 │   ├── __init__.py                  # Public facade re-exporting all domain entities
 │   ├── enums.py                     # Closed catalogs: Department, Classification, LifecycleStatus, IdPGroup, BehaviorEnum
+│   ├── exceptions.py                # Domain and infrastructure exception hierarchy
 │   ├── documents.py                 # Document/Ingestion entities: ManifestRecord, CanonicalDocument, GovernedChunk, VectorizedChunk
 │   ├── queries.py                   # Query runtime entities: Citation, CallerContext, RetrievedChunk, GenerationResult
 │   └── ports/                       # Abstract Ports (abc.ABC)
@@ -150,7 +151,7 @@ tests/
 │
 └── integration/                     # Integration tests against real/in-memory adapters
     ├── test_qdrant_retrieval.py     # Hybrid retrieval with pre-filtering against in-memory Qdrant
-    ├── test_query_api_e2e.py        # FastAPI TestClient end-to-end tests (200, 401, 422, 502)
+    ├── test_query_api_e2e.py        # FastAPI TestClient end-to-end tests (200, 401, 422, 502, 504)
     └── test_api_telemetry.py        # Trace propagation, latency_ms header/body, and token scrubbing
 
 evals/

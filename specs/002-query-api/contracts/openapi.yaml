@@ -91,7 +91,7 @@ components:
         chunk_id:
           type: string
           description: Specific chunk excerpt identifier.
-          example: DOC-ENG-001_0001
+          example: DOC-ENG-001#c0
       additionalProperties: false
 
     BehaviorEnum:

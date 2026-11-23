@@ -13,6 +13,7 @@ from fastapi.testclient import TestClient
 from src.api.dependencies import get_orchestrator
 from src.api.main import app
 from src.domain.enums import BehaviorEnum
+from src.domain.exceptions import GenerationProviderError, RetrievalProviderError
 from src.domain.ports.generation import GenerationPort
 from src.domain.ports.identity import TokenValidatorPort
 from src.domain.ports.retrieval import RetrievalPort
@@ -171,3 +172,74 @@ def test_healthz_endpoint(test_client: TestClient) -> None:
     response = test_client.get("/healthz")
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {"status": "ok"}
+
+
+def test_query_upstream_provider_failure_returns_502(test_client: TestClient) -> None:
+    """Verify 502 Bad Gateway when an upstream dependency fails."""
+    class FailingRetriever(RetrievalPort):
+        def retrieve(self, query: str, caller_groups: set[str], top_k: int = 3) -> list[RetrievedChunk]:
+            raise RetrievalProviderError("Qdrant connection dropped")
+
+    class FailingGenerator(GenerationPort):
+        def generate(self, query: str, context: list[RetrievedChunk], user_id: str) -> GenerationResult:
+            raise GenerationProviderError("LiteLLM 503 Service Unavailable")
+
+    # 1. Retrieval failure produces 502
+    failing_orchestrator = QueryOrchestrator(
+        token_validator=MockTestTokenValidator(),
+        retriever=FailingRetriever(),
+        generator=MockTestGenerator(),
+    )
+    app.dependency_overrides[get_orchestrator] = lambda: failing_orchestrator
+    try:
+        response = test_client.post(
+            "/query",
+            headers={"Authorization": "Bearer valid-eng-token"},
+            json={"query": "How is deployment configured?", "top_k": 3},
+        )
+        assert response.status_code == status.HTTP_502_BAD_GATEWAY
+        assert "Upstream provider failure" in response.json()["detail"]
+    finally:
+        del app.dependency_overrides[get_orchestrator]
+
+    # 2. Generation failure produces 502
+    gen_failing_orchestrator = QueryOrchestrator(
+        token_validator=MockTestTokenValidator(),
+        retriever=MockTestRetriever(),
+        generator=FailingGenerator(),
+    )
+    app.dependency_overrides[get_orchestrator] = lambda: gen_failing_orchestrator
+    try:
+        response = test_client.post(
+            "/query",
+            headers={"Authorization": "Bearer valid-eng-token"},
+            json={"query": "How is deployment configured?", "top_k": 3},
+        )
+        assert response.status_code == status.HTTP_502_BAD_GATEWAY
+        assert "Upstream provider failure" in response.json()["detail"]
+    finally:
+        del app.dependency_overrides[get_orchestrator]
+
+
+def test_query_timeout_budget_exceeded_returns_504(test_client: TestClient) -> None:
+    """Verify 504 Gateway Timeout when query execution exceeds timeout budget."""
+    class TimingOutGenerator(GenerationPort):
+        def generate(self, query: str, context: list[RetrievedChunk], user_id: str) -> GenerationResult:
+            raise TimeoutError("Execution budget 2000ms exceeded")
+
+    timeout_orchestrator = QueryOrchestrator(
+        token_validator=MockTestTokenValidator(),
+        retriever=MockTestRetriever(),
+        generator=TimingOutGenerator(),
+    )
+    app.dependency_overrides[get_orchestrator] = lambda: timeout_orchestrator
+    try:
+        response = test_client.post(
+            "/query",
+            headers={"Authorization": "Bearer valid-eng-token"},
+            json={"query": "How is deployment configured?", "top_k": 3},
+        )
+        assert response.status_code == status.HTTP_504_GATEWAY_TIMEOUT
+        assert "timeout budget exceeded" in response.json()["detail"]
+    finally:
+        del app.dependency_overrides[get_orchestrator]

@@ -9,6 +9,7 @@ from typing import Any
 
 from qdrant_client import QdrantClient, models
 
+from src.domain.exceptions import RetrievalProviderError
 from src.domain.ports.embeddings import EmbedderPort
 from src.domain.ports.retrieval import RetrievalPort
 from src.domain.queries import RetrievedChunk
@@ -55,57 +56,60 @@ class QdrantRetrievalAdapter(RetrievalPort):
         if not caller_groups:
             return []
 
-        # Vectorize query using dual dense and sparse channels
-        dense_vectors = self.embedder.embed_dense([query])
-        dense_vector = dense_vectors[0]
-        sparse_batch = self.embedder.embed_sparse([query])
-        sparse_indices, sparse_values = sparse_batch[0]
+        try:
+            # Vectorize query using dual dense and sparse channels
+            dense_vectors = self.embedder.embed_dense([query])
+            dense_vector = dense_vectors[0]
+            sparse_batch = self.embedder.embed_sparse([query])
+            sparse_indices, sparse_values = sparse_batch[0]
 
-        # Construct deterministic pre-inference security trimming filter
-        filter_clause = models.Filter(
-            must=[
-                models.FieldCondition(
-                    key="allowed_groups",
-                    match=models.MatchAny(any=list(caller_groups)),
-                )
-            ],
-            must_not=[
-                models.FieldCondition(
-                    key="status",
-                    match=models.MatchValue(value="archived"),
-                )
-            ],
-        )
-
-        # Build hybrid prefetch queries
-        prefetch: list[models.Prefetch] = [
-            models.Prefetch(
-                query=dense_vector,
-                using="dense",
-                filter=filter_clause,
-                limit=top_k * 2,
+            # Construct deterministic pre-inference security trimming filter
+            filter_clause = models.Filter(
+                must=[
+                    models.FieldCondition(
+                        key="allowed_groups",
+                        match=models.MatchAny(any=list(caller_groups)),
+                    )
+                ],
+                must_not=[
+                    models.FieldCondition(
+                        key="status",
+                        match=models.MatchValue(value="archived"),
+                    )
+                ],
             )
-        ]
 
-        if sparse_indices:
-            prefetch.append(
+            # Build hybrid prefetch queries
+            prefetch: list[models.Prefetch] = [
                 models.Prefetch(
-                    query=models.SparseVector(
-                        indices=sparse_indices,
-                        values=sparse_values,
-                    ),
-                    using="sparse",
+                    query=dense_vector,
+                    using="dense",
                     filter=filter_clause,
                     limit=top_k * 2,
                 )
-            )
+            ]
 
-        query_response = self.client.query_points(
-            collection_name=self.collection_name,
-            prefetch=prefetch,
-            query=models.FusionQuery(fusion=models.Fusion.RRF),
-            limit=top_k,
-        )
+            if sparse_indices:
+                prefetch.append(
+                    models.Prefetch(
+                        query=models.SparseVector(
+                            indices=sparse_indices,
+                            values=sparse_values,
+                        ),
+                        using="sparse",
+                        filter=filter_clause,
+                        limit=top_k * 2,
+                    )
+                )
+
+            query_response = self.client.query_points(
+                collection_name=self.collection_name,
+                prefetch=prefetch,
+                query=models.FusionQuery(fusion=models.Fusion.RRF),
+                limit=top_k,
+            )
+        except Exception as exc:
+            raise RetrievalProviderError(f"Qdrant retrieval query failed: {exc}") from exc
 
         retrieved: list[RetrievedChunk] = []
         for point in query_response.points:

@@ -72,7 +72,9 @@ def test_citation_model_validation() -> None:
     assert citation.chunk_id == "DOC-ENG-001#c0"
 
     with pytest.raises(ValidationError, match="extra"):
-        Citation.model_validate({"doc_id": "DOC-ENG-001", "chunk_id": "c0", "extra_field": "bad"})
+        Citation.model_validate(
+            {"doc_id": "DOC-ENG-001", "chunk_id": "DOC-ENG-001#c0", "extra_field": "bad"}
+        )
 
 
 def test_caller_context_validation() -> None:
@@ -104,8 +106,8 @@ def test_retrieved_chunk_validation() -> None:
     with pytest.raises(ValidationError, match="extra"):
         RetrievedChunk.model_validate(
             {
-                "chunk_id": "c0",
-                "doc_id": "DOC-001",
+                "chunk_id": "DOC-ENG-001#c0",
+                "doc_id": "DOC-ENG-001",
                 "text": "t",
                 "score": 0.5,
                 "allowed_groups": [],

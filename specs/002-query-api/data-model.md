@@ -15,7 +15,23 @@ Document-related entities (`ManifestRecord`, `CanonicalDocument`, `GovernedChunk
 
 ```python
 from enum import StrEnum
-from pydantic import BaseModel, ConfigDict, Field
+from typing import Annotated
+
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints
+
+DocId = Annotated[
+    str,
+    StringConstraints(
+        pattern=r"^DOC-[A-Z]{2,4}-[0-9]{3}$",
+    ),
+]
+
+ChunkId = Annotated[
+    str,
+    StringConstraints(
+        pattern=r"^DOC-[A-Z]{2,4}-[0-9]{3}#c[0-9]+$",
+    ),
+]
 
 
 class BehaviorEnum(StrEnum):
@@ -32,8 +48,8 @@ class Citation(BaseModel):
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    doc_id: str = Field(..., description="Document identifier, e.g. DOC-ENG-001")
-    chunk_id: str = Field(..., description="Chunk identifier, e.g. DOC-ENG-001_0001")
+    doc_id: DocId = Field(..., description="Document identifier, e.g. DOC-ENG-001")
+    chunk_id: ChunkId = Field(..., description="Chunk identifier, e.g. DOC-ENG-001#c0")
 
 
 class CallerContext(BaseModel):
@@ -52,8 +68,8 @@ class RetrievedChunk(BaseModel):
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    chunk_id: str = Field(..., description="Unique chunk identifier")
-    doc_id: str = Field(..., description="Parent document identifier")
+    chunk_id: ChunkId = Field(..., description="Unique chunk identifier")
+    doc_id: DocId = Field(..., description="Parent document identifier")
     text: str = Field(..., description="Text content of the chunk")
     score: float = Field(..., description="Hybrid fusion relevance score")
     allowed_groups: list[str] = Field(
@@ -69,6 +85,31 @@ class GenerationResult(BaseModel):
     answer: str = Field(..., description="Synthesized answer text or governed refusal message")
     behavior: BehaviorEnum = Field(..., description="Resolved pipeline behavior")
     citations: list[Citation] = Field(default_factory=list, description="Source citations")
+```
+
+### 1.1 Domain and Infrastructure Error Hierarchy (`src/domain/exceptions.py`)
+
+All exceptions crossing domain and adapter boundaries are strictly structured and typed:
+
+```python
+class DomainError(Exception):
+    """Base exception for all domain and governed execution errors."""
+
+
+class AuthenticationError(DomainError):
+    """Raised when bearer token is missing, forged, expired, or claims are invalid."""
+
+
+class UpstreamProviderError(DomainError):
+    """Base exception for external infrastructure failures (Qdrant, LLM providers, network)."""
+
+
+class RetrievalProviderError(UpstreamProviderError):
+    """Raised when hybrid vector search, embedding generation, or database access fails."""
+
+
+class GenerationProviderError(UpstreamProviderError):
+    """Raised when external generative LLM provider fails or becomes unreachable."""
 ```
 
 ---

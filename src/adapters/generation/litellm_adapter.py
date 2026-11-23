@@ -10,6 +10,7 @@ from typing import Any
 import litellm
 
 from src.domain.enums import BehaviorEnum
+from src.domain.exceptions import GenerationProviderError
 from src.domain.ports.generation import GenerationPort
 from src.domain.queries import Citation, GenerationResult, RetrievedChunk
 
@@ -103,7 +104,7 @@ class LiteLLMGenerationAdapter(GenerationPort):
             )
             answer_text = str(response.choices[0].message.content)
         except Exception as exc:
-            raise RuntimeError(f"Upstream model gateway failure: {exc}") from exc
+            raise GenerationProviderError(f"Upstream model gateway failure: {exc}") from exc
 
         citations = [Citation(doc_id=chunk.doc_id, chunk_id=chunk.chunk_id) for chunk in context]
 

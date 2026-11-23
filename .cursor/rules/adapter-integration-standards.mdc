@@ -19,3 +19,11 @@ Infrastructure adapters initializing third-party models, drivers, or network tra
 Every adapter must nominally implement its corresponding domain port:
 - Inherit explicitly from the corresponding abstract base class in `src/domain/ports/`.
 - Adhere strictly to port signatures and return types without adding proprietary or provider-leaking parameters to the public contract.
+
+## 3. Strict Boundary Error Handling in API Route Handlers
+
+FastAPI route handlers (`src/api/routes/`) must strictly manage errors across domain seams:
+- **Prohibition of Catch-All `except Exception`**: Route handlers must never catch bare `Exception`. Doing so masks internal software defects (which must bubble up as HTTP 500) as external infrastructure failures.
+- **Selective Upstream Mapping**: Only declared domain/infrastructure exceptions (e.g. `RetrievalProviderError`, `GenerationProviderError` inheriting from `UpstreamProviderError`) may be caught and mapped to HTTP 502 Bad Gateway.
+- **Timeout and Auth Granularity**: `TimeoutError` must map strictly to HTTP 504 Gateway Timeout; `AuthenticationError` must map strictly to HTTP 401 Unauthorized.
+

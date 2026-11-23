@@ -27,15 +27,31 @@ All domain categories, lifecycles, and access classifications must be declared a
 
 ## 3. Canonical Identifiers & Regex Constraints
 
-Identifiers must be deterministic and verifiable:
+Identifiers must be deterministic, verifiable, and declared as reusable `Annotated` type aliases rather than raw `str`:
+```python
+DocId = Annotated[
+    str,
+    StringConstraints(
+        pattern=r"^DOC-[A-Z]{2,4}-[0-9]{3}$",
+    ),
+]
+
+ChunkId = Annotated[
+    str,
+    StringConstraints(
+        pattern=r"^DOC-[A-Z]{2,4}-[0-9]{3}#c[0-9]+$",
+    ),
+]
+```
 - **Document IDs**: Must match the canonical enterprise pattern `^DOC-[A-Z]{2,4}-[0-9]{3}$` (e.g., `DOC-SEC-001`, `DOC-HR-042`).
 - **Chunk IDs**: Must follow the deterministic compound schema `{doc_id}#c{chunk_index}` (e.g., `DOC-SEC-001#c0`, `DOC-SEC-001#c1`). Chunk indexes must be non-negative integers (`chunk_index >= 0`).
 
 ## 4. Inseparable Governance Metadata Inheritance
 
 Chunks or transformed representations derived from a parent canonical document must inseparably inherit that document's governance boundary metadata:
-- Every chunk model (`GovernedChunk`) must contain:
-  - `doc_id: str`
+- Every chunk model (`GovernedChunk`, `RetrievedChunk`, `Citation`) must use typed identifiers:
+  - `doc_id: DocId`
+  - `chunk_id: ChunkId`
   - `allowed_groups: list[IdPGroup]` (minimum 1 group)
   - `status: LifecycleStatus`
   - `department: Department`

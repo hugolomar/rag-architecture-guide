@@ -6,14 +6,15 @@ caller context, candidate evidence chunks, and synthesis results.
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from src.domain.documents import ChunkId, DocId
 from src.domain.enums import BehaviorEnum
 
 
 class Citation(BaseModel):
     """Attribution link to an authorized source chunk."""
 
-    doc_id: str = Field(..., description="Document identifier, e.g. DOC-ENG-001")
-    chunk_id: str = Field(..., description="Chunk identifier, e.g. DOC-ENG-001#c0")
+    doc_id: DocId = Field(..., description="Document identifier, e.g. DOC-ENG-001")
+    chunk_id: ChunkId = Field(..., description="Chunk identifier, e.g. DOC-ENG-001#c0")
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -32,8 +33,8 @@ class CallerContext(BaseModel):
 class RetrievedChunk(BaseModel):
     """Internal domain representation of an authorized candidate chunk."""
 
-    chunk_id: str = Field(..., description="Unique chunk identifier")
-    doc_id: str = Field(..., description="Parent document identifier")
+    chunk_id: ChunkId = Field(..., description="Unique chunk identifier")
+    doc_id: DocId = Field(..., description="Parent document identifier")
     text: str = Field(..., description="Text content of the chunk")
     score: float = Field(..., description="Hybrid fusion relevance score")
     allowed_groups: list[str] = Field(

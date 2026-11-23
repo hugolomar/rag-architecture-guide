@@ -81,8 +81,8 @@ def populated_qdrant() -> QdrantClient:
     # 3. Engineering Archived
     chunk_archived = VectorizedChunk(
         chunk=GovernedChunk(
-            chunk_id="DOC-ENG-OLD#c0",
-            doc_id="DOC-ENG-OLD",
+            chunk_id="DOC-ENG-099#c0",
+            doc_id="DOC-ENG-099",
             allowed_groups=[IdPGroup.ENGINEERING_CORE],
             status=LifecycleStatus.ARCHIVED,
             department=Department.ENGINEERING,
@@ -155,4 +155,4 @@ def test_lifecycle_filter_excludes_archived_documents(populated_qdrant: QdrantCl
     )
 
     retrieved_doc_ids = {r.doc_id for r in results}
-    assert "DOC-ENG-OLD" not in retrieved_doc_ids
+    assert "DOC-ENG-099" not in retrieved_doc_ids
